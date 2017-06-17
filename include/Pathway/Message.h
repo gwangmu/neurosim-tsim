@@ -1,12 +1,14 @@
 
-struct Message
+struct Message: public IMetadata
 {
 public:
-    Message* GetPrototype ();
+    Message (const char *clsname) { this->clsname = clsname; }
 
-protected:
-    virtual Message* CreatePrototype () = 0;
+    virtual string GetName final { return "(noname)"; }
+    virtual string GetFullName final { return "(noname)"; }
+    virtual const char* GetClassName final { return clsname; }
+    virtual string GetSummary {} ;
 
 private:
-    Message *proto;
+    const char *clsname;
 };

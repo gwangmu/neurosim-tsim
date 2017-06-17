@@ -1,3 +1,17 @@
+#pragma once        //< Why is this NOT a standard?
+
+#include <inttypes.h>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Testbench;
+class Module;
+class Pathway;
+class FileScript;
+class Register;
+
 
 class Simulator final
 {
@@ -35,3 +49,5 @@ private:
     // Simulation states
     uint64_t curtime;
 };
+
+

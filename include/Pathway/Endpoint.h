@@ -16,15 +16,24 @@ public:
     Module* GetConnectedModule ();
     uint32_t GetConnectedPortID (); 
 
-    /* Called by 'Pathway' */
-    virtual bool Assign (Message msg);
-    virtual Message Fetch ();
+    /* Called by 'Pathway' and 'Module' */
+    // FIXME enforcing LHS, RHS caller classes?
+    virtual bool IsAssignable ();
+    virtual bool Assign (Message *msg);
+    virtual Message* Fetch ();
 
     /* Called by 'Simulator' */
-    virtual void Clock (PERMIT(Simulator));
+    virtual void PreClock (PERMIT(Simulator));
+    virtual void PostClock (PERMIT(Simulator));
 
     /* Called by 'Module' */
     bool JoinTo (Module *module, uint32_t idPort, PERMIT(Module));
+
+protected:
+    virtual uint32_t GetCapacity () = 0;
+    virtual uint32_t GetSize () = 0;
+    virtual bool IsFull () = 0;
+    virtual bool IsEmpty () = 0;
 
 private:
     const char* clsname;
@@ -32,5 +41,5 @@ private:
 
     Module *modConn;
     uint32_t idPortConn;
-    Register* reg;
+    // Register *reg;     // TODO for future use to estimate RAM size
 };

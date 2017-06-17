@@ -1,7 +1,21 @@
 #include <Simulation/Simulator.h>
+
 #include <Simulation/Testbench.h>
+#include <Component/Component.h>
+#include <Module/Module.h>
+#include <Register/Register.h>
+#include <Script/FileScript.h>
+#include <Pathway/Pathway.h>
+#include <Utility/AccessKey.h>
+#include <Utility/Logging.h>
+
+#include <vector>
+#include <map>
+
+using namespace std;
 
 
+/* Constructors */
 Simulator::ClockDomain::ClockDomain ()
 {
     name = "";
@@ -30,7 +44,6 @@ bool Simulator::AttachTestbench (Testbench *tb)
 
     return true;
 }
-
 
 bool Simulator::LoadTestbench ()
 {
@@ -206,6 +219,7 @@ bool Simulator::ValidateTestbench ()
 }
 
 
+/* function Simulate */
 bool Simulator::Simulate ()
 {
     macrotask ("Initializing clocks..")
@@ -241,17 +255,21 @@ bool Simulator::Simulate ()
 
             task ("simulate %u ns", curtime)
             {
-                operation ("operate modules")
-                {
-                    for (Module *module : curCDom->modules)
-                        module->Clock (KEY(Simulator));
-                }
+                operation ("pre-clock modules");
+                for (Module *module : curCDom->modules)
+                    module->PreClock (KEY(Simulator));
 
-                operation ("flow messages")
-                {
-                    for (Pathway *pathway : curCDom->pathway)
-                        pathway->Clock (KEY(Simulator));
-                }
+                operation ("pre-clock pathways");
+                for (Pathway *pathway : curCDom->pathway)
+                    pathway->PreClock (KEY(Simulator));
+
+                operation ("post-clock modules");
+                for (Module *module : curCDom->modules)
+                    module->PostClock (KEY(Simulator));
+
+                operation ("post-clock pathways");
+                for (Pathway *pathway : curCDom->pathway)
+                    pathway->PostClock (KEY(Simulator));
             }
         }
     }

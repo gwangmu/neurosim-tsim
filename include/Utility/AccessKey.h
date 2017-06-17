@@ -1,3 +1,4 @@
+#pragma once
 
 #define PERMIT(x) x##AccessKey
 #define KEY(x) (x##AccessKey ()) 

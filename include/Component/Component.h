@@ -30,6 +30,9 @@ public:
 
     virtual IssueCount Validate (PERMIT(Simulator)) final;
 
+    /* Called by child 'Interface' */
+    bool AddChild (Interface *child, PERMIT(Interface));
+
 protected:
     /* Called by parent 'Component' */
     virtual bool Connect (uint32_t portid, Endpoint *endpt) final;

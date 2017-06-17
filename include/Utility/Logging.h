@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,6 +14,9 @@
             iname, __VA_ARGS__);                        \
 }
 
+#define SIM_ERROR(msg, iname, ...)                      \
+    DESIGN_ERROR(msg, iname, __VA_ARGS__)
+
 
 #define SYSTEM_WARNING(msg, ...) {                      \
     fprintf (stderr, "(system): warning: (%s, line %d)" \
@@ -22,6 +27,10 @@
     fprintf (stderr, "%s: warning: " msg "\n",          \
             iname, __VA_ARGS__);                        \
 }
+
+#define SIM_WARNING(msg, iname, ...)                    \
+    DESIGN_ERROR(msg, iname, __VA_ARGS__)
+
 
 #define PRINT(msg, ...) {                               \
     fprintf (stdout, msg "\n",                          \
@@ -34,8 +43,11 @@
         fprintf (stderr, "debug: (%s, line %d)"             \
                 msg "\n", __FILE__, __LINE__, __VA_ARGS__); \
     }
+    #define MICRODEBUG_PRINT(msg, ...)                      \
+        operation(msg, __VA_ARGS__)
 #else
     #define operation(msg, ...)
+    #define MICRODEBUG_PRINT(msg, ...)
 #endif
     
 #ifndef NDEBUG
@@ -43,10 +55,10 @@
         fprintf (stderr, "debug: (%s, line %d)"             \
                 msg "\n", __FILE__, __LINE__, __VA_ARGS__); \
     }
-    #define DEBUG(msg, ...) task(msg, __VA_ARGS__)
+    #define DEBUG_PRINT(msg, ...) task(msg, __VA_ARGS__)
 #else
     #define task(msg, ...)
-    #define DEBUG(msg, ...)
+    #define DEBUG_PRINT(msg, ...)
 #endif
 
 #define macrotask(msg, ...) {                               \

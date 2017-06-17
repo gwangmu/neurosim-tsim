@@ -16,8 +16,8 @@ protected:
     {
     public:
         // Operations
-        void Switch (Message msg);
-        Message Sample ();
+        void Switch (Message *msg);
+        Message* Sample ();
 
         // ConnectionAttr Interfaces
         ConnectionAttr GetConnectionAttr ();
@@ -26,8 +26,8 @@ protected:
     private:
         ConnectionAttr conattr;
 
-        Message msgCurrent;
-        vector<Message> vecPendingMsgs;
+        Message *msgCurrent;
+        vector<Message *> vecPendingMsgs;
         uint32_t idxNextMsg;
     };
 
@@ -55,7 +55,8 @@ public:
 
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator)) = 0;
-    virtual void Clock (PERMIT(Simulator)) = 0;
+    virtual void PreClock (PERMIT(Simulator)) = 0;
+    virtual void PostClock (PERMIT(Simulator)) = 0;
 
 protected:
     struct
