@@ -1,0 +1,2 @@
+
+class AutoScript: public Script {};

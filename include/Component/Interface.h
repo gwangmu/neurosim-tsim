@@ -3,8 +3,9 @@ class Interface
 {
 public: 
     /* Universal */
-    Interface (string name);
-    string GetName ();
+    Interface ();
+
+    string GetClock ();
 
 protected:  
     /* Called by parent 'Component' */
@@ -12,6 +13,5 @@ protected:
     virtual bool Connect (uint32_t portid, Endpoint *endpt) = 0;
 
 private:
-    string name;
     string clockname;
 };
