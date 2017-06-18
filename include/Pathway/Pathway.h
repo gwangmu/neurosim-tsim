@@ -32,7 +32,8 @@ protected:
     {
     public:
         Message* Sample ();
-        void Flow (Message *newmsg);
+        void Flow ();
+        void Assign (Message *newmsg);
 
     private:
         ConnectionAttr conattr;
@@ -61,8 +62,10 @@ public:
 
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator)) final;
-    virtual void PreClock (PERMIT(Simulator));
-    virtual void PostClock (PERMIT(Simulator));
+    virtual void PreClock (PERMIT(Simulator)) final;
+    virtual void PostClock (PERMIT(Simulator)) final;
+
+    virtual uint32_t TargetLHSEndpointID () = 0;
 
 protected:
     bool AddEndpoint (Endpoint::Type type, uint32_t capacity); 
@@ -74,11 +77,31 @@ protected:
     } endpts;
 
 private:
+    inline bool IsReady (uint32_t rhsid) { return rhsreadymask & (1 << rhsid); }
+    inline void SetNextReady (uint32_t rhsid, bool state)
+    { next_rhsreadymask ^= (-(uint32_t)state ^ next_rhsreadymask) & (1 << rhsid); }
+    inline void UpdateReadyState () { next_rhsreadymask = rhsreadymask; }
+
+    inline uint32_t GetLHSIDOfThisCycle ()
+    { 
+        if (stabilize_cycle == 0)
+            return tarlhsid;
+        else
+        {
+            stabilize_cycle--;
+            return -1;
+        }
+    }
+
+private:
     Component *parent;
 
     Connection conn;
     Message *msgproto;
 
-    bool ready;
-    bool next_ready;
+    uint64_t rhsreadymask;
+    uint64_t next_rhsreadymask;
+
+    uint32_t lhsid;
+    uint32_t stabilize_cycle;
 };

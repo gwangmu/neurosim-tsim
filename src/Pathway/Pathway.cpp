@@ -20,15 +20,16 @@ Message* Pathway::Connection::Sample ()
     return msgprop[curidx];
 }
 
-void Pathway::Connection::Flow (Message *newmsg)
+void Pathway::Connection::Flow ()
 {
     // advance
     msgprop[curidx] = nullptr;
     nextidx = (curidx + 1) & PROPIDX_MASK;
+}
 
-    // add new message
-    if (newmsg)
-        msgprop[(curidx + conattr.latency) & PROPIDX_MASK] = newmsg;
+void Pathway::Connection::Assign (Message *newmsg)
+{
+    msgprop[(curidx + conattr.latency) & PROPIDX_MASK] = newmsg;
 }
     
 
@@ -105,9 +106,16 @@ bool Pathway::AddEndpoint (Endpoint::Type type, uint32_t capacity)
 {
     if (type == Endpoint::LHS)
     {
+        /*
         if (endpts.lhs.size () == 1)
         {
             SYSTEM_ERROR ("'#lhs > 1' not supported");
+            return false;
+        }*/
+
+        if (endpts.lhs.size () >= 64)
+        {
+            DESIGN_ERROR ("'#lhs > 64' not allowed", GetName().c_str());
             return false;
         }
         
@@ -115,6 +123,12 @@ bool Pathway::AddEndpoint (Endpoint::Type type, uint32_t capacity)
     }
     else if (type == Endpoint::RHS)
     {
+        if (endpts.rhs.size () >= 64)
+        {
+            DESIGN_ERROR ("'#rhs > 64' not allowed", GetName().c_str());
+            return false;
+        }
+
         endpts.rhs.push_back (Endpoint (this, Endpoint::RHS, capacity, KEY(Pathway)));
     }
     else
@@ -168,50 +182,89 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
 void Pathway::PreClock (PERMIT(Simulator))
 {
-    if (ready)
-    {
-        operation ("sample from connection (LHS pop)")
-        endpts.lhs[0].Pop ();
-    }
-
     operation ("push messages (RHS push)")
     {    
         Message *sampledmsg = conn.Sample ();
 
         if (sampledmsg)
         {
-            bool shouldstop = false;
-            for (Endpoint &ept : endpts.rhs)
+            if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
             {
-                if (!ept->Assign (sampledmsg))
+                operation ("broadcast message");
+                for (auto i = 0; i < endpts.rhs.size(); i++)
                 {
-                    SIM_WARNING ("message dropped (portname: %s)",
-                            GetName().c_str(), ept->GetConnectedPortName().c_str());
+                    Endpoint &ept = endpts.rhs[i];
+                    if (!ept.Assign (sampledmsg))
+                        SIM_WARNING ("message dropped (portname: %s)",
+                                GetName().c_str(), ept.GetConnectedPortName().c_str());
                 }
-
-                if ((uint32_t)(ept->GetConnectedModule().IsStalled ())
-                        + ept->GetCapacity () - ept->GetNumMessages ()
-                        >= conn.conattr.latency + 1)
-                    shouldstop = true;
             }
+            else
+            {
+                operation ("send message to specific RHS")
+                {
+                    #ifndef NDEBUG
+                    if (sampledmsg->DEST_RHS_ID >= endpts.rhs.size ())
+                        SYSTEM_ERROR ("DEST_RHS_ID >= #rhs");
+                    #endif
 
-            next_ready = !shouldstop;
+                    Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
+                    if (!ept.Assign (sampledmsg))
+                        SIM_WARNING ("message dropped (portname: %s)",
+                                GetName().c_str(), ept.GetConnectedPortName().c_str());
+                }
+            }
         }
     }
+
+    operation ("update next ready state");
+    for (auto i = 0; i < endpts.rhs.size(); i++)
+    {
+        SetNextReady (i,
+                (uint32_t)(ept.GetConnectedModule().IsStalled ())
+                + ept.GetCapacity () - ept.GetNumMessages ()
+                < conn.conattr.latency + 1);
+    }
+
+    operation ("flow messages in connection");
+    conn.Flow ();
+
+    operation ("pop message from LHS (LHS pop)") {
+        Message *msg_to_assign = nullptr;
+        if (GetLHSIDOfThisCycle () != (uint32_t)-1)
+            msg_to_assign = endpts.lhs[GetLHSIDOfThisCycle ()].Peek ();
+
+        if (msg_to_assign && !IsReady (msg_to_assign->DEST_RHS_ID))
+            msg_to_assign = nullptr;
+        else
+            emdpts.lhs[GetLHSIDOfThisCycle ()].Pop ();
+
+        if (msg_to_assign)
+            conn.Assign (msg_to_assign);
+    }
+
+    operation ("transition ready state");
+    UpdateReadyState ();
 }
 
 void Pathway::PostClock (PERMIT(Simulator))
 {
-    Message *msgtoflow = nullptr;
-    if (ready)
+    uint32_t targetid = TargetLHSEndpointID ();
+    if (targetid != lhsid)
     {
-        operation ("sample message from LHS")
-            msgtoflow = endpts.lhs[0].Peek ();
+        #ifndef NDEBUG
+        if (targetid >= endpts.lhs.size ())
+        {
+            SIM_FATAL ("target LHS ID (%u) is out of bound (0 to %u)",
+                    GetName().c_str(), targetid, endpts.lhs.size () - 1);
+        }
+        #endif
+
+        if (stabilize_time == 0)
+            stabilize_time = conn.conattr.latency;
+        lhsid = targetid;
     }
-
-    operation ("flow messages through connection")
-    conn.Flow (msgtoflow);
-
-    operation ("transition ready state")
-    ready = next_ready;
 }
+
+
+// TODO: lhs change timing restriction

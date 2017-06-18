@@ -16,6 +16,9 @@
     abort ();                                           \
 }
 
+#define SIM_FATAL(msg, iname, ...)                      \
+    DESIGN_FATAL(msg, iname, __VA_ARGS__)
+
 
 #define SYSTEM_ERROR(msg, ...) {                        \
     fprintf (stderr, "(system): error: (%s, line %d) "  \
