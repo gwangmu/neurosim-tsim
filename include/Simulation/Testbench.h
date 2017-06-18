@@ -15,7 +15,7 @@
 
 #include <Interface/IMetadata.h>
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <string>
 #include <map>
 

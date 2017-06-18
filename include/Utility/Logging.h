@@ -1,7 +1,21 @@
 #pragma once
 
 #include <stdio.h>
-#include <stdlib.h>
+
+
+#define PROHIBITED {                                    \
+    fprintf (stderr, "(system): prohibited: "           \
+            "(%s, line %d)\n", __FILE__, __LINE__);     \
+}
+
+
+#define DESIGN_FATAL(msg, iname, ...) {                 \
+    fprintf (stderr, "%s: fatal: (%s, line %u)"         \
+            msg "\n", iname, __FILE__, __LINE__,        \
+            __VA_ARGS__);                               \
+    abort ();                                           \
+}
+
 
 #define SYSTEM_ERROR(msg, ...) {                        \
     fprintf (stderr, "(system): error: (%s, line %d) "  \

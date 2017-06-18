@@ -62,23 +62,21 @@ bool Simulator::LoadTestbench ()
             queComps.pop ();
 
             for (auto ipath = nextcomp->PathwayBegin (KEY(Simulator));
-                    ipath != nextcomp->PathwayEnd (KEY(Simulator));
-                    ipath = nextcomp->PathwayNext (ipath, KEY(Simulator)))
+                    ipath != nextcomp->PathwayEnd (KEY(Simulator)); ipath++)
             {
                 pathways.push_back (*ipath);
             }
 
             for (auto iface = nextcomp->ChildBegin (KEY(Simulator));
-                    iface != nextcomp->ChildEnd (KEY(Simulator));
-                    iface = nextcomp->ChildNext (iface, KEY(Simulator)))
+                    iface != nextcomp->ChildEnd (KEY(Simulator)); iface++)
             {
-                Interface *face = *iface;
+                LogicBlock *face = *iface;
                 if (Component *comp = dynamic_cast<Component *>(face))
-                    queComps.enqueue (comp);
+                    queComps.push (comp);
                 else if (Module *module = dynamic_cast<Module *>(face))
                     modules.push_back (module);
                 else
-                    SYSTEM_ERROR ("bogus Interface class");
+                    SYSTEM_ERROR ("bogus LogicBlock class");
             }
         }
 

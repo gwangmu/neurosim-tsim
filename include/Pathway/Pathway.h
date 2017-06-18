@@ -1,74 +1,84 @@
-#include <inttypes.h>
+#pragma once
 
-class Unit;
+#include <Base/Metadata.h>
+#include <Interface/IValidatable.h>
+#include <Interface/IClockable.h>
+#include <Base/IssueCount.h>
 
-struct ConnectionAttr
+#include <cinttypes>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Component;
+class Simulator;
+class Endpoint;
+class Message;
+
+
+class Pathway: public Metadata, public IValidatable, public IClockable
 {
-    uint32_t latency;
-    uint32_t bitwidth;
-};
+public:
+    struct ConnectionAttr
+    {
+        ConnectionAttr () { latency = 0; bitwidth = 0; }
+        uint32_t latency;
+        uint32_t bitwidth;
+    };
 
-class Pathway: public IClockable, public IValidatable, public IMetadata
-{
 protected:
-    // Inner Class
     class Connection
     {
     public:
-        // Operations
-        void Switch (Message *msg);
         Message* Sample ();
-
-        // ConnectionAttr Interfaces
-        ConnectionAttr GetConnectionAttr ();
-        bool SetConnectionAttr (ConntectionAttr conattr);
+        void Flow (Message *newmsg);
 
     private:
         ConnectionAttr conattr;
 
-        Message *msgCurrent;
-        vector<Message *> vecPendingMsgs;
-        uint32_t idxNextMsg;
+        Message *msgprop[];
+        uint32_t nprop;
+        uint32_t curidx;
+
+        uint32_t PROPIDX_MASK;
     };
 
 public:
     /* Universal */
-    Pathway (ConnectionAttr conattr, Message *msgproto, const char* clsname);
+    Pathway (const char *clsname, Component *parent, 
+            ConnectionAttr conattr, Message *msgproto);
 
-    virtual string GetName () final { return "(noname)"; }
-    virtual string GetFullName () final;
-    virtual const char* GetClassName () final;
-    virtual string GetSummary ();
+    Component* GetParent () { return parent; }
+    virtual string GetInstanceName ();
+    Message *GetMsgPrototype () { return msgproto; }
 
     /* Called by 'Component' */
-    Message *GetMsgPrototype ();
+    Endpoint* GetEndpoint (Endpoint::Type type, uint32_t idEndpt = 0);
 
-    LHSEndpoint* GetLHSEndpt (uint32_t idLEndpt = 0);
-    RHSEndpoint* GetRHSEndpt (uint32_t idREndpt = 0);
-    // UniEndpoint* GetUniEndpt (uint32_t idUEndpt = 0); TODO
-
-    ConnectionAttr GetConnectionAttr ();
-    bool SetConnectionAttr (ConntectionAttr conattr, PERMIT(Component));
-
-    Component* GetParent ();
-    bool SetParent (Component *parent, PERMIT(Component));
+    ConnectionAttr GetConnectionAttr () { return conn.conattr; }
+    bool SetConnectionAttr (ConntectionAttr conattr);
 
     /* Called by 'Simulator' */
-    virtual IssueCount Validate (PERMIT(Simulator)) = 0;
-    virtual void PreClock (PERMIT(Simulator)) = 0;
-    virtual void PostClock (PERMIT(Simulator)) = 0;
+    virtual IssueCount Validate (PERMIT(Simulator)) final;
+    virtual void PreClock (PERMIT(Simulator));
+    virtual void PostClock (PERMIT(Simulator));
 
 protected:
+    bool AddEndpoint (Endpoint::Type type, uint32_t capacity); 
+
     struct
     {
-        vector<LHSEndPoint> lhs;
-        vector<RHSEndPoint> rhs;
+        vector<EndPoint> lhs;
+        vector<EndPoint> rhs;
     } endpts;
 
 private:
-    const char* clsname;
     Component *parent;
 
     Connection conn;
     Message *msgproto;
+
+    bool ready;
+    bool next_ready;
 };

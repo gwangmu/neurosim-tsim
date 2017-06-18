@@ -9,7 +9,7 @@
 #include <Utility/AccessKey.h>
 #include <Utility/Logging.h>
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <vector>
 #include <string>
 #include <map>
@@ -26,15 +26,9 @@ Module::Port::Port ()
     endpt = nullptr;
 }
 
-Module::Module (Component *parent, const char *clsname, string name)
+Module::Module (const char *clsname, string iname, Component *parent):
+    Component (clsname, iname, parent)
 {
-    this->parent = parent;
-    if (parent)
-        parent->AddChild (this, KEY(Interface));
-
-    this->name = name;
-    this->clsname = clsname;
-
     script = nullptr;
     reg = nullptr;
     outMsgPended = false;
@@ -48,12 +42,7 @@ string Module::GetFullName ()
     if (parent)
         familyname = parent->GetFullName ();
 
-    return (familyname + string("::") + name);
-}
-
-string Module::GetSummary ()
-{
-    // TODO to be implemented
+    return (string(GetClassName()) + " " + familyname + string("::") + name);
 }
 
 
@@ -61,14 +50,13 @@ string Module::GetSummary ()
 bool Module::SetScript (Script *script)
 {
     if (this->script)
-        DESIGN_WARNING ("overwriting '%s %s' with '%s %s'",
-                name.c_str(), this->script->GetClassName(), 
-                this->script->GetName().c_str(),
-                script->GetClassName(), script->GetName().c_str());
+        DESIGN_WARNING ("overwriting '%s' with '%s'",
+                GetFullName().c_str(), this->script->GetName().c_str(), 
+                script->GetName().c_str());
 
     if (script->IsAssigned ()) {
-        DESIGN_ERROR ("'%s %s' has already been assigned",
-                name.c_str(), script->GetClassName(), script->GetName().c_str());
+        DESIGN_ERROR ("'%s' has already been assigned",
+                GetFullName().c_str(), script->GetName().c_str());
         return false;
     }
 
@@ -80,13 +68,13 @@ bool Module::SetScript (Script *script)
 bool Module::SetRegister (Register *reg)
 {
     if (this->reg)
-        DESIGN_WARNING ("overwriting '%s %s' with '%s %s'",
-                name.c_str(), this->reg->GetClassName(), this->reg->GetName().c_str(),
-                reg->GetClassName(), reg->GetName().c_str());
+        DESIGN_WARNING ("overwriting '%s' with '%s'",
+                GetFullName().c_str(), this->reg->GetName().c_str(),
+                reg->GetName().c_str());
 
     if (reg->IsAssigned ()) {
-        DESIGN_ERROR ("'%s %s' has already been assigned",
-                name.c_str(), reg->GetClassName(), reg->GetName().c_str());
+        DESIGN_ERROR ("'%s' has already been assigned",
+                GetFullName().c_str(), reg->GetName().c_str());
         return false;
     }
 
@@ -100,7 +88,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
 {
     if (!portname2id.count (portname))
     {
-        DESIGN_ERROR ("non-existing port '%s'", name.c_str(), portname.c_str());
+        DESIGN_ERROR ("non-existing port '%s'", GetFullName().c_str(), 
+                portname.c_str());
         return false;
     }
 
@@ -109,13 +98,14 @@ bool Module::Connect (string portname, Endpoint *endpt)
     if (port->iotype == Module::Port::UNKNOWN)
     {
         SYSTEM_ERROR ("port type cannot be UNKNOWN"
-                "(portname: %s, portid: %u)", portname.c_str(), portid);
+                "(portname: %s)", portname.c_str());
         return false;
     }
 
     if (!endpt)
     {
-        DESIGN_WARNING ("attemping to assign a null endpoint", name);
+        DESIGN_WARNING ("attemping to assign a null endpoint to the port '%s'",
+                GetFullName().c_str(), portname.c_str());
         port->endpt = nullptr;
         return true;
     }
@@ -123,11 +113,11 @@ bool Module::Connect (string portname, Endpoint *endpt)
     if (typeid(endpt->GetParent()->GetMsgPrototype ())
             != typeid(port->msgproto))
     {
-        DESIGN_ERROR ("mismatching message proto %s (of %s %s) "
+        DESIGN_ERROR ("mismatching message proto %s (of '%s') "
                 "and %s (of port '%s')",
-                name.c_str(), endpt->GetParent()->GetMsgPrototype()->GetClassName (),
-                endpt->GetParent()->GetClassName (), 
-                endpt->GetParent()->GetFullName().c_str (),
+                GetFullName().c_str(), 
+                endpt->GetParent()->GetMsgPrototype()->GetClassName (),
+                endpt->GetParent()->GetName().c_str(), 
                 port->msgproto->GetClassName (), portname.c_str());
         return false;
     }
@@ -137,19 +127,19 @@ bool Module::Connect (string portname, Endpoint *endpt)
             !(port->iotype == Module::Port::Output &&
                 dynamic_cast<LHSEndpoint *>(endpt)))
     {
-        DESIGN_ERROR ("incompatible endpoint '%s %s' to %s port '%s'",
-                name.c_str(), endpt->GetClassName(), endpt->GetFullName().c_str (),
-                Module::Port::GetIOTypeString(port->iotype), portname.c_str());
+        DESIGN_ERROR ("incompatible endpoint '%s' to %s port '%s'",
+                name.c_str(), endpt->GetClassName(),
+                Module::Port::GetTypeString(port->iotype), portname.c_str());
         return false;
     }
 
     port->endpt = endpt;
+    endpt->JoinTo (this, portname, KEY(Module));
 
     return true;
 }
 
 
-/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 /* functions for 'Simulator' */
 IssueCount Module::Validate (PERMIT(Simulator))
 {
@@ -157,7 +147,7 @@ IssueCount Module::Validate (PERMIT(Simulator))
 
     if (!parent)
     {
-        SYSTEM_ERROR ("module '%s %s' has no parent", GetClassName(), name.c_str());
+        SYSTEM_ERROR ("module '%s' has no parent", GetFullName().c_str());
         icount.error++;
     }
 
@@ -165,7 +155,8 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         if (!port.endpt)
         {
-            DESIGN_WARNING ("disconnected port '%s'", name, port.name.c_str());
+            DESIGN_WARNING ("disconnected port '%s'", 
+                    GetFullName().c_str(), port.name.c_str());
             icount.warning++;
         }
     }
@@ -173,38 +164,50 @@ IssueCount Module::Validate (PERMIT(Simulator))
     return icount;
 }
 
+/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Module::PreClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("pre-clocking '%s %s'", GetClassName(), GetFullName().c_str());
+    MICRODEBUG_PRINT ("pre-clocking '%s'", GetFullName().c_str());
 
     if (outMsgPended)
     {
         Instruction *nextinstr = nullptr;
-        operation ("sample messages")
+        operation ("sample messages (RHS peek)")
         {
             for (auto i = 0; i < inports.size(); i++)
-                nextinmsgs[i] = inports[i].endpt->Fetch();
+                if (!nextinmsgs[i])
+                    nextinmsgs[i] = inports[i].endpt->Peek ();
             
             if (script)
                 script->NextInstruction ();
         }
 
-        operation ("call operation");
-        Operation (nextinmsgs, nextoutmsgs, nextinstr);
+        operation ("call operation")
+        {
+            // NOTE: set nextinmsgs[i] to nullptr to pop ith input
+            // NOTE: assign new message to nextoutmsgs[j] to push to jth output
+            Operation (nextinmsgs, nextoutmsgs, nextinstr);
+        }
+        
+        operation ("pop messages (RHS pop)");
+        for (auto i = 0; i < inports.size(); i++)
+            if (!nextinmsgs[i])
+                inports[i].endpt->Pop ();
     }
 
     return;
 }
 
+/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Module::PostClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("post-clocking '%s %s'", GetClassName(), GetFullName().c_str());
+    MICRODEBUG_PRINT ("post-clocking '%s'", GetFullName().c_str());
 
     operation ("check pending state")
     {
         for (Port &port : outports)
         {
-            if (!port->IsAssignable ())
+            if (!port->endpt->IsAssignable ())
             {
                 outMsgPended = true;
                 return;
@@ -212,7 +215,7 @@ void Module::PostClock (PERMIT(Simulator))
         }
     }
 
-    operation ("assign/clear messages")
+    operation ("assign/clear messages (LHS push)")
     {
         for (auto i = 0; i < outports.size (); i++)
         {
@@ -231,7 +234,7 @@ void Module::PostClock (PERMIT(Simulator))
 
 
 /* Called by 'Module' */
-uint32_t Module::CreatePort (string portname, Module::Port::IOType iotype,
+uint32_t Module::CreatePort (string portname, Module::Port::Type iotype,
         Message* msgproto)
 {
     uint32_t id = -1;
@@ -242,17 +245,23 @@ uint32_t Module::CreatePort (string portname, Module::Port::IOType iotype,
         inports.push_back (Port ());
         id = inports.size () - 1;
         port = &inports.back ();
+        
+        delete[] nextinmsgs;
+        nextinmsgs = new Message *[inports.size ()] ();
     }
     else if (iotype == Module::Port::OUTPUT)
     {
         outports.push_back (Port ());
         id = outports.size () - 1;
         port = &outports.back ();
+        
+        delete[] nextoutmsgs;
+        nextoutmsgs = new Message *[outports.size ()] ();
     }
     else
     {
-        DESIGN_ERROR ("cannot create port type '%s'", name.c_str(),
-                Module::Port::GetIOTypeString (iotype));
+        DESIGN_ERROR ("cannot create %s port", GetFullName().c_str(),
+                Module::Port::GetTypeString (iotype));
         return -1;
     }
 

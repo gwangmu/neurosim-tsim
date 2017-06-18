@@ -1,7 +1,13 @@
+#pragma once
 
-class Instruction;
+#include <Base/Metadata.h>
+#include <string>
 
-class Script
+using namespace std;
+
+struct Instruction;
+
+class Script: public Metadata
 {
 public:
     Script (string name);

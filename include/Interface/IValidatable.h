@@ -1,15 +1,13 @@
 #pragma once
 
-struct IssueCount
-{
-    IssueCount () { error = 0; warning = 0; }
+#include <Base/IssueCount.h>
+#include <Utility/AccessKey.h>
 
-    uint32_t error;
-    uint32_t warning;
-};
+class Simulator;
 
 class IValidatable
 {
 public:
     virtual IssueCount Validate (PERMIT(Simulator)) = 0;
 };
+

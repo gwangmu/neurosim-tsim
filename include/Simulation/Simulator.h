@@ -1,6 +1,6 @@
 #pragma once        //< Why is this NOT a standard?
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <string>
 #include <vector>
 

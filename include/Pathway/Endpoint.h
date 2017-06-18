@@ -1,45 +1,55 @@
+#pragma once
+
+#include <Base/Metadata.h>
+#include <Utility/AccessKey.h>
+
+#include <string>
+#include <cinttypes>
+#include <queue>
+
+using namespace std;
 
 class Pathway;
+class Module;
+class Message;
+class Simulator;
 
-class Endpoint: public IClockable, public IMetadata
+
+class Endpoint: public Metadata
 {
 public:
-    Endpoint (Pathway *parent, const char* clsname, PERMIT(Pathway));
+    enum Type { LHS, RHS, /* Uni */ };
+
+public:
+    Endpoint (Pathway *parent, Type type, uint32_t capacity, PERMIT(Pathway));
 
     /* Universal */
-    virtual string GetName () final { return "(noname)"; }
-    virtual string GetFullName () final { return "(noname)"; }
-    virtual const char* GetClassName () final;
-    virtual string GetSummary ();
-
-    Pathway* GetParent ();
-    Module* GetConnectedModule ();
-    uint32_t GetConnectedPortID (); 
+    Type GetEndpointType () { return type; }
+    Pathway* GetParent () { return parent; }
+    Module* GetConnectedModule () { return modConn; }
+    string GetConnectedPortName () { return portConn; }
 
     /* Called by 'Pathway' and 'Module' */
     // FIXME enforcing LHS, RHS caller classes?
-    virtual bool IsAssignable ();
-    virtual bool Assign (Message *msg);
-    virtual Message* Fetch ();
+    bool Assign (Message *msg);
+    Message* Peek () { return msgque.front (); }
+    void Pop () { msgque.pop (); }
 
-    /* Called by 'Simulator' */
-    virtual void PreClock (PERMIT(Simulator));
-    virtual void PostClock (PERMIT(Simulator));
+    bool IsFull (); 
+    bool IsEmpty () { return msgque.empty (); }
+    uint32_t GetCapacity { return capacity; }
+    uint32_t GetNumMessages { return msgque.size (); }
 
     /* Called by 'Module' */
-    bool JoinTo (Module *module, uint32_t idPort, PERMIT(Module));
-
-protected:
-    virtual uint32_t GetCapacity () = 0;
-    virtual uint32_t GetSize () = 0;
-    virtual bool IsFull () = 0;
-    virtual bool IsEmpty () = 0;
+    bool JoinTo (Module *module, string portname, PERMIT(Module));
 
 private:
-    const char* clsname;
+    Type type;
     Pathway* parent;
 
     Module *modConn;
-    uint32_t idPortConn;
-    // Register *reg;     // TODO for future use to estimate RAM size
+    string portConn;
+
+    uint32_t capacity;
+    queue<Message *> msgque;
 };
