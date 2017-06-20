@@ -10,19 +10,6 @@
 using namespace std;
 
 
-Testbench::Testbench (const char *clsname, string name)
-{
-    this->clsname = clsname;
-    this->name = name;
-}
-
-
-string Testbench::GetSummary ()
-{
-    // TODO to be implemented
-}
-
-
 string Testbench::GetStringParam (Testbench::ParamType ptype, 
         string pname, PERMIT(Simulator))
 {

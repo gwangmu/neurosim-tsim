@@ -25,18 +25,13 @@ class Simulator;
 class Component;
 
 
-class Testbench: public IMetadata
+class Testbench: public Metadata
 {
 public:
     enum ParamType { FILESCRIPT_PATH, REGISTER_PATH, CLOCK_PERIOD };
 
 pubilc:
-    Testbench (const char *clsname, string name);
-
-    virtual string GetName () final { return name; }
-    virtual string GetFullName () final { return name; }
-    virtual const char* GetClassName () final { return clsname; }
-    virtual string GetSummary ();
+    Testbench (const char *clsname, string name) : Metadata (clsname, name) {};
 
     /* Called by 'Simulator' */
     Component* LoadTopComponent (PERMIT(Simulator)) = 0;
@@ -46,9 +41,6 @@ pubilc:
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
 
 protected:
-    string name;
-    const char *clsname;
-
     map<string, string> fscrpaths;
     map<string, string> regpaths;
     map<string, uint32_t> clkperiods;

@@ -31,6 +31,19 @@ public:
     string GetFullName ();
     Component* GetParent () { return parent; }
 
+    bool IsAncestor (Component *comp) 
+    { return (!parent) ? false : parent->IsAncestor (comp); }
+    bool IsDescendant (Component *comp)
+    { 
+        if (!children.empty ())
+        {
+            for (Component *ccomp : children)
+                if (ccomp->IsDescendant (comp))
+                    return true;
+        }
+        return false;
+    }
+
     /* Called by 'Simulator' */
     auto ChildBegin (PERMIT(Simulator)) { return children.begin (); }
     auto ChildEnd (PERMIT(Simulator)) { return children.end (); }
@@ -39,6 +52,9 @@ public:
     auto PathwayEnd (PERMIT(Simulator)) { return pathways.end (); }
 
     virtual IssueCount Validate (PERMIT(Simulator)) final;
+
+    /* Called by 'Pathway' */
+    bool AddChildPathway (Pathway *pathway, PERMIT(Pathway));
 
 protected:
     /* Called by parent 'Component' */

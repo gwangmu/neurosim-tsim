@@ -39,16 +39,19 @@ Pathway::Pathway (const char *clsname, Component *parent,
     : Metadata (clsname, "")
 {
     if (!parent)
-        DESIGN_WARNING ("pathway with no parent", clsname);
+        DESIGN_ERROR ("pathway must have parent", clsname);
     this->parent = parent;
+    parent->AddChildPathway (this, KEY(Pathway));
 
     if (!msgproto)
         DESIGN_ERROR ("pathway with no message prototype (parent: %s)",
-                clsname, parent->GetFullName().c_str());
+                clsname, (parent ? parent->GetFullName().c_str() : "(null)"));
     this->msgproto = msgproto;
 
-    ready = true;
-    next_ready = true;
+    InitReadyState ();
+
+    lhsid = (uint32_t)-1;
+    stabilized_cycle = 0;
 
     SetConnectionAttr (conattr);
 }
@@ -175,7 +178,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
 
-    // TODO to be implemented
+    // TODO this!!!!!!!!!!!!!!!!!
 
     return icount;
 }

@@ -77,11 +77,23 @@ protected:
     } endpts;
 
 private:
-    inline bool IsReady (uint32_t rhsid) { return rhsreadymask & (1 << rhsid); }
+    // ready state
+    inline void InitReadyState () { rhsreadymask = next_rhsreadymask = (uint32_t)-1 }
+
+    inline bool IsReady (uint32_t rhsid) 
+    {
+        return (rhsid == (uint32_t)-1 ? 
+                rhsreadymask == (uint32_t)-1 : rhsreadymask & (1 << rhsid); 
+    }
+
     inline void SetNextReady (uint32_t rhsid, bool state)
-    { next_rhsreadymask ^= (-(uint32_t)state ^ next_rhsreadymask) & (1 << rhsid); }
+    { 
+        next_rhsreadymask ^= (-(uint32_t)state ^ next_rhsreadymask) & (1 << rhsid); 
+    }
+
     inline void UpdateReadyState () { next_rhsreadymask = rhsreadymask; }
 
+    // target LHS
     inline uint32_t GetLHSIDOfThisCycle ()
     { 
         if (stabilize_cycle == 0)

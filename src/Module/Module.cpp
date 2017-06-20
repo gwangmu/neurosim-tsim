@@ -35,17 +35,6 @@ Module::Module (const char *clsname, string iname, Component *parent):
 }
 
 
-/* functions from 'IMetadata' */
-string Module::GetFullName ()
-{
-    string familyname = "";
-    if (parent)
-        familyname = parent->GetFullName ();
-
-    return (string(GetClassName()) + " " + familyname + string("::") + name);
-}
-
-
 /* functions for 'Component' */
 bool Module::SetScript (Script *script)
 {
