@@ -105,24 +105,18 @@ Endpoint* Pathway::GetEndpoint (Endpoint::Type type, uint32_t idEndpt)
         return (*vec)[idLEndpt];
 }
 
-bool Pathway::AddEndpoint (Endpoint::Type type, uint32_t capacity) 
+bool Pathway::AddEndpoint (string name, Endpoint::Type type, uint32_t capacity) 
 {
     if (type == Endpoint::LHS)
     {
-        /*
-        if (endpts.lhs.size () == 1)
-        {
-            SYSTEM_ERROR ("'#lhs > 1' not supported");
-            return false;
-        }*/
-
         if (endpts.lhs.size () >= 64)
         {
             DESIGN_ERROR ("'#lhs > 64' not allowed", GetName().c_str());
             return false;
         }
         
-        endpts.lhs.push_back (Endpoint (this, Endpoint::LHS, capacity, KEY(Pathway)));
+        endpts.lhs.push_back (Endpoint (name, this, Endpoint::LHS, 
+                    capacity, KEY(Pathway)));
     }
     else if (type == Endpoint::RHS)
     {
@@ -132,7 +126,8 @@ bool Pathway::AddEndpoint (Endpoint::Type type, uint32_t capacity)
             return false;
         }
 
-        endpts.rhs.push_back (Endpoint (this, Endpoint::RHS, capacity, KEY(Pathway)));
+        endpts.rhs.push_back (Endpoint (name, this, Endpoint::RHS, 
+                    capacity, KEY(Pathway)));
     }
     else
     {
@@ -151,7 +146,7 @@ bool Pathway::SetConnectionAttr (Pathway::ConnectionAttr conattr)
         DESIGN_WARNING ("zero-bitwidth connection is unrealistic (parent: %s)",
                 clsname, parent->GetFullName().c_str());
 
-    if (conattr.latency > 10000)
+    if (conattr.latency > ConnectionAttr::CONN_LATENCY_LIMIT)
         DESIGN_FATAL ("connection with %u cycle (> 10000) latency "
                 "is not allowed (parent: %s)",
                 clsname, conattr.latency, parent->GetFullName().c_str()); 
@@ -178,7 +173,48 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
 
-    // TODO this!!!!!!!!!!!!!!!!!
+    if (conn.conattr.latency > Pathway::ConnectionAttr::CONN_LATENCY_LIMIT)
+    {
+        DESIGN_ERROR ("connection latency (%u) exceeded the limit (%u)",
+                GetName().c_str(), conn.conattr.latency,
+                Pathway::ConnectionAttr::CONN_LATENCY_LIMIT);
+        icount.error++;
+    }
+
+    if (!msgproto)
+    {
+        SYSTEM_ERROR ("null message prototype (pathway: %u)", GetName().c_str());
+        icount.error++;
+    }
+
+    if (sizeof(*msgproto) - sizeof(msgproto->DEST_RHS_ID) < conn.conattr.bitwidth)
+    {
+        DESIGN_WARNING ("connection bitwidth (%u) smaller than"
+                "message prototype size (%u)",
+                GetName().c_str(), con.conattr.bitwidth,
+                sizeof(*msgproto) - sizeof(msgproto->DEST_RHS_ID));
+        icount.warning++;
+    }
+
+    for (Endpoint &ept : endpts.lhs)
+    {
+        if (!ept->GetConnectedModule ())
+        {
+            DESIGN_ERROR ("disconnected endpoint '%s'",
+                    GetName().c_str(), ept.GetName().c_str());
+            icount.error++;
+        }
+    }
+
+    for (Endpoint &ept : endpts.rhs)
+    {
+        if (!ept->GetConnectedModule ())
+        {
+            DESIGN_ERROR ("disconnected endpoint '%s'",
+                    GetName().c_str(), ept.GetName().c_str());
+            icount.error++;
+        }
+    }
 
     return icount;
 }
@@ -269,5 +305,3 @@ void Pathway::PostClock (PERMIT(Simulator))
     }
 }
 
-
-// TODO: lhs change timing restriction

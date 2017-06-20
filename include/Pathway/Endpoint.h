@@ -15,13 +15,14 @@ class Message;
 class Simulator;
 
 
-class Endpoint: public Metadata
+class Endpoint final: public Metadata
 {
 public:
     enum Type { LHS, RHS, /* Uni */ };
 
 public:
-    Endpoint (Pathway *parent, Type type, uint32_t capacity, PERMIT(Pathway));
+    Endpoint (string name, Pathway *parent, Type type, 
+            uint32_t capacity, PERMIT(Pathway));
 
     /* Universal */
     Type GetEndpointType () { return type; }
