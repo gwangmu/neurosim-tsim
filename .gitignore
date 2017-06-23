@@ -2,3 +2,5 @@
 *.log
 *.swp
 neurosim-tsim
+*.a
+*.so
