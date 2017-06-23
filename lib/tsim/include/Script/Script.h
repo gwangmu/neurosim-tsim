@@ -10,12 +10,12 @@ struct Instruction;
 class Script: public Metadata
 {
 public:
-    Script (const char *clsname, string name):
-        Metadata (clsname, name) {}
+    Script (const char *clsname): Metadata (clsname, "") {}
 
     void CheckAssigned () { assigned = true; }
     bool IsAssigned () { return assigned; }
 
+    virtual bool NextSection () = 0;
     virtual Instruction* NextInstruction () = 0;
 
 private:

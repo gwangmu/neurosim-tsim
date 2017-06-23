@@ -144,7 +144,7 @@ bool Simulator::LoadTestbench ()
             for (Register *reg : regs)
             {
                 string regname = reg->GetName ();
-                string path = tb->GetStringParam (Testbench::REGISTER_PATH,
+                string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH,
                         regname, KEY(Simulator));
 
                 if (path != "")

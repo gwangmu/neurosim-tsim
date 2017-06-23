@@ -13,11 +13,11 @@ struct RegisterWord;
 class Register: public Metadata
 {
 public:
-    enum RegisterType { FF, SRAM, /* and more.. */ };
+    enum Type { FF, SRAM, /* and more.. */ };
 
-    struct RegisterAttr
+    struct Attr
     {
-        RegisterAttr (uint32_t wordsize, uint32_t nwords)
+        Attr (uint32_t wordsize, uint32_t nwords)
         {
             this->wordsize = wordsize;
             this->nwords = nwords;
@@ -28,31 +28,23 @@ public:
     };
 
 public:
-    Register (const char *clsname,
-            string datatag, RegisterType type, 
-            RegisterAttr attr, RegisterWord *wproto);
+    Register (const char *clsname, Type type, 
+            Attr attr, RegisterWord *wproto);
 
     RegisterWord* GetWordPrototype () { return wproto; }
     void CheckAssigned () { assigned = true; }
     bool IsAssigned () { return assigned; }
 
     bool LoadDataFromFile (string filename);
-    virtual RegisterWord* ParseRawLine (string rawline) = 0;
+    virtual RegisterWord* ParseRawString (string rawline) = 0;
 
-    const RegisterWord* GetWord (uint64_t addr)
-    {
-        if (addr < words.size ())
-            return words[addr];
-        else
-            return nullptr;
-    }
+    const RegisterWord* GetWord (uint64_t addr);
 
 private:
-    string datatag;
     bool assigned;
 
-    RegisterType type;
-    RegisterAttr attr;
+    Type type;
+    Attr attr;
     RegisterWord *wproto;
 
     vector<RegisterWord *> words;

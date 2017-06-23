@@ -39,7 +39,7 @@ LIBDIR=lib
 TSIM=TSim
 TSIM_DIR=$(LIBDIR)/tsim
 TSIM_HDRDIR=$(TSIM_DIR)/include
-TSIM_LIB=$(TSIM_DIR)/bin
+TSIM_LIB=$(TSIM_DIR)/tsim.a
 
 # TODO: add variables for new library
 #[lib]=[lib_name]
@@ -48,7 +48,7 @@ TSIM_LIB=$(TSIM_DIR)/bin
 #[lib]_LIB=$([lib]_DIR)/[lib_bindir_name]
 
 # libraies in use
-LIBS=TSIM  		# TODO: add [lib] in this list.
+USING_LIBS=TSIM  		# TODO: add [lib] in this list.
 #############
 
 ### Helper functions ###
@@ -67,16 +67,18 @@ CODEFILES:=$(wildcard $(CODEFILES))
 SRCFILES:=$(filter %.$(CPPEXT),$(CODEFILES))
 OBJFILES:=$(subst $(SRCDIR),$(OBJDIR),$(SRCFILES:%.$(CPPEXT)=%.$(OBJEXT)))
 RMFILES:=$(OBJDIR) $(BIN)
+
+LIBS:=$(foreach LIB,$(USING_LIBS),$($(LIB)_LIB))
 ######################
 
 
 ### rules
 
-.PHONY: $(LIBS)
+.PHONY: $(USING_LIBS)
 
-all: $(LIBS) $(OBJSUBDIRS) $(FRAMEWORK) $(BIN)
+all: $(USING_LIBS) $(OBJSUBDIRS) $(FRAMEWORK) $(BIN)
 
-$(LIBS):
+$(USING_LIBS):
 	@ $(eval LIBHDRDIR=$($@_HDRDIR))
 	@ $(eval SYMLIBHDRDIR=$(HDRDIR)/$($(@)))
 	@ $(if $(wildcard $(LIBHDRDIR)),,$(error non-existing library '$@'))
@@ -88,7 +90,7 @@ $(OBJSUBDIRS):
 	@ $(call print,"creating..",$(call to_comma_list,$@))
 	@ $(MKDIR) $@
 
-$(BIN): $(OBJFILES) $(FRAMEWORK)
+$(BIN): $(OBJFILES) $(LIBS)
 	@ $(call print,"linking..",$(call to_comma_list,$^),$@)
 	@ $(LD) $^ -o $@
 

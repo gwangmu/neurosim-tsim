@@ -8,9 +8,9 @@
 
 /* to be used in constructor */
 #define TESTBENCH_NAME(name) clsname = name
-#define SCRIPT_PATH(scr,path) fscrpaths[scr] = path
-#define REGDATA_PATH(reg,path) regpaths[reg] = path
-#define CLOCK_PERIOD(clk,period) clkperiods[clk] = period
+#define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
+#define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
+#define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
 
 
 #include <Base/Metadata.h>
@@ -29,7 +29,7 @@ class Component;
 class Testbench: public Metadata
 {
 public:
-    enum ParamType { FILESCRIPT_PATH, REGISTER_PATH, CLOCK_PERIOD };
+    enum ParamType { FILESCRIPT_PATH, REGISTER_DATAPATH, CLOCK_PERIOD };
 
 public:
     Testbench (const char *clsname, string name) : Metadata (clsname, name) {};

@@ -20,7 +20,7 @@ string Testbench::GetStringParam (Testbench::ParamType ptype,
         else
             return "";
     }
-    else if (ptype == Testbench::REGISTER_PATH)
+    else if (ptype == Testbench::REGISTER_DATAPATH)
     {
         if (regpaths.count (pname))
             return regpaths[pname];

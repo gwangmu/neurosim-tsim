@@ -1,0 +1,13 @@
+#!TSim Script
+
+CLASSNAME: TestFileScript
+SCRIPT:
+    section
+        cycle=0, data=random data..
+        cycle=100, data=another random data..
+    endsection
+
+    section
+        cycle=0, data=yet another random data..
+    endsection
+
