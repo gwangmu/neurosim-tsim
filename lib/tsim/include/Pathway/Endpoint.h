@@ -30,7 +30,10 @@ public:
     Module* GetConnectedModule () { return modConn; }
     string GetConnectedPortName () { return portConn; }
 
-    /* Called by 'Pathway' and 'Module' */
+    /* Called by 'Component' */
+    bool SetCapacity (uint32_t capacity);
+
+    /* Called by 'Pathway' and 'Module' (during simulation) */
     // FIXME enforcing LHS, RHS caller classes?
     bool Assign (Message *msg);
     Message* Peek () { return msgque.front (); }

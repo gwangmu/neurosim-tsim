@@ -33,6 +33,19 @@ Endpoint::Endpoint (string name, Pathway *parent, Type type,
 }
 
 
+bool Endpoint::SetCapacity (uint32_t capacity)
+{
+    if (capacity == 0)
+    {
+        DESIGN_ERROR ("endpoint must have capacity >= 1", GetName().c_str());
+        return false;
+    }
+
+    this->capacity = capacity;
+    return true;
+}
+
+
 bool Endpoint::Assign (Message *msg)
 {
     if (msgque.size () == capacity)
