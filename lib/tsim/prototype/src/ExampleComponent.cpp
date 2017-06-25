@@ -3,6 +3,7 @@
  **/
 
 #include <Prototype/ExampleComponent.h>
+#include <Utility/Prototype.h>
 
 #include <cinttypes>
 #include <string>
@@ -25,7 +26,7 @@ ExampleModule::ExampleModule (string iname, Component *parent)
     Pathway::ConnectionAttr conattr;
     conattr.latency = 0;
     conattr.bitwidth = 32;
-    Wire *d2dwire = new Wire (this, conattr, new SpikeMessage ());
+    Wire *d2dwire = new Wire (this, conattr, Prototype<ExampleMessage>::Get());
 
     // (TODO) connect modules
     dummymodule1.Connect ("spikeout", d2dwire.GetEndpoint (Endpoint::LHS));

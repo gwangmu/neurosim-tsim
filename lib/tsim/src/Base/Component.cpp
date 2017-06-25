@@ -57,7 +57,7 @@ Module* Component::GetModule (string name)
     Module *tar = nullptr;
     for (Component *child : children)
     {
-        if (tar = child->GetModule (name))
+        if ((tar = child->GetModule (name)))
             break;
     }
 

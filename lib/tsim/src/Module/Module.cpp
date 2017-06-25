@@ -99,8 +99,7 @@ bool Module::Connect (string portname, Endpoint *endpt)
         return true;
     }
 
-    if (endpt->GetParent()->GetMsgPrototype()->GetClassName ()
-            != port->msgproto->GetClassName())
+    if (endpt->GetParent()->GetMsgPrototype() != port->msgproto)
     {
         DESIGN_ERROR ("mismatching message proto %s (of '%s') "
                 "and %s (of port '%s')",

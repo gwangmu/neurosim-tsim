@@ -8,12 +8,18 @@ using namespace std;
 struct Message: public Metadata
 {
 public:
-    Message (const char *clsname, string name, uint32_t destrhsid) 
-        : Metadata (clsname, name), DEST_RHS_ID (destrhsid) {}
+    // For prototype creation. 
+    // DO NOT USE FOR ORDINARY MESSAGE CREATION
+    Message (const char *clsname)
+        : Metadata (clsname, ""), DEST_RHS_ID (-1) {}
+
+    Message (const char *clsname, uint32_t destrhsid)
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid) {}
 
     const uint32_t DEST_RHS_ID;     // NOTE: -1 to broadcast
 
-    /*>> Below this is for MESSAGE DISPOSAL <<*/
+/*>> Below this is for MESSAGE DISPOSAL <<*/
+public:
     void SetNumDestination (uint32_t n_dest, PERMIT(Pathway)) { dispcount = n_dest; }
     void Dispose (PERMIT(Module)) 
     {

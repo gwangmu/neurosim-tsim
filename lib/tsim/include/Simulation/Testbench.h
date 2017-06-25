@@ -35,14 +35,14 @@ public:
         : Metadata (clsname, ""), TOP_COMPONENT (topcomp) {}
 
     /* Called by 'Simulator' */
-    virtual Component* LoadTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
+    virtual Component *const LoadTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
     string GetStringParam (ParamType ptype, string pname, PERMIT(Simulator));
     uint32_t GetUIntParam (ParamType ptype, string pname, PERMIT(Simulator));
 
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
 
 protected:
-    const Component *TOP_COMPONENT;
+    Component *const TOP_COMPONENT;
 
     map<string, string> fscrpaths;
     map<string, string> regpaths;
