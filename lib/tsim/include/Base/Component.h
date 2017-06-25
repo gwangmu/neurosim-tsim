@@ -12,6 +12,7 @@
 using namespace std;
 
 class Simulator;
+class Testbench;
 class Pathway;
 
 
@@ -32,6 +33,8 @@ public:
     string GetFullName ();
     string GetFullNameWOClass ();
     Component* GetParent () { return parent; }
+
+    virtual Module* GetModule (string name);
 
     bool IsAncestor (Component *comp) 
     { return (!parent) ? false : parent->IsAncestor (comp); }

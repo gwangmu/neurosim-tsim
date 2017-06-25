@@ -129,6 +129,15 @@ bool Module::Connect (string portname, Endpoint *endpt)
 }
 
 
+Module* Module::GetModule (string name)
+{
+    if (GetInstanceName() == name)
+        return this;
+    else
+        return nullptr;
+}
+
+
 /* functions for 'Simulator' */
 IssueCount Module::Validate (PERMIT(Simulator))
 {
@@ -201,6 +210,12 @@ void Module::PreClock (PERMIT(Simulator))
 void Module::PostClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("post-clocking '%s'", GetFullName().c_str());
+
+    operation ("dispose incoming messages")
+    {
+        for (auto i = 0; i < inports.size (); i++)
+            nextinmsgs[i]->Dispose (KEY(Module));
+    }
 
     operation ("check pending state")
     {

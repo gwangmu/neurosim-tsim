@@ -52,6 +52,19 @@ string Component::GetFullNameWOClass ()
 }
 
 
+Module* Component::GetModule (string name)
+{
+    Module *tar = nullptr;
+    for (Component *child : children)
+    {
+        if (tar = child->GetModule (name))
+            break;
+    }
+
+    return tar;
+}
+
+
 bool Component::AddChildPathway (Pathway *pathway, PERMIT(Pathway))
 {
     for (Pathway *cpathway : pathways)

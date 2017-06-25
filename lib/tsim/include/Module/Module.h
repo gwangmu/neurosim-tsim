@@ -47,6 +47,7 @@ public:
     
     Script* GetScript () { return script; }
     Register* GetRegister () { return reg; }
+    virtual Module* GetModule (string name);
 
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator));

@@ -7,7 +7,6 @@
 #define EXPORT_TESTBENCH(TB) Testbench *simtb = new TB()
 
 /* to be used in constructor */
-#define TESTBENCH_NAME(name) clsname = name
 #define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
 #define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
 #define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
@@ -32,16 +31,19 @@ public:
     enum ParamType { FILESCRIPT_PATH, REGISTER_DATAPATH, CLOCK_PERIOD };
 
 public:
-    Testbench (const char *clsname, string name) : Metadata (clsname, name) {};
+    Testbench (const char *clsname, Component *topcomp)
+        : Metadata (clsname, ""), TOP_COMPONENT (topcomp) {}
 
     /* Called by 'Simulator' */
-    virtual Component* LoadTopComponent (PERMIT(Simulator)) = 0;
+    virtual Component* LoadTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
     string GetStringParam (ParamType ptype, string pname, PERMIT(Simulator));
     uint32_t GetUIntParam (ParamType ptype, string pname, PERMIT(Simulator));
 
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
 
 protected:
+    const Component *TOP_COMPONENT;
+
     map<string, string> fscrpaths;
     map<string, string> regpaths;
     map<string, uint32_t> clkperiods;

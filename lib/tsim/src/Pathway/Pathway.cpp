@@ -232,13 +232,17 @@ void Pathway::PreClock (PERMIT(Simulator))
         {
             if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
             {
-                operation ("broadcast message");
-                for (auto i = 0; i < endpts.rhs.size(); i++)
+                operation ("broadcast message")
                 {
-                    Endpoint &ept = endpts.rhs[i];
-                    if (!ept.Assign (sampledmsg))
-                        SIM_WARNING ("message dropped (portname: %s)",
-                                GetName().c_str(), ept.GetConnectedPortName().c_str());
+                    sampledmsg->SetNumDestination (endpts.rhs.size(), KEY(Pathway));
+
+                    for (auto i = 0; i < endpts.rhs.size(); i++)
+                    {
+                        Endpoint &ept = endpts.rhs[i];
+                        if (!ept.Assign (sampledmsg))
+                            SIM_WARNING ("message dropped (portname: %s)",
+                                    GetName().c_str(), ept.GetConnectedPortName().c_str());
+                    }
                 }
             }
             else
@@ -249,6 +253,8 @@ void Pathway::PreClock (PERMIT(Simulator))
                     if (sampledmsg->DEST_RHS_ID >= endpts.rhs.size ())
                         SYSTEM_ERROR ("DEST_RHS_ID >= #rhs");
                     #endif
+
+                    sampledmsg->SetNumDestination (1, KEY(Pathway));
 
                     Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
                     if (!ept.Assign (sampledmsg))
