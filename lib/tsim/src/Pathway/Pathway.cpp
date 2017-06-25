@@ -1,10 +1,10 @@
-#include <Pathway/Pathway.h>
+#include <TSim/Pathway/Pathway.h>
 
-#include <Base/Component.h>
-#include <Pathway/Message.h>
-#include <Module/Module.h>
-#include <Utility/AccessKey.h>
-#include <Utility/Logging.h>
+#include <TSim/Base/Component.h>
+#include <TSim/Pathway/Message.h>
+#include <TSim/Module/Module.h>
+#include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 
 using namespace std;
 

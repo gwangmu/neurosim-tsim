@@ -2,8 +2,8 @@
  * TSim Component prototype (body)
  **/
 
-#include <Prototype/ExampleComponent.h>
-#include <Utility/Prototype.h>
+#include <TSim/Prototype/ExampleComponent.h>
+#include <TSim/Utility/Prototype.h>
 
 #include <cinttypes>
 #include <string>
@@ -12,7 +12,8 @@
 using namespace std;
 
 
-ExampleModule::ExampleModule (string iname, Component *parent)
+ExampleComponent::ExampleComponent (string iname, Component *parent)
+    : Component ("ExampleComponent", iname, parent)
 {
     #if 0
     // (TODO) add child modules/components

@@ -1,11 +1,11 @@
-#include <Pathway/Endpoint.h>
+#include <TSim/Pathway/Endpoint.h>
 
-#include <Pathway/Pathway.h>
-#include <Pathway/Message.h>
-#include <Module/Module.h>
-#include <Simulation/Simulator.h>
-#include <Utility/AccessKey.h>
-#include <Utility/Logging.h>
+#include <TSim/Pathway/Pathway.h>
+#include <TSim/Pathway/Message.h>
+#include <TSim/Module/Module.h>
+#include <TSim/Simulation/Simulator.h>
+#include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 
 #include <string>
 #include <cinttypes>

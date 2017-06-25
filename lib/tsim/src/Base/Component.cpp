@@ -1,10 +1,10 @@
-#include <Base/Component.h>
+#include <TSim/Base/Component.h>
 
-#include <Simulation/Simulator.h>
-#include <Pathway/Pathway.h>
-#include <Pathway/Endpoint.h>
-#include <Utility/AccessKey.h>
-#include <Utility/Logging.h>
+#include <TSim/Simulation/Simulator.h>
+#include <TSim/Pathway/Pathway.h>
+#include <TSim/Pathway/Endpoint.h>
+#include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 
 #include <string>
 #include <vector>

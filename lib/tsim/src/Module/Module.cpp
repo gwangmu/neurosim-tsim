@@ -1,13 +1,13 @@
-#include <Module/Module.h>
+#include <TSim/Module/Module.h>
 
-#include <Base/Component.h>
-#include <Script/Script.h>
-#include <Register/Register.h>
-#include <Pathway/Endpoint.h>
-#include <Pathway/Pathway.h>
-#include <Pathway/Message.h>
-#include <Utility/AccessKey.h>
-#include <Utility/Logging.h>
+#include <TSim/Base/Component.h>
+#include <TSim/Script/Script.h>
+#include <TSim/Register/Register.h>
+#include <TSim/Pathway/Endpoint.h>
+#include <TSim/Pathway/Pathway.h>
+#include <TSim/Pathway/Message.h>
+#include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 
 #include <cinttypes>
 #include <vector>
@@ -21,7 +21,7 @@ using namespace std;
 Module::Port::Port ()
 {
     name = "";
-    iotype = Module::Port::UNKNOWN;
+    iotype = Module::PORT_UNKNOWN;
     msgproto = nullptr;
     endpt = nullptr;
 }
@@ -84,7 +84,7 @@ bool Module::Connect (string portname, Endpoint *endpt)
 
     Port *port = pname2port[portname];
 
-    if (port->iotype == Module::Port::UNKNOWN)
+    if (port->iotype == Module::PORT_UNKNOWN)
     {
         SYSTEM_ERROR ("port type cannot be UNKNOWN"
                 "(portname: %s)", portname.c_str());
@@ -110,9 +110,9 @@ bool Module::Connect (string portname, Endpoint *endpt)
         return false;
     }
 
-    if (!(port->iotype == Module::Port::INPUT &&
+    if (!(port->iotype == Module::PORT_INPUT &&
                 endpt->GetEndpointType() == Endpoint::RHS) &&
-            !(port->iotype == Module::Port::OUTPUT &&
+            !(port->iotype == Module::PORT_OUTPUT &&
                 endpt->GetEndpointType() == Endpoint::LHS))
     {
         DESIGN_ERROR ("incompatible endpoint '%s' to %s port '%s'",
@@ -247,13 +247,13 @@ void Module::PostClock (PERMIT(Simulator))
 
 
 /* Called by 'Module' */
-uint32_t Module::CreatePort (string portname, Module::Port::Type iotype,
+uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         Message* msgproto)
 {
     uint32_t id = -1;
     Port *port = nullptr;
 
-    if (iotype == Module::Port::INPUT)
+    if (iotype == Module::PORT_INPUT)
     {
         inports.push_back (Port ());
         id = inports.size () - 1;
@@ -262,7 +262,7 @@ uint32_t Module::CreatePort (string portname, Module::Port::Type iotype,
         delete[] nextinmsgs;
         nextinmsgs = new Message *[inports.size ()] ();
     }
-    else if (iotype == Module::Port::OUTPUT)
+    else if (iotype == Module::PORT_OUTPUT)
     {
         outports.push_back (Port ());
         id = outports.size () - 1;

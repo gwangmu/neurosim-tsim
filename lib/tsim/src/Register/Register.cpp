@@ -1,7 +1,7 @@
-#include <Register/Register.h>
-#include <Register/RegisterWord.h>
-#include <Utility/Logging.h>
-#include <Utility/String.h>
+#include <TSim/Register/Register.h>
+#include <TSim/Register/RegisterWord.h>
+#include <TSim/Utility/Logging.h>
+#include <TSim/Utility/String.h>
 
 #include <string>
 #include <vector>

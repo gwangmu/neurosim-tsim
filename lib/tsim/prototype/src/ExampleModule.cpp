@@ -2,8 +2,8 @@
  * TSim Module prototype (body)
  **/
 
-#include <Prototype/ExampleModule.h>
-#include <Utility/Prototype.h>
+#include <TSim/Prototype/ExampleModule.h>
+#include <TSim/Utility/Prototype.h>
 
 #include <cinttypes>
 #include <string>
@@ -16,8 +16,8 @@ ExampleModule::ExampleModule (string iname, Component *parent)
 {
     #if 0
     // (TODO) create ports
-    PORT_SPIKEIN = CreatePort ("spikein", Port::INPUT, Prototype<ExampleMessage>::Get());
-    PORT_SPIKEOUT = CreatePort ("spikeout", Port::OUTPUT, Prototype<ExampleMessage>::Get());
+    PORT_SPIKEIN = CreatePort ("spikein", Module::PORT_INPUT, Prototype<ExampleMessage>::Get());
+    PORT_SPIKEOUT = CreatePort ("spikeout", Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
 
     // (OPTIONAL) initialize fields
     counter = 0

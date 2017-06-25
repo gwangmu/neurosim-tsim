@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <TSim/Module/Module.h>
-#include <TSim/Simulation/Testbench.h>
+#include <TSim/TSim/Module/Module.h>
+#include <TSim/TSim/Simulation/Testbench.h>
 
 #include <cinttypes>
 #include <string>

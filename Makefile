@@ -38,7 +38,7 @@ LIBDIR=lib
 # library paths
 TSIM=TSim
 TSIM_DIR=$(LIBDIR)/tsim
-TSIM_HDRDIR=$(TSIM_DIR)/include
+TSIM_HDRDIR=$(TSIM_DIR)/include/TSim
 TSIM_LIB=$(TSIM_DIR)/tsim.a
 
 # TODO: add variables for new library
@@ -78,13 +78,11 @@ LIBS:=$(foreach LIB,$(USING_LIBS),$($(LIB)_LIB))
 
 all: $(USING_LIBS) $(OBJSUBDIRS) $(FRAMEWORK) $(BIN)
 
-$(USING_LIBS):
-	@ $(eval LIBHDRDIR=$($@_HDRDIR))
-	@ $(eval SYMLIBHDRDIR=$(HDRDIR)/$($(@)))
-	@ $(if $(wildcard $(LIBHDRDIR)),,$(error non-existing library '$@'))
-	@ $(if $(wildcard $(SYMLIBHDRDIR)),,	\
-			$(call print,"symlinking..",$(LIBHDRDIR),$(SYMLIBHDRDIR)) \
-			$(shell ln -s ../$(LIBHDRDIR) $(SYMLIBHDRDIR)))
+TSIM:
+	@ $(if $(wildcard $(TSIM_HDRDIR)),,$(error non-existing $(TSIM_HDRDIR)))
+	@ $(if $(wildcard $(HDRDIR)/$(TSIM)),,	\
+		$(call print,"symlinking..",$(TSIM_HDRDIR),$(HDRDIR)/$(TSIM)) \
+		$(shell ln -s ../$(TSIM_HDRDIR) $(HDRDIR)/$(TSIM)))
 
 $(OBJSUBDIRS):
 	@ $(call print,"creating..",$(call to_comma_list,$@))

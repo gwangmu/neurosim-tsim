@@ -1,7 +1,7 @@
-#include <Pathway/FanoutWire.h>
-#include <Pathway/Message.h>
-#include <Base/Component.h>
-#include <Utility/Logging.h>
+#include <TSim/Pathway/FanoutWire.h>
+#include <TSim/Pathway/Message.h>
+#include <TSim/Base/Component.h>
+#include <TSim/Utility/Logging.h>
 
 #include <cinttypes>
 #include <string>

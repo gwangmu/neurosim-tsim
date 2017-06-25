@@ -1,12 +1,12 @@
-#include <Simulation/Simulator.h>
+#include <TSim/Simulation/Simulator.h>
 
-#include <Simulation/Testbench.h>
-#include <Module/Module.h>
-#include <Register/Register.h>
-#include <Script/FileScript.h>
-#include <Pathway/Pathway.h>
-#include <Utility/AccessKey.h>
-#include <Utility/Logging.h>
+#include <TSim/Simulation/Testbench.h>
+#include <TSim/Module/Module.h>
+#include <TSim/Register/Register.h>
+#include <TSim/Script/FileScript.h>
+#include <TSim/Pathway/Pathway.h>
+#include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 
 #include <vector>
 #include <map>
