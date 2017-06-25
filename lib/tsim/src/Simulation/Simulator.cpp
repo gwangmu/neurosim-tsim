@@ -130,7 +130,7 @@ bool Simulator::LoadTestbench ()
                 if (path != "")
                 {
                     PRINT ("Loading '%s' <-- '%s'..", 
-                            fscr->GetName().c_str(), path.c_str())
+                            fscr->GetName().c_str(), path.c_str());
                     fscr->LoadScriptFromFile (path);
                 }
                 else
@@ -150,7 +150,7 @@ bool Simulator::LoadTestbench ()
                 if (path != "")
                 {
                     PRINT ("Loading '%s' <-- '%s'..", 
-                            reg->GetName().c_str(), path.c_str())
+                            reg->GetName().c_str(), path.c_str());
                     reg->LoadDataFromFile (path);
                 }
                 else
