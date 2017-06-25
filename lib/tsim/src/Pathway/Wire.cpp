@@ -13,8 +13,8 @@ using namespace std;
 Wire::Wire (Component *parent, ConnectionAttr conattr, Message *msgproto)
     : Pathway ("Wire", parent, conattr, msgproto)
 {
-    AddEndpoint ("lhs", Endpoint::LHS, 0);
-    AddEndpoint ("rhs", Endpoint::RHS, 0);
+    AddEndpoint ("lhs", Endpoint::LHS, 1);
+    AddEndpoint ("rhs", Endpoint::RHS, 1);
 }
 
 uint32_t Wire::TargetLHSEndpointID ()

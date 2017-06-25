@@ -18,15 +18,10 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
 {
     // add child modules/components
     Module *datasource = new DataSourceModule ("datasource", this);
-    AddChild (datasource);
-
     Module *datasink = new DataSinkModule ("datasink", this);
-    AddChild (datasink);
 
     // create pathways
-    Pathway::ConnectionAttr conattr;
-    conattr.latency = 0;
-    conattr.bitwidth = 32;
+    Pathway::ConnectionAttr conattr (0, 32);
     Wire *d2dwire = new Wire (this, conattr, Prototype<ExampleMessage>::Get());
 
     // connect modules

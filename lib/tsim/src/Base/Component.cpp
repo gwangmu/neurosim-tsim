@@ -97,14 +97,14 @@ IssueCount Component::Validate (PERMIT(Simulator))
     {
         IssueCount subicount = comp->Validate (TRANSFER_KEY(Simulator));
         icount.error += subicount.error;
-        icount.warning += subicount.error;
+        icount.warning += subicount.warning;
     }
 
     for (Pathway *pathway : pathways)
     {
         IssueCount subicount = pathway->Validate (TRANSFER_KEY(Simulator));
         icount.error += subicount.error;
-        icount.warning += subicount.error;
+        icount.warning += subicount.warning;
     }
 
     return icount;

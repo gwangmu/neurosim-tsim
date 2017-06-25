@@ -11,7 +11,7 @@
 
 
 #define DESIGN_FATAL(msg, iname, ...) do {              \
-    fprintf (stderr, "%s: fatal: (%s, line %u)"         \
+    fprintf (stderr, "(%s) fatal: (%s, line %u) "         \
             msg "\n", iname, __FILE__, __LINE__,        \
             ##__VA_ARGS__);                               \
     abort ();                                           \
@@ -28,7 +28,7 @@
 } while (0)
 
 #define DESIGN_ERROR(msg, iname, ...) {                 \
-    fprintf (stderr, "%s: error: " msg "\n",            \
+    fprintf (stderr, "(%s) error: " msg "\n",            \
             iname, ##__VA_ARGS__);                        \
 } while (0)
 
@@ -37,12 +37,12 @@
 
 
 #define SYSTEM_WARNING(msg, ...) do {                      \
-    fprintf (stderr, "(system): warning: (%s, line %d)" \
+    fprintf (stderr, "(system): warning: (%s, line %d) " \
             msg "\n",  __FILE__, __LINE__, ##__VA_ARGS__);\
 } while (0)
 
 #define DESIGN_WARNING(msg, iname, ...) do {               \
-    fprintf (stderr, "%s: warning: " msg "\n",          \
+    fprintf (stderr, "(%s) warning: " msg "\n",          \
             iname, ##__VA_ARGS__);                        \
 } while (0)
 
@@ -57,7 +57,7 @@
 
 #if defined(MICRODEBUG) || !defined(NDEBUG)
     #define operation(msg, ...) {                           \
-        fprintf (stderr, "debug: (%s, line %d)"             \
+        fprintf (stderr, "debug: (%s, line %d) "             \
                 msg "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     }
     #define MICRODEBUG_PRINT(msg, ...)                      \
@@ -69,7 +69,7 @@
     
 #ifndef NDEBUG
     #define task(msg, ...) {                                \
-        fprintf (stderr, "debug: (%s, line %d)"             \
+        fprintf (stderr, "debug: (%s, line %d) "             \
                 msg "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     }
     #define DEBUG_PRINT(msg, ...) task(msg, ##__VA_ARGS__)

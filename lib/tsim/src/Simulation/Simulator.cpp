@@ -78,6 +78,8 @@ bool Simulator::LoadTestbench ()
         }
 
         PRINT ("total %zu module(s) found", modules.size());
+        for (Module *module:modules)
+            DEBUG_PRINT ("%s", module->GetName().c_str());
     }
 
     task ("init this->cdomains")

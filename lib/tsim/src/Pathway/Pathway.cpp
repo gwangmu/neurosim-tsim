@@ -190,7 +190,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
         icount.error++;
     }
 
-    if (sizeof(*msgproto) - sizeof(Message) < conn.conattr.bitwidth)
+    if (sizeof(*msgproto) - sizeof(Message) >= conn.conattr.bitwidth)
     {
         DESIGN_WARNING ("connection bitwidth (%u) smaller than"
                 "message prototype size (%lu)",

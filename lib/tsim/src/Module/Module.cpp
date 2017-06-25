@@ -282,8 +282,9 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     port->id = id;
     port->iotype = iotype;
     port->msgproto = msgproto;
-    
     port->endpt = nullptr;
+
+    pname2port[portname] = port;
 
     return id;
 }

@@ -23,6 +23,11 @@ public:
     struct ConnectionAttr
     {
         ConnectionAttr () { latency = 0; bitwidth = 0; }
+        ConnectionAttr (uint32_t latency, uint32_t bitwidth)
+        {
+            this->latency = latency;
+            this->bitwidth = bitwidth;
+        }
 
         static const uint32_t CONN_LATENCY_LIMIT = 10000;
 
