@@ -48,9 +48,14 @@ bool Endpoint::SetCapacity (uint32_t capacity)
 
 bool Endpoint::Assign (Message *msg)
 {
-    if (msgque.size () == capacity)
+    if (capacity != 0 && msgque.size () == capacity)
     {
         SIM_WARNING ("attemped to enque to full endpoint", GetName().c_str());
+        return false;
+    }
+    else if (capacity == 0 && msgque.size () >= 1)
+    {
+        SYSTEM_ERROR ("capacity=0 endpoint cannot have elements more than one");
         return false;
     }
     

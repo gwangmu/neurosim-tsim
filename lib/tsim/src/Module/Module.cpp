@@ -31,7 +31,7 @@ Module::Module (const char *clsname, string iname, Component *parent):
 {
     script = nullptr;
     reg = nullptr;
-    outMsgPended = false;
+    stalled = false;
 }
 
 
@@ -174,8 +174,39 @@ IssueCount Module::Validate (PERMIT(Simulator))
 /*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Module::PreClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("pre-clocking '%s'", GetFullName().c_str());
+    MICRODEBUG_PRINT ("assign '%s'-->path", GetFullName().c_str());
 
+    operation ("update stall state")
+    {
+        stalled = false;
+
+        for (Port &outport: outports)
+        {
+            if (outport.endpt->IsFull ())
+            {
+                stalled = true;
+                break;
+            }
+        }
+    }
+
+    if (!stalled)
+    {
+        operation ("assign module output to pathway")
+        {
+            for (auto i = 0; i < outports.size(); i++)
+            {
+                if (nextoutmsgs[i])
+                {
+                    if (!outports[i].endpt->Assign (nextoutmsgs[i]))
+                        SYSTEM_ERROR ("attemped to push to full RHS queue.");
+                    nextoutmsgs[i] = nullptr;
+                }
+            }
+        }
+    }
+
+#if 0
     if (!outMsgPended)
     {
         Instruction *nextinstr = nullptr;
@@ -208,13 +239,67 @@ void Module::PreClock (PERMIT(Simulator))
         DEBUG_PRINT ("pended (module:%s)", GetName().c_str());
 
     return;
+#endif
 }
 
 /*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Module::PostClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("post-clocking '%s'", GetFullName().c_str());
+    MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
 
+    Instruction *nextinstr = nullptr;
+    if (script)
+        nextinstr = script->NextInstruction ();
+
+    if (!stalled)
+    {
+        operation ("peak messages from RHS")
+        {
+            for (auto i = 0; i < inports.size(); i++)
+                if (!nextinmsgs[i])
+                {
+                    nextinmsgs[i] = inports[i].endpt->Peek ();
+                    DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
+                }
+        }
+
+        operation ("call operation")
+        {
+            // NOTE: set nextinmsgs[i] to nullptr not to use ith input
+            // NOTE: assign new message to nextoutmsgs[j] to push to jth output
+            Operation (nextinmsgs, nextoutmsgs, nextinstr);
+        }
+        
+        operation ("pop used messages from RHS")
+        {
+            for (auto i = 0; i < inports.size(); i++)
+            {
+                if (nextinmsgs[i])
+                {
+                    inports[i].endpt->Pop ();
+                    nextinmsgs[i]->Dispose ();
+                    nextinmsgs[i] = nullptr;
+                }
+            }
+        }
+
+        // TODO: optimize this
+        operation ("direct assign if endpt.capacity==0")
+        {
+            for (auto i = 0; i < outports.size(); i++)
+            {
+                if (outports[i].endpt->GetCapacity() == 0)
+                {
+                    if (!outports[i].endpt->Assign (nextoutmsgs[i]))
+                        SYSTEM_ERROR ("attempted to push to full RHS");
+                    nextoutmsgs[i] = nullptr;
+                }
+            }
+        }
+    }
+
+
+#if 0
     operation ("dispose incoming messages")
     {
         for (auto i = 0; i < inports.size (); i++)
@@ -251,6 +336,7 @@ void Module::PostClock (PERMIT(Simulator))
     outMsgPended = false;
 
     return;
+#endif
 }
 
 

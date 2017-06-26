@@ -224,6 +224,57 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
 void Pathway::PreClock (PERMIT(Simulator))
 {
+    MICRODEBUG_PRINT ("assign '%s'-->module", GetName().c_str());
+
+    operation ("push messages to RHS")
+    {    
+        Message *sampledmsg = conn.Sample ();
+
+        if (sampledmsg)
+        {
+            if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
+            {
+                operation ("broadcast message")
+                {
+                    sampledmsg->SetNumDestination (endpts.rhs.size());
+
+                    for (auto i = 0; i < endpts.rhs.size(); i++)
+                    {
+                        Endpoint &ept = endpts.rhs[i];
+                        if (!ept.Assign (sampledmsg))
+                        {
+                            SIM_WARNING ("message dropped (portname: %s)",
+                                    GetName().c_str(), ept.GetConnectedPortName().c_str());
+                            sampledmsg->Dispose ();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                operation ("send message to specific RHS")
+                {
+                    #ifndef NDEBUG
+                    if (sampledmsg->DEST_RHS_ID >= endpts.rhs.size ())
+                        SYSTEM_ERROR ("DEST_RHS_ID >= #rhs");
+                    #endif
+
+                    sampledmsg->SetNumDestination (1);
+
+                    Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
+                    if (!ept.Assign (sampledmsg))
+                    {
+                        SIM_WARNING ("message dropped (portname: %s)",
+                                GetName().c_str(), ept.GetConnectedPortName().c_str());
+                        sampledmsg->Dispose ();
+                    }
+                }
+            }
+        }
+    }
+
+
+#if 0
     operation ("push messages (RHS push)")
     {    
         Message *sampledmsg = conn.Sample ();
@@ -284,7 +335,8 @@ void Pathway::PreClock (PERMIT(Simulator))
     operation ("flow messages in connection");
     conn.Flow ();
 
-    operation ("pop message from LHS (LHS pop)") {
+    operation ("pop message from LHS (LHS pop)") 
+    {
         Message *msg_to_assign = nullptr;
         DEBUG_PRINT ("GetLHS..=%u", GetLHSIDOfThisCycle ());
         if (GetLHSIDOfThisCycle () != (uint32_t)-1)
@@ -305,10 +357,44 @@ void Pathway::PreClock (PERMIT(Simulator))
 
     operation ("transition ready state");
     UpdateReadyState ();
+#endif
 }
 
 void Pathway::PostClock (PERMIT(Simulator))
 {
+    operation ("update next ready state");
+    for (auto i = 0; i < endpts.rhs.size(); i++)
+    {
+        Endpoint &ept = endpts.rhs[i];
+        SetNextReady (i, ept.GetCapacity () - ept.GetNumMessages () >
+                conn.conattr.latency);
+    }
+
+    operation ("flow messages in connection");
+    conn.Flow ();
+
+    operation ("push message from LHS to connection") 
+    {
+        Message *msg_to_assign = nullptr;
+        DEBUG_PRINT ("GetLHS..=%u", GetLHSIDOfThisCycle ());
+
+        if (GetLHSIDOfThisCycle () != (uint32_t)-1)
+            msg_to_assign = endpts.lhs[GetLHSIDOfThisCycle ()].Peek ();
+
+        if (msg_to_assign)
+        {
+            DEBUG_PRINT ("DEST_RHS_ID=%u", msg_to_assign->DEST_RHS_ID);
+
+            if (IsReady (msg_to_assign->DEST_RHS_ID))
+            {
+                DEBUG_PRINT ("pushing message %p", msg_to_assign);
+                endpts.lhs[GetLHSIDOfThisCycle ()].Pop ();
+                conn.Assign (msg_to_assign);
+            }
+        }
+    }
+
+#if 0
     uint32_t targetid = TargetLHSEndpointID ();
     if (targetid != lhsid)
     {
@@ -324,5 +410,6 @@ void Pathway::PostClock (PERMIT(Simulator))
             stabilize_cycle = conn.conattr.latency;
         lhsid = targetid;
     }
+#endif
 }
 

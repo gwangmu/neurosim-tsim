@@ -56,8 +56,6 @@ public:
     virtual void PreClock (PERMIT(Simulator)) final;
     virtual void PostClock (PERMIT(Simulator)) final;
 
-    bool IsStalled () { return outMsgPended; }
-
     /* Called by parent 'Component' */
     bool SetScript (Script *script); 
     bool SetRegister (Register *reg);
@@ -82,7 +80,7 @@ private:
     
     Message **nextinmsgs;
     Message **nextoutmsgs;
-    bool outMsgPended;
+    bool stalled;
 
     Script *script;
     Register *reg;

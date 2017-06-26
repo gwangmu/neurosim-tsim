@@ -279,7 +279,7 @@ bool Simulator::Simulate ()
         }
     }
 
-    PRINT ("Simulation finished at %u ns", curtime);
+    PRINT ("Simulation finished at %lu ns", curtime);
 
     return true;
 }

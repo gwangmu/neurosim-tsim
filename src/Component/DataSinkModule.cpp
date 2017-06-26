@@ -22,7 +22,6 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
 void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     ExampleMessage *inmsg = static_cast<ExampleMessage *>(inmsgs[PORT_DATAIN]);
-    inmsgs[PORT_DATAIN] = nullptr;
 
     if (inmsg)
     {

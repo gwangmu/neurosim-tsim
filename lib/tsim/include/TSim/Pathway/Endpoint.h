@@ -18,7 +18,7 @@ class Simulator;
 class Endpoint final: public Metadata
 {
 public:
-    enum Type { LHS, RHS, /* Uni */ };
+    enum Type { LHS, RHS };
 
 public:
     Endpoint (string name, Pathway *parent, Type type, 
