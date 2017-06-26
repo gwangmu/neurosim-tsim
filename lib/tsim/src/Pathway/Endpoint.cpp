@@ -30,6 +30,8 @@ Endpoint::Endpoint (string name, Pathway *parent, Type type,
     if (capacity == 0)
         DESIGN_FATAL ("zero-capacity endpoint not allowed", GetName().c_str());
     this->capacity = capacity;
+
+    this->selected_lhs = false;
 }
 
 

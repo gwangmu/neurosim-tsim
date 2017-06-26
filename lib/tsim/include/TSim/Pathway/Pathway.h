@@ -75,7 +75,7 @@ public:
     virtual void PreClock (PERMIT(Simulator)) final;
     virtual void PostClock (PERMIT(Simulator)) final;
 
-    virtual uint32_t TargetLHSEndpointID () = 0;
+    virtual uint32_t NextTargetLHSEndpointID () = 0;
 
 protected:
     bool AddEndpoint (string name, Endpoint::Type type, uint32_t capacity); 
@@ -93,7 +93,9 @@ private:
     inline void UpdateReadyState ();
 
     // target LHS
-    inline uint32_t GetLHSIDOfThisCycle ();
+    inline void SetNewTargetLHSID (uint32_t lhsid);
+    inline uint32_t GetTargetLHSID ();
+    inline void UpdateStabilizeCycle ();
 
 private:
     Component *parent;
@@ -116,6 +118,7 @@ private:
 
 
 /* Inline functions */
+// FIXME need to be polished
 inline void Pathway::InitReadyState () 
 {
     rhsreadymask = next_rhsreadymask = (uint32_t)-1;
@@ -138,13 +141,35 @@ inline void Pathway::UpdateReadyState ()
 }
 
 
-inline uint32_t Pathway::GetLHSIDOfThisCycle ()
+inline void Pathway::SetNewTargetLHSID (uint32_t lhsid)
+{
+    if (this->lhsid == lhsid) return;
+
+    if (this->lhsid != -1)
+        endpts.lhs[this->lhsid].SetSelectedLHS (false);
+
+    if (this->lhsid != -1 || stabilize_cycle == 0)
+        stabilize_cycle = conn.conattr.latency;
+
+    if (stabilize_cycle == 0 && lhsid != -1)
+        endpts.lhs[lhsid].SetSelectedLHS (true);
+
+    this->lhsid = lhsid;
+}
+
+inline uint32_t Pathway::GetTargetLHSID ()
 { 
     if (stabilize_cycle == 0)
         return lhsid;
     else
-    {
-        stabilize_cycle--;
         return -1;
-    }
+}
+
+inline void Pathway::UpdateStabilizeCycle ()
+{
+    if (stabilize_cycle != 0)
+        stabilize_cycle--;
+
+    if (stabilize_cycle == 0 && lhsid != -1)
+        endpts.lhs[lhsid].SetSelectedLHS (true);
 }

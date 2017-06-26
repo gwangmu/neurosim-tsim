@@ -182,7 +182,15 @@ void Module::PreClock (PERMIT(Simulator))
 
         for (Port &outport: outports)
         {
-            if (outport.endpt->IsFull ())
+            if (outport.endpt->GetCapacity() == 0)
+            {
+                if (!outport.endpt->IsSelectedLHSOfThisCycle ())
+                {
+                    stalled = true;
+                    break;
+                }
+            }
+            else if (outport.endpt->IsFull ())
             {
                 stalled = true;
                 break;
@@ -205,41 +213,6 @@ void Module::PreClock (PERMIT(Simulator))
             }
         }
     }
-
-#if 0
-    if (!outMsgPended)
-    {
-        Instruction *nextinstr = nullptr;
-        operation ("sample messages (RHS peek)")
-        {
-            for (auto i = 0; i < inports.size(); i++)
-                if (!nextinmsgs[i])
-                {
-                    nextinmsgs[i] = inports[i].endpt->Peek ();
-                    DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
-                }
-            
-            if (script)
-                script->NextInstruction ();
-        }
-
-        operation ("call operation")
-        {
-            // NOTE: set nextinmsgs[i] to nullptr to pop ith input
-            // NOTE: assign new message to nextoutmsgs[j] to push to jth output
-            Operation (nextinmsgs, nextoutmsgs, nextinstr);
-        }
-        
-        operation ("pop messages (RHS pop)");
-        for (auto i = 0; i < inports.size(); i++)
-            if (!nextinmsgs[i])
-                inports[i].endpt->Pop ();
-    }
-    else
-        DEBUG_PRINT ("pended (module:%s)", GetName().c_str());
-
-    return;
-#endif
 }
 
 /*>>> ! PERFORMANCE-CRITICAL ! <<<*/
@@ -297,46 +270,6 @@ void Module::PostClock (PERMIT(Simulator))
             }
         }
     }
-
-
-#if 0
-    operation ("dispose incoming messages")
-    {
-        for (auto i = 0; i < inports.size (); i++)
-        {
-            if (nextinmsgs[i])
-                nextinmsgs[i]->Dispose ();
-        }
-    }
-
-    operation ("check pending state")
-    {
-        for (Port &port : outports)
-        {
-            if (port.endpt->IsFull ())
-            {
-                outMsgPended = true;
-                return;
-            }
-        }
-    }
-
-    operation ("assign/clear messages (LHS push)")
-    {
-        for (auto i = 0; i < outports.size (); i++)
-        {
-            if (nextoutmsgs[i])
-            {
-                outports[i].endpt->Assign (nextoutmsgs[i]);
-                nextoutmsgs[i] = nullptr;
-            }
-        }
-    }
-
-    outMsgPended = false;
-
-    return;
-#endif
 }
 
 

@@ -16,5 +16,5 @@ class Wire: public Pathway
 {
 public:
     Wire (Component *parent, ConnectionAttr conattr, Message *msgproto);
-    virtual uint32_t TargetLHSEndpointID ();
+    virtual uint32_t NextTargetLHSEndpointID ();
 };

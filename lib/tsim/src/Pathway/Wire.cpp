@@ -17,7 +17,7 @@ Wire::Wire (Component *parent, ConnectionAttr conattr, Message *msgproto)
     AddEndpoint ("rhs", Endpoint::RHS, 1);
 }
 
-uint32_t Wire::TargetLHSEndpointID ()
+uint32_t Wire::NextTargetLHSEndpointID ()
 {
     return 0;
 }

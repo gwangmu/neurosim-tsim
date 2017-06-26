@@ -44,6 +44,9 @@ public:
     uint32_t GetCapacity () { return capacity; }
     uint32_t GetNumMessages () { return msgque.size (); }
 
+    void SetSelectedLHS (bool val) { selected_lhs = val; }
+    bool IsSelectedLHSOfThisCycle () { return selected_lhs; }
+
     /* Called by 'Module' */
     bool JoinTo (Module *module, string portname, PERMIT(Module));
 
@@ -56,4 +59,5 @@ private:
 
     uint32_t capacity;
     queue<Message *> msgque;
+    bool selected_lhs;
 };

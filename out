@@ -1,4 +1,6 @@
+Loading 'ExampleTestbench (noname)'..
 debug: (src/Simulation/Simulator.cpp, line 54) find modules/pathways
+total 2 module(s) found
 debug: (src/Simulation/Simulator.cpp, line 83) DataSourceModule datasource
 debug: (src/Simulation/Simulator.cpp, line 83) DataSinkModule datasink
 debug: (src/Simulation/Simulator.cpp, line 86) load simulation spec
@@ -8,11 +10,17 @@ debug: (src/Simulation/Testbench.cpp, line 55) parameter (fscr1 <-- data/fscr1.s
 debug: (src/Simulation/Testbench.cpp, line 55) parameter (reg1 <-- data/reg1.regdata)
 debug: (src/Simulation/Testbench.cpp, line 55) parameter (main <-- 500)
 debug: (src/Simulation/Simulator.cpp, line 93) init this->cdomains
+total 1 clock domain(s) formed
 debug: (src/Simulation/Simulator.cpp, line 125) init this->fscrs, this->regs
 debug: (src/Simulation/Simulator.cpp, line 136) load file scripts
 debug: (src/Simulation/Simulator.cpp, line 156) load register data
+Checking testbench validity..
 debug: (src/Simulation/Simulator.cpp, line 184) validate design
+0 design error(s) and 0 design warning(s)
 debug: (src/Simulation/Simulator.cpp, line 195) vaildate clocks
+0 clock error(s)
+Initializing clocks..
+Starting simulation..
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 0 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -26,22 +34,21 @@ debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datasink.datain'-->module
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message (nil)
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message (nil)
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 500 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -55,24 +62,21 @@ debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datasink.datain'-->module
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message (nil)
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message (nil)
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74d40
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 1000 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -87,25 +91,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74d40
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7d40
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 0
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74d90
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 1500 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -120,25 +121,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74d90
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7d90
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 1
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74e80
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 2000 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -153,25 +151,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74e80
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7e80
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 2
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74d40
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 2500 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -186,25 +181,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74d40
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7d40
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 3
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74ed0
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 3000 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -219,25 +211,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74ed0
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7ed0
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 4
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74e80
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 3500 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -252,25 +241,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74e80
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7e80
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 5
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74d40
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 4000 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -285,25 +271,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74d40
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7d40
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 6
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74ed0
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 4500 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -318,25 +301,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74ed0
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7ed0
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 7
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74e80
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 5000 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -351,25 +331,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74e80
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7e80
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 8
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74d40
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 5500 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -384,25 +361,22 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74d40
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7d40
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 9
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74ed0
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 debug: (src/Simulation/Simulator.cpp, line 243) advance clock
 debug: (src/Simulation/Simulator.cpp, line 261) simulating 6000 ns..
 debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
@@ -417,31 +391,20 @@ debug: (src/Pathway/Pathway.cpp, line 227) assign 'Wire datasource.dataout-datas
 debug: (src/Pathway/Pathway.cpp, line 229) push messages to RHS
 debug: (src/Pathway/Pathway.cpp, line 255) send message to specific RHS
 debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
-debug: (src/Module/Module.cpp, line 248) calc 'DataSourceModule top::datasource'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 266) call operation
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
-debug: (src/Module/Module.cpp, line 248) calc 'DataSinkModule top::datasink'
-debug: (src/Module/Module.cpp, line 256) peak messages from RHS
-debug: (src/Module/Module.cpp, line 262) peaking message 0x1f74ed0
-debug: (src/Module/Module.cpp, line 266) call operation
+debug: (src/Module/Module.cpp, line 213) calc 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 231) call operation
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 213) calc 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 221) peak messages from RHS
+debug: (src/Module/Module.cpp, line 227) peaking message 0x1ae7ed0
+debug: (src/Module/Module.cpp, line 231) call operation
 debug: (src/Component/DataSinkModule.cpp, line 29) value = 10
-debug: (src/Module/Module.cpp, line 273) pop used messages from RHS
-debug: (src/Module/Module.cpp, line 287) direct assign if endpt.capacity==0
+debug: (src/Module/Module.cpp, line 238) pop used messages from RHS
+debug: (src/Module/Module.cpp, line 252) direct assign if endpt.capacity==0
 debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
 debug: (src/Pathway/Pathway.cpp, line 365) update next ready state
-debug: (src/Pathway/Pathway.cpp, line 373) flow messages in connection
-debug: (src/Pathway/Pathway.cpp, line 376) push message from LHS to connection
-debug: (src/Pathway/Pathway.cpp, line 379) GetLHS..=0
-debug: (src/Pathway/Pathway.cpp, line 386) DEST_RHS_ID=0
-debug: (src/Pathway/Pathway.cpp, line 390) pushing message 0x1f74e80
-Loading 'ExampleTestbench (noname)'..
-total 2 module(s) found
-total 1 clock domain(s) formed
-Checking testbench validity..
-0 design error(s) and 0 design warning(s)
-0 clock error(s)
-Initializing clocks..
-Starting simulation..
+debug: (src/Pathway/Pathway.cpp, line 377) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 380) push message from LHS to connection
 Simulation finished at 6000 ns

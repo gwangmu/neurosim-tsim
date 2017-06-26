@@ -17,5 +17,5 @@ class FanoutWire: public Pathway
 public:
     FanoutWire (Component *parent, ConnectionAttr conattr, 
             Message *msgproto, uint32_t n_rhs);
-    virtual uint32_t TargetLHSEndpointID ();
+    virtual uint32_t NextTargetLHSEndpointID ();
 };

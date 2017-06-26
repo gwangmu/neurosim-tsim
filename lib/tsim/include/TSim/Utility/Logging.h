@@ -57,7 +57,7 @@
 
 #if defined(MICRODEBUG) || !defined(NDEBUG)
     #define operation(msg, ...) {                           \
-        fprintf (stderr, "debug: (%s, line %d) "             \
+        fprintf (stdout, "debug: (%s, line %d) "             \
                 msg "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     }
     #define MICRODEBUG_PRINT(msg, ...)                      \
@@ -69,7 +69,7 @@
     
 #ifndef NDEBUG
     #define task(msg, ...) {                                \
-        fprintf (stderr, "debug: (%s, line %d) "             \
+        fprintf (stdout, "debug: (%s, line %d) "             \
                 msg "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     }
     #define DEBUG_PRINT(msg, ...) task(msg, ##__VA_ARGS__)

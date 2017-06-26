@@ -25,7 +25,7 @@ FanoutWire::FanoutWire (Component *parent, ConnectionAttr conattr,
         AddEndpoint ("rhs" + to_string(i), Endpoint::RHS, 1);
 }
 
-uint32_t FanoutWire::TargetLHSEndpointID () 
+uint32_t FanoutWire::NextTargetLHSEndpointID () 
 {
     return 0; 
 }

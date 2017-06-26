@@ -23,8 +23,8 @@ LD=clang++
 AR=ar
 
 # compiler flags
-CXXFLAGS=--std=c++14 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG)
-LDFLAGS=
+CXXFLAGS=-O3 --std=c++14 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG)
+LDFLAGS=-O3
 ARFLAGS=-rc
 #################
 
