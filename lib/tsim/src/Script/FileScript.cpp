@@ -32,7 +32,7 @@ bool FileScript::LoadScriptFromFile (string filename)
     {
         scrfile.open (filename);
         if (!scrfile.is_open ()){
-            DESIGN_ERROR ("cannot open a script file '%s'",
+            DESIGN_ERROR ("cannot open script file '%s'",
                     "FileScript", filename.c_str());
             return false;
         }

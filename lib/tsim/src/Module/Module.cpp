@@ -176,14 +176,17 @@ void Module::PreClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("pre-clocking '%s'", GetFullName().c_str());
 
-    if (outMsgPended)
+    if (!outMsgPended)
     {
         Instruction *nextinstr = nullptr;
         operation ("sample messages (RHS peek)")
         {
             for (auto i = 0; i < inports.size(); i++)
                 if (!nextinmsgs[i])
+                {
                     nextinmsgs[i] = inports[i].endpt->Peek ();
+                    DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
+                }
             
             if (script)
                 script->NextInstruction ();
@@ -201,6 +204,8 @@ void Module::PreClock (PERMIT(Simulator))
             if (!nextinmsgs[i])
                 inports[i].endpt->Pop ();
     }
+    else
+        DEBUG_PRINT ("pended (module:%s)", GetName().c_str());
 
     return;
 }
@@ -213,14 +218,17 @@ void Module::PostClock (PERMIT(Simulator))
     operation ("dispose incoming messages")
     {
         for (auto i = 0; i < inports.size (); i++)
-            nextinmsgs[i]->Dispose (KEY(Module));
+        {
+            if (nextinmsgs[i])
+                nextinmsgs[i]->Dispose ();
+        }
     }
 
     operation ("check pending state")
     {
         for (Port &port : outports)
         {
-            if (!port.endpt->IsFull ())
+            if (port.endpt->IsFull ())
             {
                 outMsgPended = true;
                 return;

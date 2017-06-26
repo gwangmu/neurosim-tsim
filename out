@@ -1,0 +1,1302 @@
+GNU gdb (Ubuntu 7.11.1-0ubuntu1~16.04) 7.11.1
+Copyright (C) 2016 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./neurosim-tsim...(no debugging symbols found)...done.
+(gdb) r
+Starting program: /home/gwangmu/project/NPU/code/neurosim-tsim/neurosim-tsim simspec/test.simspec
+debug: (src/Simulation/Simulator.cpp, line 54) find modules/pathways
+debug: (src/Simulation/Simulator.cpp, line 83) DataSourceModule datasource
+debug: (src/Simulation/Simulator.cpp, line 83) DataSinkModule datasink
+debug: (src/Simulation/Simulator.cpp, line 86) load simulation spec
+debug: (src/Simulation/Testbench.cpp, line 20) open simulation spec file
+debug: (src/Simulation/Testbench.cpp, line 30) parse spec file
+debug: (src/Simulation/Testbench.cpp, line 55) parameter (fscr1 <-- data/fscr1.script)
+debug: (src/Simulation/Testbench.cpp, line 55) parameter (reg1 <-- data/reg1.regdata)
+debug: (src/Simulation/Testbench.cpp, line 55) parameter (main <-- 500)
+debug: (src/Simulation/Simulator.cpp, line 93) init this->cdomains
+debug: (src/Simulation/Simulator.cpp, line 125) init this->fscrs, this->regs
+debug: (src/Simulation/Simulator.cpp, line 136) load file scripts
+debug: (src/Simulation/Simulator.cpp, line 156) load register data
+debug: (src/Simulation/Simulator.cpp, line 184) validate design
+debug: (src/Simulation/Simulator.cpp, line 195) vaildate clocks
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 0 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654d40
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 1000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654d90
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 1500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654e80
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 2000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654ed0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 2500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654f20
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 3000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654f70
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 3500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x654fc0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 4000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655010
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 4500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655060
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 5000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6550b0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 5500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655100
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 6000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655150
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 6500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6551a0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 7000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6551f0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 7500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655240
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 8000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655290
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 8500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6552e0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 9000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655330
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 9500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655380
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 10000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6553d0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 10500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655420
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 11000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655470
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 11500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6554c0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 12000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655510
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 12500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655560
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 13000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6555b0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 13500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655600
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 14000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655650
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 14500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6556a0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 15000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6556f0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 15500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655740
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 16000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655790
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 16500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6557e0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 17000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655830
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 17500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655880
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 18000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x6558d0
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 18500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655920
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 19000 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message (nil)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Simulation/Simulator.cpp, line 267) pre-clock pathways
+debug: (src/Pathway/Pathway.cpp, line 227) push messages (RHS push)
+debug: (src/Pathway/Pathway.cpp, line 253) send message to specific RHS
+debug: (src/Pathway/Pathway.cpp, line 274) update next ready state
+debug: (src/Pathway/Pathway.cpp, line 284) flow messages in connection
+debug: (src/Pathway/Pathway.cpp, line 287) pop message from LHS (LHS pop)
+debug: (src/Pathway/Pathway.cpp, line 289) GetLHS..=0
+debug: (src/Pathway/Pathway.cpp, line 295) DEST_RHS_ID=0
+debug: (src/Pathway/Pathway.cpp, line 299) pushing message 0x655970
+debug: (src/Pathway/Pathway.cpp, line 306) transition ready state
+debug: (src/Simulation/Simulator.cpp, line 271) post-clock modules
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Module/Module.cpp, line 216) post-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 218) dispose incoming messages
+debug: (src/Module/Module.cpp, line 227) check pending state
+debug: (src/Module/Module.cpp, line 239) assign/clear messages (LHS push)
+debug: (src/Simulation/Simulator.cpp, line 275) post-clock pathways
+debug: (src/Simulation/Simulator.cpp, line 243) advance clock
+debug: (src/Simulation/Simulator.cpp, line 261) simulating 19500 ns..
+debug: (src/Simulation/Simulator.cpp, line 263) pre-clock modules
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSourceModule top::datasource'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 195) call operation
+debug: (src/Module/Module.cpp, line 202) pop messages (RHS pop)
+debug: (src/Module/Module.cpp, line 177) pre-clocking 'DataSinkModule top::datasink'
+debug: (src/Module/Module.cpp, line 182) sample messages (RHS peek)
+debug: (src/Module/Module.cpp, line 188) peaking message 0x1f7f1
+debug: (src/Module/Module.cpp, line 195) call operation
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000405420 in DataSinkModule::Operation(Message**, Message**, Instruction*) ()
+(gdb) q
+A debugging session is active.
+
+	Inferior 1 [process 5961] will be killed.
+
+Quit anyway? (y or n) yqrq
+Please answer y or n.
+A debugging session is active.
+
+	Inferior 1 [process 5961] will be killed.
+
+Quit anyway? (y or n) y

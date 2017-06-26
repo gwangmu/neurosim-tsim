@@ -8,9 +8,14 @@ using namespace std;
 
 extern Testbench *simtb;
 
-int main ()
+int main (int argc, char *argv[])
 {
-    Simulator sim;
+    if (argc < 2) {
+        PRINT ("usage: %s <simspec_file>", argv[0]);
+        return 0;
+    }
+                
+    Simulator sim (argv[1]);
 
     if (!sim.AttachTestbench (simtb))
     {

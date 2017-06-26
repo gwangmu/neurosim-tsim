@@ -35,7 +35,9 @@ public:
         : Metadata (clsname, ""), TOP_COMPONENT (topcomp) {}
 
     /* Called by 'Simulator' */
-    virtual Component *const LoadTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
+    virtual Component *const GetTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
+    bool LoadSimulationSpec (string specfilename, PERMIT(Simulator));
+
     string GetStringParam (ParamType ptype, string pname, PERMIT(Simulator));
     uint32_t GetUIntParam (ParamType ptype, string pname, PERMIT(Simulator));
 

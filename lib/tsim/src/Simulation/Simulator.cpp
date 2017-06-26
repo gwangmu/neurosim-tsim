@@ -23,8 +23,9 @@ Simulator::ClockDomain::ClockDomain ()
 }
 
 
-Simulator::Simulator ()
+Simulator::Simulator (string specfilename)
 {
+    this->specfilename = specfilename;
     tb = NULL;
     curtime = 0;
 }
@@ -53,7 +54,7 @@ bool Simulator::LoadTestbench ()
     task ("find modules/pathways")
     {
         queue<Component *> queComps;
-        queComps.push (tb->LoadTopComponent (KEY(Simulator)));
+        queComps.push (tb->GetTopComponent (KEY(Simulator)));
         
         while (!queComps.empty ())
         {
@@ -82,6 +83,13 @@ bool Simulator::LoadTestbench ()
             DEBUG_PRINT ("%s", module->GetName().c_str());
     }
 
+    task ("load simulation spec")
+    {
+        if (!tb->LoadSimulationSpec (specfilename, KEY(Simulator)))
+            DESIGN_FATAL ("cannot load simulation spec '%s'",
+                    tb->GetName().c_str(), specfilename.c_str());
+    }
+
     task ("init this->cdomains")
     {
         map<string, ClockDomain> mapCDoms;
@@ -107,6 +115,9 @@ bool Simulator::LoadTestbench ()
         
         for (auto &centry : mapCDoms)
             cdomains.push_back (centry.second);
+
+        for (ClockDomain &cdomain : cdomains)
+            cdomain.period = tb->GetUIntParam (Testbench::CLOCK_PERIOD, cdomain.name, KEY(Simulator));
 
         PRINT ("total %zu clock domain(s) formed", cdomains.size());
     }
@@ -172,7 +183,7 @@ bool Simulator::ValidateTestbench ()
 
     task ("validate design")
     {
-        IssueCount icount = tb->LoadTopComponent(KEY(Simulator))->
+        IssueCount icount = tb->GetTopComponent(KEY(Simulator))->
             Validate(KEY(Simulator));
         PRINT ("%d design error(s) and %d design warning(s)",
                 icount.error, icount.warning);
@@ -247,7 +258,7 @@ bool Simulator::Simulate ()
                 cdomains[minidx].nexttime += cdomains[minidx].period;
             }
 
-            task ("simulate %lu ns", curtime)
+            task ("simulating %lu ns..", curtime)
             {
                 operation ("pre-clock modules");
                 for (Module *module : curCDom->modules)
@@ -267,6 +278,8 @@ bool Simulator::Simulate ()
             }
         }
     }
+
+    PRINT ("Simulation finished at %u ns", curtime);
 
     return true;
 }

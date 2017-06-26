@@ -35,7 +35,7 @@ bool Register::LoadDataFromFile (string filename)
     {
         regfile.open (filename);
         if (!regfile.is_open ()){
-            DESIGN_ERROR ("cannot open a script file '%s'",
+            DESIGN_ERROR ("cannot open register data file '%s'",
                     "FileScript", filename.c_str());
             return false;
         }

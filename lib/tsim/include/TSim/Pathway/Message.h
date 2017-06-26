@@ -20,8 +20,11 @@ public:
 
 /*>> Below this is for MESSAGE DISPOSAL <<*/
 public:
-    void SetNumDestination (uint32_t n_dest, PERMIT(Pathway)) { dispcount = n_dest; }
-    void Dispose (PERMIT(Module)) 
+    // Only for Pathway
+    void SetNumDestination (uint32_t n_dest) { dispcount = n_dest; }
+
+    // Only for Pathway and Module
+    void Dispose () 
     {
         dispcount--;
         if (dispcount == 0)

@@ -53,7 +53,7 @@ Pathway::Pathway (const char *clsname, Component *parent,
 
     InitReadyState ();
 
-    lhsid = (uint32_t)-1;
+    lhsid = 0;//(uint32_t)-1;
     stabilize_cycle = 0;
 
     SetConnectionAttr (conattr);
@@ -234,14 +234,17 @@ void Pathway::PreClock (PERMIT(Simulator))
             {
                 operation ("broadcast message")
                 {
-                    sampledmsg->SetNumDestination (endpts.rhs.size(), KEY(Pathway));
+                    sampledmsg->SetNumDestination (endpts.rhs.size());
 
                     for (auto i = 0; i < endpts.rhs.size(); i++)
                     {
                         Endpoint &ept = endpts.rhs[i];
                         if (!ept.Assign (sampledmsg))
+                        {
                             SIM_WARNING ("message dropped (portname: %s)",
                                     GetName().c_str(), ept.GetConnectedPortName().c_str());
+                            sampledmsg->Dispose ();
+                        }
                     }
                 }
             }
@@ -254,12 +257,15 @@ void Pathway::PreClock (PERMIT(Simulator))
                         SYSTEM_ERROR ("DEST_RHS_ID >= #rhs");
                     #endif
 
-                    sampledmsg->SetNumDestination (1, KEY(Pathway));
+                    sampledmsg->SetNumDestination (1);
 
                     Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
                     if (!ept.Assign (sampledmsg))
+                    {
                         SIM_WARNING ("message dropped (portname: %s)",
                                 GetName().c_str(), ept.GetConnectedPortName().c_str());
+                        sampledmsg->Dispose ();
+                    }
                 }
             }
         }
@@ -280,16 +286,21 @@ void Pathway::PreClock (PERMIT(Simulator))
 
     operation ("pop message from LHS (LHS pop)") {
         Message *msg_to_assign = nullptr;
+        DEBUG_PRINT ("GetLHS..=%u", GetLHSIDOfThisCycle ());
         if (GetLHSIDOfThisCycle () != (uint32_t)-1)
             msg_to_assign = endpts.lhs[GetLHSIDOfThisCycle ()].Peek ();
 
-        if (msg_to_assign && !IsReady (msg_to_assign->DEST_RHS_ID))
-            msg_to_assign = nullptr;
-        else
-            endpts.lhs[GetLHSIDOfThisCycle ()].Pop ();
-
         if (msg_to_assign)
-            conn.Assign (msg_to_assign);
+        {
+            DEBUG_PRINT ("DEST_RHS_ID=%u", msg_to_assign->DEST_RHS_ID);
+
+            if (IsReady (msg_to_assign->DEST_RHS_ID))
+            {
+                DEBUG_PRINT ("pushing message %p", msg_to_assign);
+                endpts.lhs[GetLHSIDOfThisCycle ()].Pop ();
+                conn.Assign (msg_to_assign);
+            }
+        }
     }
 
     operation ("transition ready state");

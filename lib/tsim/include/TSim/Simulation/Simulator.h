@@ -33,7 +33,7 @@ protected:
     };
 
 public:
-    Simulator ();
+    Simulator (string specfilename);
 
     bool AttachTestbench (Testbench *tb);
     bool Simulate ();
@@ -45,6 +45,7 @@ private:
     bool ValidateTestbench ();
 
     // Loaded design
+    string specfilename;
     Testbench *tb;
     vector<ClockDomain> cdomains;
     vector<FileScript *> fscrs;
