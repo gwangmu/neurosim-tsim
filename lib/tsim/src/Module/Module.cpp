@@ -26,12 +26,22 @@ Module::Port::Port ()
     endpt = nullptr;
 }
 
-Module::Module (const char *clsname, string iname, Component *parent):
+Module::Module (const char *clsname, string iname, 
+        Component *parent, uint32_t pdepth):
     Component (clsname, iname, parent)
 {
     script = nullptr;
     reg = nullptr;
     stalled = false;
+
+    this->pdepth = pdepth;
+    omsgidx = 0;
+
+    omsgidxmask = 1;
+    for (uint32_t pd = pdepth; pd; omsgidxmask <<= 1, pd >>= 1);
+    omsgidxmask--;
+
+    nextoutmsgs = new Message **[omsgidxmask + 1];
 }
 
 
@@ -206,11 +216,11 @@ void Module::PreClock (PERMIT(Simulator))
         {
             for (auto i = 0; i < outports.size(); i++)
             {
-                if (nextoutmsgs[i])
+                if (nextoutmsgs[omsgidx][i])
                 {
-                    if (!outports[i].endpt->Assign (nextoutmsgs[i]))
+                    if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
                         SYSTEM_ERROR ("attemped to push to full RHS queue.");
-                    nextoutmsgs[i] = nullptr;
+                    nextoutmsgs[omsgidx][i] = nullptr;
                 }
             }
         }
@@ -245,7 +255,8 @@ void Module::PostClock (PERMIT(Simulator))
         {
             // NOTE: set nextinmsgs[i] to nullptr not to use ith input
             // NOTE: assign new message to nextoutmsgs[j] to push to jth output
-            Operation (nextinmsgs, nextoutmsgs, nextinstr);
+            uint32_t omsgidx_out = (omsgidx + pdepth) & omsgidxmask;
+            Operation (nextinmsgs, nextoutmsgs[omsgidx_out], nextinstr);
         }
         
         operation ("pop used messages from RHS")
@@ -261,20 +272,24 @@ void Module::PostClock (PERMIT(Simulator))
             }
         }
 
+        omsgidx = (omsgidx + 1) & omsgidxmask;
+
         // TODO: optimize this
         for (auto i = 0; i < outports.size(); i++)
         {
-            if (nextoutmsgs[i] && outports[i].endpt->GetCapacity() == 0)
+            if (nextoutmsgs[omsgidx][i] && outports[i].endpt->GetCapacity() == 0)
             {
-                operation ("direct assign if endpt.capacity==0")
+                operation ("ahead-of-time assign if LHS.capacity==0")
                 {
-                    if (!outports[i].endpt->Assign (nextoutmsgs[i]))
+                    if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
                         SYSTEM_ERROR ("attempted to push to full RHS");
-                    nextoutmsgs[i] = nullptr;
+                    nextoutmsgs[omsgidx][i] = nullptr;
                 }
             }
         }
     }
+
+    // XXX if (stalled || all_empty (nextoutmsgs)) then this=idle
 }
 
 
@@ -300,8 +315,11 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         id = outports.size () - 1;
         port = &outports.back ();
         
-        delete[] nextoutmsgs;
-        nextoutmsgs = new Message *[outports.size ()] ();
+        for (uint32_t i = 0; i < omsgidxmask + 1; i++)
+        {
+            delete[] nextoutmsgs[i];
+            nextoutmsgs[i] = new Message *[outports.size ()] ();
+        }
     }
     else
     {

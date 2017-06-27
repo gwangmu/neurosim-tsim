@@ -31,7 +31,7 @@ public:
     string GetConnectedPortName () { return portConn; }
 
     /* Called by 'Component' */
-    void SetCapacity (uint32_t capacity) { this->capacity = capacity; }
+    void SetCapacity (uint32_t capacity);
 
     /* Called by 'Pathway' and 'Module' (during simulation) */
     // FIXME enforcing LHS, RHS caller classes?

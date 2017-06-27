@@ -27,11 +27,19 @@ Endpoint::Endpoint (string name, Pathway *parent, Type type,
     this->modConn = nullptr;
     this->portConn = "";
 
-    //if (capacity == 0)
-    //    DESIGN_FATAL ("zero-capacity endpoint not allowed", GetName().c_str());
+    if (capacity == 0 && type == RHS)
+        DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
     this->capacity = capacity;
 
     this->selected_lhs = false;
+}
+
+void Endpoint::SetCapacity (uint32_t capacity)
+{
+    if (capacity == 0 && type == RHS)
+        DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
+
+    this->capacity = capacity;
 }
 
 
@@ -75,13 +83,6 @@ bool Endpoint::JoinTo (Module *module, string portname, PERMIT(Module))
         DESIGN_WARNING ("port '%s' (of %s) has been already asigned",
                 GetName().c_str(), portname.c_str(), module->GetName().c_str());
     }
-
-    //if (capacity == 0)
-    //{
-    //    DESIGN_ERROR ("port '%s' has zero-capacity. cannot be jointed",
-    //            GetName().c_str(), portname.c_str());
-    //    return false;
-    //}
 
     modConn = module;
     portConn = portname;

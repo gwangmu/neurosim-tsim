@@ -14,7 +14,7 @@ using namespace std;
 
 
 DataSourceModule::DataSourceModule (string iname, Component *parent)
-    : Module ("DataSourceModule", iname, parent)
+    : Module ("DataSourceModule", iname, parent, 1)
 {
     // create ports
     PORT_DATAOUT = CreatePort ("dataout", Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
