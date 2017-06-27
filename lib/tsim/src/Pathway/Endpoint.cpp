@@ -27,24 +27,11 @@ Endpoint::Endpoint (string name, Pathway *parent, Type type,
     this->modConn = nullptr;
     this->portConn = "";
 
-    if (capacity == 0)
-        DESIGN_FATAL ("zero-capacity endpoint not allowed", GetName().c_str());
+    //if (capacity == 0)
+    //    DESIGN_FATAL ("zero-capacity endpoint not allowed", GetName().c_str());
     this->capacity = capacity;
 
     this->selected_lhs = false;
-}
-
-
-bool Endpoint::SetCapacity (uint32_t capacity)
-{
-    if (capacity == 0)
-    {
-        DESIGN_ERROR ("endpoint must have capacity >= 1", GetName().c_str());
-        return false;
-    }
-
-    this->capacity = capacity;
-    return true;
 }
 
 
@@ -52,7 +39,7 @@ bool Endpoint::Assign (Message *msg)
 {
     if (capacity != 0 && msgque.size () == capacity)
     {
-        SIM_WARNING ("attemped to enque to full endpoint", GetName().c_str());
+        SIM_WARNING ("attempted to enque to full endpoint", GetName().c_str());
         return false;
     }
     else if (capacity == 0 && msgque.size () >= 1)
@@ -61,6 +48,11 @@ bool Endpoint::Assign (Message *msg)
         return false;
     }
     
+    #ifndef NDEBUG
+    if (msg == nullptr)
+        SYSTEM_ERROR ("attempted to push null message");
+    #endif
+
     msgque.push (msg);
     return true;
 }
@@ -84,12 +76,12 @@ bool Endpoint::JoinTo (Module *module, string portname, PERMIT(Module))
                 GetName().c_str(), portname.c_str(), module->GetName().c_str());
     }
 
-    if (capacity == 0)
-    {
-        DESIGN_ERROR ("port '%s' has zero-capacity. cannot be jointed",
-                GetName().c_str(), portname.c_str());
-        return false;
-    }
+    //if (capacity == 0)
+    //{
+    //    DESIGN_ERROR ("port '%s' has zero-capacity. cannot be jointed",
+    //            GetName().c_str(), portname.c_str());
+    //    return false;
+    //}
 
     modConn = module;
     portConn = portname;

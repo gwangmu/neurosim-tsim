@@ -20,6 +20,12 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
 // NOTE: called only if not stalled
 void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
-    outmsgs[PORT_DATAOUT] = new ExampleMessage (0, counter);
-    counter++;
+    static int delay = 4;
+    if (delay > 0)
+        delay--;
+    else
+    {    
+        outmsgs[PORT_DATAOUT] = new ExampleMessage (0, counter);
+        counter++;
+    }
 }

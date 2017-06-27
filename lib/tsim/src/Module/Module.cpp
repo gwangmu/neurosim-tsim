@@ -257,11 +257,11 @@ void Module::PostClock (PERMIT(Simulator))
         }
 
         // TODO: optimize this
-        operation ("direct assign if endpt.capacity==0")
+        for (auto i = 0; i < outports.size(); i++)
         {
-            for (auto i = 0; i < outports.size(); i++)
+            if (nextoutmsgs[i] && outports[i].endpt->GetCapacity() == 0)
             {
-                if (outports[i].endpt->GetCapacity() == 0)
+                operation ("direct assign if endpt.capacity==0")
                 {
                     if (!outports[i].endpt->Assign (nextoutmsgs[i]))
                         SYSTEM_ERROR ("attempted to push to full RHS");
