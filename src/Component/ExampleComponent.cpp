@@ -17,7 +17,7 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
     : Component ("ExampleComponent", iname, parent)
 {
     // NOTE: children automatically inherit parent's clock
-    //  but can override the clock by redefining its own.
+    //  but they can override it by redefining their own.
     SetClock ("main");
 
     // add child modules/components
