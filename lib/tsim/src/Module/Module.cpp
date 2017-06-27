@@ -218,6 +218,23 @@ void Module::PreClock (PERMIT(Simulator))
             {
                 if (nextoutmsgs[omsgidx][i])
                 {
+                    if (pdepth == 0)
+                    {
+                        if (Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                        {
+                            outports[i].endpt->Reserve ();
+                            nextoutmsgs[omsgidx][i] = nullptr;
+                            continue;
+                        }
+                    }
+
+                    #ifndef NDEBUG
+                    if (pdepth != 0 && 
+                            Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                        SIM_FATAL ("pdepth!=0 cannot produce RESERVE msg",
+                                GetName().c_str());
+                    #endif
+
                     if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
                         SYSTEM_ERROR ("attemped to push to full RHS queue.");
                     nextoutmsgs[omsgidx][i] = nullptr;
@@ -281,6 +298,12 @@ void Module::PostClock (PERMIT(Simulator))
             {
                 operation ("ahead-of-time assign if LHS.capacity==0")
                 {
+                    #ifndef NDEBUG
+                    if (Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                        SIM_FATAL ("capacity=0 endpoint cannot reserve",
+                                GetName().c_str());
+                    #endif
+
                     if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
                         SYSTEM_ERROR ("attempted to push to full RHS");
                     nextoutmsgs[omsgidx][i] = nullptr;

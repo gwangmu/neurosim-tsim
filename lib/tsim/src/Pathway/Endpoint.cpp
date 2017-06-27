@@ -31,6 +31,7 @@ Endpoint::Endpoint (string name, Pathway *parent, Type type,
         DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
     this->capacity = capacity;
 
+    this->resv_count = 0;
     this->selected_lhs = false;
 }
 
@@ -42,6 +43,14 @@ void Endpoint::SetCapacity (uint32_t capacity)
     this->capacity = capacity;
 }
 
+
+void Endpoint::Reserve ()
+{
+    resv_count++;
+
+    if (resv_count + msgque.size() > capacity)
+        SYSTEM_ERROR ("queue size + resv_count exceeded capacity");
+}
 
 bool Endpoint::Assign (Message *msg)
 {
@@ -61,7 +70,9 @@ bool Endpoint::Assign (Message *msg)
         SYSTEM_ERROR ("attempted to push null message");
     #endif
 
+    if (resv_count > 0) resv_count--;
     msgque.push (msg);
+
     return true;
 }
 
@@ -72,7 +83,7 @@ bool Endpoint::IsFull ()
         SYSTEM_ERROR ("endpoint queue size exceeded capacity");
     #endif
 
-    return msgque.size() >= capacity;
+    return (resv_count + msgque.size()) >= capacity;
 }
 
 
