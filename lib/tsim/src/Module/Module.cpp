@@ -43,12 +43,13 @@ bool Module::SetScript (Script *script)
                 GetFullName().c_str(), this->script->GetName().c_str(), 
                 script->GetName().c_str());
 
-    if (script->IsAssigned ()) {
+    if (script->GetParent ()) {
         DESIGN_ERROR ("'%s' has already been assigned",
                 GetFullName().c_str(), script->GetName().c_str());
         return false;
     }
 
+    script->SetParent (this, KEY(Module));
     this->script = script;
 
     return true;
@@ -61,12 +62,13 @@ bool Module::SetRegister (Register *reg)
                 GetFullName().c_str(), this->reg->GetName().c_str(),
                 reg->GetName().c_str());
 
-    if (reg->IsAssigned ()) {
+    if (reg->GetParent ()) {
         DESIGN_ERROR ("'%s' has already been assigned",
                 GetFullName().c_str(), reg->GetName().c_str());
         return false;
     }
 
+    reg->SetParent (this, KEY(Module));
     this->reg = reg;
 
     return true;
@@ -220,12 +222,15 @@ void Module::PostClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
 
-    Instruction *nextinstr = nullptr;
-    if (script)
-        nextinstr = script->NextInstruction ();
-
     if (!stalled)
     {
+        Instruction *nextinstr = nullptr;
+        if (script)
+        {
+            operation ("prepare instruction");
+            nextinstr = script->NextInstruction ();
+        }
+
         operation ("peak messages from RHS")
         {
             for (auto i = 0; i < inports.size(); i++)

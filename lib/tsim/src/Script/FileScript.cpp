@@ -14,8 +14,11 @@ using namespace std;
 FileScript::FileScript (const char *clsname, Instruction *iproto):
     Script (clsname)
 {
+    loaded = false;
+
     cursec = 0;
-    curinstr = 0;
+    nextinstr = 0;
+    internal_cycle = 0;
 
     if (!iproto)
         DESIGN_FATAL ("null instructino prototype", GetName().c_str ());
@@ -143,7 +146,7 @@ bool FileScript::LoadScriptFromFile (string filename)
 
                             if (item[0] == "cycle")
                                 instr_info.cycle = stoi (item[1]);
-                            else if (item[1] == "data")
+                            else if (item[0] == "data")
                                 instr_info.data = item[1];
                             else
                             {
@@ -183,7 +186,7 @@ bool FileScript::LoadScriptFromFile (string filename)
                                 return false;
                             }
 
-                            sections.back().push_back (newinstr);
+                            sections.back().push_back (CycleInstrPair (instr_info.cycle, newinstr));
 
                             prev_instr_info = instr_info;
 
@@ -214,5 +217,52 @@ bool FileScript::LoadScriptFromFile (string filename)
 
     PRINT ("total %u section(s), %u instruction(s)", total_nsec, total_ninstr);
 
+    loaded = true;
     return true;
+}
+
+
+bool FileScript::NextSection ()
+{
+    if (cursec >= sections.size ())
+        return false;
+
+    internal_cycle = 0;
+    nextinstr = 0;
+    cursec++;
+
+    return (cursec < sections.size());
+}
+
+Instruction* FileScript::NextInstruction ()
+{
+    Instruction *instr = nullptr;
+
+    if (cursec < sections.size () &&
+            nextinstr < sections[cursec].size ())
+    {
+        if (sections[cursec][nextinstr].cycle == internal_cycle)
+        {
+            instr = sections[cursec][nextinstr].instr;
+            nextinstr++;
+        }
+    }
+
+    internal_cycle++;
+    return instr;
+}
+
+
+IssueCount FileScript::Validate (PERMIT(Simulator))
+{
+    IssueCount icount;
+
+    if (!loaded)
+    {
+        DESIGN_WARNING ("script file not loaded", GetName().c_str());
+        icount.warning++;
+    }
+
+    return icount;
+
 }

@@ -4,5 +4,3 @@ CLASSNAME: TestRegister
 Data:
     addr=0x1, data=0x8329
     addr=0x2, data=0xFA2D
-
-

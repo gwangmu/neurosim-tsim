@@ -1,6 +1,8 @@
 #pragma once
 
 #include <TSim/Base/Metadata.h>
+#include <TSim/Utility/AccessKey.h>
+
 #include <string>
 #include <cinttypes>
 #include <vector>
@@ -8,6 +10,7 @@
 using namespace std;
 
 struct RegisterWord;
+class Module;
 
 
 class Register: public Metadata
@@ -32,8 +35,8 @@ public:
             Attr attr, RegisterWord *wproto);
 
     RegisterWord* GetWordPrototype () { return wproto; }
-    void CheckAssigned () { assigned = true; }
-    bool IsAssigned () { return assigned; }
+    Module* GetParent () { return parent; }
+    void SetParent (Module *module, PERMIT(Module)) { parent = module; }
 
     bool LoadDataFromFile (string filename);
     virtual RegisterWord* ParseRawString (string rawline) = 0;
@@ -41,7 +44,7 @@ public:
     const RegisterWord* GetWord (uint64_t addr);
 
 private:
-    bool assigned;
+    Module *parent;
 
     Type type;
     Attr attr;
