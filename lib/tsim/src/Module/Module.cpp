@@ -210,7 +210,7 @@ void Module::PreClock (PERMIT(Simulator))
         }
     }
 
-    if (!stalled)
+    if (pdepth > 0 && !stalled)
     {
         operation ("assign module output to pathway")
         {
@@ -249,9 +249,9 @@ void Module::PostClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
 
+    Instruction *nextinstr = nullptr;
     if (!stalled)
     {
-        Instruction *nextinstr = nullptr;
         if (script)
         {
             operation ("prepare instruction");
@@ -267,7 +267,10 @@ void Module::PostClock (PERMIT(Simulator))
                     DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
                 }
         }
+    }
 
+    if (pdepth > 0 && !stalled)
+    {
         operation ("call operation")
         {
             // NOTE: set nextinmsgs[i] to nullptr not to use ith input

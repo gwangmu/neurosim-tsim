@@ -13,7 +13,7 @@ using namespace std;
 
 
 DataSinkModule::DataSinkModule (string iname, Component *parent)
-    : Module ("DataSinkModule", iname, parent, 0)
+    : Module ("DataSinkModule", iname, parent, 1)
 {
     // create ports
     PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<ExampleMessage>::Get());
