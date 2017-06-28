@@ -21,7 +21,10 @@ public:
 /*>> Below this is for OUTPUT RESERVATION <<*/
 public:
     // NOTE: reserve message has signature '10' in its 63rd~62nd bits 
-    static const Message *RESERVE;
+    static inline Message* RESERVE ()
+    {
+        return (Message *)((uint64_t)1 << 63); 
+    }
 
     static inline uint32_t IsReserveMsg (Message *msg)
     {

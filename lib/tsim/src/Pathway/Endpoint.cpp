@@ -15,7 +15,7 @@
 using namespace std;
 
 
-const Endpoint* Endpoint::PORTCAP = new Endpoint ();
+Endpoint *Endpoint::_PORTCAP = nullptr;
 
 
 Endpoint::Endpoint (string name, Pathway *parent, Type type, 

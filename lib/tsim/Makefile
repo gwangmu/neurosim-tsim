@@ -1,4 +1,4 @@
-LIB=tsim.a
+LIB=libtsim.a
 
 ### Auxiliaries ###
 # characters
@@ -51,7 +51,7 @@ CODEFILES:=$(wildcard $(CODEFILES))
 
 SRCFILES:=$(filter %.$(CPPEXT),$(CODEFILES))
 OBJFILES:=$(subst $(SRCDIR),$(OBJDIR),$(SRCFILES:%.$(CPPEXT)=%.$(OBJEXT)))
-RMFILES:=$(OBJDIR)/* $(BIN)
+RMFILES:=$(OBJDIR)/* $(LIB)
 ######################
 
 
