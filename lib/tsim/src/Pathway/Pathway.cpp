@@ -5,6 +5,7 @@
 #include <TSim/Module/Module.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
+#include <TSim/Utility/StaticBranchPred.h>
 
 using namespace std;
 
@@ -100,6 +101,12 @@ Endpoint* Pathway::GetEndpoint (Endpoint::Type type, uint32_t idEndpt)
         case Endpoint::RHS:
             vec = &endpts.rhs;
             break;
+        case Endpoint::CAP:
+            DESIGN_WARNING ("pathway cannot have PORTCAP endpoint", GetName().c_str());
+            return nullptr;
+        default:
+            SYSTEM_ERROR ("bogus endpoint type");
+            return nullptr; 
     }
 
     if (vec->size () <= idEndpt)
@@ -266,15 +273,15 @@ void Pathway::PreClock (PERMIT(Simulator))
             {
                 operation ("send message to specific RHS")
                 {
-                    #ifndef NDEBUG
-                    if (sampledmsg->DEST_RHS_ID >= endpts.rhs.size ())
+                    if (unlikely (sampledmsg->DEST_RHS_ID >= endpts.rhs.size ()))
                         SYSTEM_ERROR ("DEST_RHS_ID >= #rhs");
-                    #endif
 
                     sampledmsg->SetNumDestination (1);
 
                     Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
-                    if (!ept.Assign (sampledmsg))
+                    bool assnres = ept.Assign (sampledmsg);
+
+                    if (unlikely (!assnres))
                     {
                         SIM_WARNING ("message dropped (portname: %s)",
                                 GetName().c_str(), ept.GetConnectedPortName().c_str());
@@ -314,7 +321,6 @@ void Pathway::PostClock (PERMIT(Simulator))
         {
             if (IsReady (msg_to_assign->DEST_RHS_ID))
             {
-                DEBUG_PRINT ("pushing message %p to conn", msg_to_assign);
                 endpts.lhs[GetTargetLHSID ()].Pop ();
                 conn.Assign (msg_to_assign);
             }

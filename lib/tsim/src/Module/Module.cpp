@@ -8,6 +8,7 @@
 #include <TSim/Pathway/Message.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
+#include <TSim/Utility/StaticBranchPred.h>
 
 #include <cinttypes>
 #include <vector>
@@ -24,6 +25,7 @@ Module::Port::Port ()
     iotype = Module::PORT_UNKNOWN;
     msgproto = nullptr;
     endpt = nullptr;
+    sealed = false;
 }
 
 Module::Module (const char *clsname, string iname, 
@@ -111,7 +113,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
         return true;
     }
 
-    if (endpt->GetParent()->GetMsgPrototype() != port->msgproto)
+    if (!endpt->IsPortCap() && 
+            endpt->GetParent()->GetMsgPrototype() != port->msgproto)
     {
         DESIGN_ERROR ("mismatching message proto %s (of '%s') "
                 "and %s (of port '%s')",
@@ -210,7 +213,7 @@ void Module::PreClock (PERMIT(Simulator))
         }
     }
 
-    if (pdepth > 0 && !stalled)
+    if (likely (pdepth == 0 || !stalled))
     {
         operation ("assign module output to pathway")
         {
@@ -228,15 +231,16 @@ void Module::PreClock (PERMIT(Simulator))
                         }
                     }
 
-                    #ifndef NDEBUG
-                    if (pdepth != 0 && 
-                            Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                    if (unlikely (pdepth != 0 && 
+                            Message::IsReserveMsg (nextoutmsgs[omsgidx][i])))
                         SIM_FATAL ("pdepth!=0 cannot produce RESERVE msg",
                                 GetName().c_str());
-                    #endif
-
-                    if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
+                    
+                    bool assnres = outports[i].endpt->Assign 
+                        (nextoutmsgs[omsgidx][i]);
+                    if (unlikely (!assnres))
                         SYSTEM_ERROR ("attemped to push to full RHS queue.");
+
                     nextoutmsgs[omsgidx][i] = nullptr;
                 }
             }
@@ -250,7 +254,7 @@ void Module::PostClock (PERMIT(Simulator))
     MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
 
     Instruction *nextinstr = nullptr;
-    if (!stalled)
+    if (likely (!stalled))
     {
         if (script)
         {
@@ -269,7 +273,7 @@ void Module::PostClock (PERMIT(Simulator))
         }
     }
 
-    if (pdepth > 0 && !stalled)
+    if (likely (pdepth == 0 || !stalled))
     {
         operation ("call operation")
         {
@@ -293,7 +297,13 @@ void Module::PostClock (PERMIT(Simulator))
         }
 
         omsgidx = (omsgidx + 1) & omsgidxmask;
+    }
 
+    // NOTE: if (stalled || all_empty (nextoutmsgs)) at this point,
+    //  then this is in idle state
+
+    if (likely (pdepth == 0 || !stalled))
+    {
         // TODO: optimize this
         for (auto i = 0; i < outports.size(); i++)
         {
@@ -301,21 +311,19 @@ void Module::PostClock (PERMIT(Simulator))
             {
                 operation ("ahead-of-time assign if LHS.capacity==0")
                 {
-                    #ifndef NDEBUG
-                    if (Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                    if (unlikely (Message::IsReserveMsg (nextoutmsgs[omsgidx][i])))
                         SIM_FATAL ("capacity=0 endpoint cannot reserve",
                                 GetName().c_str());
-                    #endif
 
-                    if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
+                    bool assnres = outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]);
+                    if (unlikely (!assnres))
                         SYSTEM_ERROR ("attempted to push to full RHS");
+
                     nextoutmsgs[omsgidx][i] = nullptr;
                 }
             }
         }
     }
-
-    // XXX if (stalled || all_empty (nextoutmsgs)) then this=idle
 }
 
 
