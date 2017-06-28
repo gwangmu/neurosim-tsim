@@ -15,6 +15,7 @@ class Simulator;
 
 EXPORT_TESTBENCH (ExampleTestbench);
 
+
 ExampleTestbench::ExampleTestbench ()
     : Testbench ("ExampleTestbench", new ExampleComponent ("top", nullptr)) 
 {
