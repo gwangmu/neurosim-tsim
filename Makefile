@@ -39,7 +39,7 @@ LIBDIR=lib
 TSIM=TSim
 TSIM_DIR=$(LIBDIR)/tsim
 TSIM_HDRDIR=$(TSIM_DIR)/include/TSim
-TSIM_LIB=$(TSIM_DIR)/tsim.a
+TSIM_LIB=$(TSIM_DIR)/libtsim.a
 
 # TODO: add variables for new library
 #[lib]=[lib_name]

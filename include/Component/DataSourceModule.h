@@ -19,6 +19,7 @@ public:
 private:
     // Port IDs
     uint32_t PORT_DATAOUT;
+    uint32_t PORT_DUMMY;
 
     // Internal states
     uint32_t counter;

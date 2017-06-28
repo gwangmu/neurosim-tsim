@@ -31,5 +31,6 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
 
     // connect modules
     datasource->Connect ("dataout", d2dwire->GetEndpoint (Endpoint::LHS));
+    datasource->Connect ("dummy", Endpoint::PORTCAP());
     datasink->Connect ("datain", d2dwire->GetEndpoint (Endpoint::RHS));
 }

@@ -17,7 +17,10 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
     : Module ("DataSourceModule", iname, parent, 1)
 {
     // create ports
-    PORT_DATAOUT = CreatePort ("dataout", Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
+    PORT_DATAOUT = CreatePort ("dataout",
+            Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
+    PORT_DUMMY = CreatePort ("dummy",
+            Module::PORT_INPUT, Prototype<ExampleMessage>::Get());
 
     // init script
     SetScript (new ExampleFileScript ());
