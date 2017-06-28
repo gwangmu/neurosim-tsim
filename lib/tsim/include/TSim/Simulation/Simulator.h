@@ -15,6 +15,14 @@ class Register;
 
 class Simulator final
 {
+public:
+    struct Option
+    {
+        Option () {}
+        uint64_t timelimit = -1;
+        uint64_t tsinterval = -1;
+    };
+
 protected:
     struct ClockDomain
     {
@@ -33,7 +41,7 @@ protected:
     };
 
 public:
-    Simulator (string specfilename);
+    Simulator (string specfilename, Option opt = Option());
 
     bool AttachTestbench (Testbench *tb);
     bool Simulate ();
@@ -43,6 +51,9 @@ private:
     // 'AttachTestbench' subfunctions
     bool LoadTestbench ();
     bool ValidateTestbench ();
+
+    // Simulator setting
+    Option opt;
 
     // Loaded design
     string specfilename;

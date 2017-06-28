@@ -314,6 +314,7 @@ void Pathway::PostClock (PERMIT(Simulator))
         {
             if (IsReady (msg_to_assign->DEST_RHS_ID))
             {
+                DEBUG_PRINT ("pushing message %p to conn", msg_to_assign);
                 endpts.lhs[GetTargetLHSID ()].Pop ();
                 conn.Assign (msg_to_assign);
             }

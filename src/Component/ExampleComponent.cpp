@@ -17,7 +17,7 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
     : Component ("ExampleComponent", iname, parent)
 {
     // NOTE: children automatically inherit parent's clock
-    //  but can override the clock by redefining its own.
+    //  but they can override it by redefining their own.
     SetClock ("main");
 
     // add child modules/components
@@ -27,6 +27,7 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     Wire *d2dwire = new Wire (this, conattr, Prototype<ExampleMessage>::Get());
+    d2dwire->GetEndpoint (Endpoint::LHS)->SetCapacity (0);
 
     // connect modules
     datasource->Connect ("dataout", d2dwire->GetEndpoint (Endpoint::LHS));

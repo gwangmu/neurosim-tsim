@@ -23,9 +23,10 @@ Simulator::ClockDomain::ClockDomain ()
 }
 
 
-Simulator::Simulator (string specfilename)
+Simulator::Simulator (string specfilename, Simulator::Option opt)
 {
     this->specfilename = specfilename;
+    this->opt = opt;
     tb = NULL;
     curtime = 0;
 }
@@ -133,17 +134,19 @@ bool Simulator::LoadTestbench ()
                 regs.push_back (reg);
         }
 
+        PRINT ("total %zu file script(s), %zu register(s) found", fscrs.size(), regs.size());
+
         task ("load file scripts") {
             for (FileScript *fscr : fscrs)
             {
-                string fscrname = fscr->GetName ();
+                string pname = fscr->GetParent()->GetInstanceName();
                 string path = tb->GetStringParam (Testbench::FILESCRIPT_PATH,
-                        fscrname, KEY(Simulator));
+                        pname, KEY(Simulator));
 
                 if (path != "")
                 {
                     PRINT ("Loading '%s' <-- '%s'..", 
-                            fscr->GetName().c_str(), path.c_str());
+                            fscr->GetParent()->GetName().c_str(), path.c_str());
                     fscr->LoadScriptFromFile (path);
                 }
                 else
@@ -156,14 +159,14 @@ bool Simulator::LoadTestbench ()
         task ("load register data") {
             for (Register *reg : regs)
             {
-                string regname = reg->GetName ();
+                string pname = reg->GetParent()->GetInstanceName();
                 string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH,
-                        regname, KEY(Simulator));
+                        pname, KEY(Simulator));
 
                 if (path != "")
                 {
                     PRINT ("Loading '%s' <-- '%s'..", 
-                            reg->GetName().c_str(), path.c_str());
+                            reg->GetParent()->GetName().c_str(), path.c_str());
                     reg->LoadDataFromFile (path);
                 }
                 else
@@ -185,6 +188,24 @@ bool Simulator::ValidateTestbench ()
     {
         IssueCount icount = tb->GetTopComponent(KEY(Simulator))->
             Validate(KEY(Simulator));
+
+        for (FileScript *fscr : fscrs)
+        {
+            IssueCount ficount = fscr->Validate (KEY(Simulator));
+            icount.error += ficount.error;
+            icount.warning += ficount.warning;
+        }
+
+        // TODO: to be implemented
+        #if 0
+        for (Register *reg : regs)
+        {
+            IssueCount ricount = reg->Validate (KEY(Simulator));
+            icount.error += ricount.error;
+            icount.warning += ricount.warning;
+        }
+        #endif
+
         PRINT ("%d design error(s) and %d design warning(s)",
                 icount.error, icount.warning);
 
@@ -237,6 +258,7 @@ bool Simulator::Simulate ()
 
     macrotask ("Starting simulation..")
     {
+        uint64_t nexttstime = opt.tsinterval;
         while (!tb->IsFinished (KEY(Simulator)))
         {
             ClockDomain *curCDom;
@@ -258,7 +280,13 @@ bool Simulator::Simulate ()
                 cdomains[minidx].nexttime += cdomains[minidx].period;
             }
 
-            task ("simulating %lu ns..", curtime)
+            if (nexttstime <= curtime)
+            {
+                PRINT ("Simulating %lu ns..", curtime);
+                nexttstime += opt.tsinterval;
+            }
+
+            task ("simulate %lu ns", curtime)
             {
                 operation ("pre-clock modules");
                 for (Module *module : curCDom->modules)
@@ -275,6 +303,12 @@ bool Simulator::Simulate ()
                 operation ("post-clock pathways");
                 for (Pathway *pathway : curCDom->pathways)
                     pathway->PostClock (KEY(Simulator));
+            }
+
+            if (curtime > opt.timelimit) 
+            {
+                PRINT ("Simulation reached time limit (%lu ns)", opt.timelimit);
+                break;
             }
         }
     }

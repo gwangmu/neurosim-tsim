@@ -31,10 +31,11 @@ public:
     string GetConnectedPortName () { return portConn; }
 
     /* Called by 'Component' */
-    bool SetCapacity (uint32_t capacity);
+    void SetCapacity (uint32_t capacity);
 
     /* Called by 'Pathway' and 'Module' (during simulation) */
     // FIXME enforcing LHS, RHS caller classes?
+    void Reserve ();
     bool Assign (Message *msg);
     Message* Peek () { return msgque.front (); }
     void Pop () { msgque.pop (); }
@@ -59,5 +60,6 @@ private:
 
     uint32_t capacity;
     queue<Message *> msgque;
+    uint32_t resv_count;
     bool selected_lhs;
 };

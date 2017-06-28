@@ -1,24 +1,28 @@
 #pragma once
 
 #include <TSim/Base/Metadata.h>
+#include <TSim/Interface/IValidatable.h>
+#include <TSim/Utility/AccessKey.h>
+
 #include <string>
 
 using namespace std;
 
 struct Instruction;
+class Module;
 
-class Script: public Metadata
+class Script: public Metadata, public IValidatable
 {
 public:
     Script (const char *clsname): Metadata (clsname, "") {}
 
-    void CheckAssigned () { assigned = true; }
-    bool IsAssigned () { return assigned; }
+    Module* GetParent () { return parent; }
+    void SetParent (Module *module, PERMIT(Module)) { parent = module; }
 
     virtual bool NextSection () = 0;
     virtual Instruction* NextInstruction () = 0;
 
 private:
-    bool assigned;
+    Module *parent;
 };
 

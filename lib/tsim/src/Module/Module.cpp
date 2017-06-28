@@ -26,12 +26,22 @@ Module::Port::Port ()
     endpt = nullptr;
 }
 
-Module::Module (const char *clsname, string iname, Component *parent):
+Module::Module (const char *clsname, string iname, 
+        Component *parent, uint32_t pdepth):
     Component (clsname, iname, parent)
 {
     script = nullptr;
     reg = nullptr;
     stalled = false;
+
+    this->pdepth = pdepth;
+    omsgidx = 0;
+
+    omsgidxmask = 1;
+    for (uint32_t pd = pdepth; pd; omsgidxmask <<= 1, pd >>= 1);
+    omsgidxmask--;
+
+    nextoutmsgs = new Message **[omsgidxmask + 1];
 }
 
 
@@ -43,12 +53,13 @@ bool Module::SetScript (Script *script)
                 GetFullName().c_str(), this->script->GetName().c_str(), 
                 script->GetName().c_str());
 
-    if (script->IsAssigned ()) {
+    if (script->GetParent ()) {
         DESIGN_ERROR ("'%s' has already been assigned",
                 GetFullName().c_str(), script->GetName().c_str());
         return false;
     }
 
+    script->SetParent (this, KEY(Module));
     this->script = script;
 
     return true;
@@ -61,12 +72,13 @@ bool Module::SetRegister (Register *reg)
                 GetFullName().c_str(), this->reg->GetName().c_str(),
                 reg->GetName().c_str());
 
-    if (reg->IsAssigned ()) {
+    if (reg->GetParent ()) {
         DESIGN_ERROR ("'%s' has already been assigned",
                 GetFullName().c_str(), reg->GetName().c_str());
         return false;
     }
 
+    reg->SetParent (this, KEY(Module));
     this->reg = reg;
 
     return true;
@@ -198,17 +210,34 @@ void Module::PreClock (PERMIT(Simulator))
         }
     }
 
-    if (!stalled)
+    if (pdepth > 0 && !stalled)
     {
         operation ("assign module output to pathway")
         {
             for (auto i = 0; i < outports.size(); i++)
             {
-                if (nextoutmsgs[i])
+                if (nextoutmsgs[omsgidx][i])
                 {
-                    if (!outports[i].endpt->Assign (nextoutmsgs[i]))
+                    if (pdepth == 0)
+                    {
+                        if (Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                        {
+                            outports[i].endpt->Reserve ();
+                            nextoutmsgs[omsgidx][i] = nullptr;
+                            continue;
+                        }
+                    }
+
+                    #ifndef NDEBUG
+                    if (pdepth != 0 && 
+                            Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                        SIM_FATAL ("pdepth!=0 cannot produce RESERVE msg",
+                                GetName().c_str());
+                    #endif
+
+                    if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
                         SYSTEM_ERROR ("attemped to push to full RHS queue.");
-                    nextoutmsgs[i] = nullptr;
+                    nextoutmsgs[omsgidx][i] = nullptr;
                 }
             }
         }
@@ -221,11 +250,14 @@ void Module::PostClock (PERMIT(Simulator))
     MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
 
     Instruction *nextinstr = nullptr;
-    if (script)
-        nextinstr = script->NextInstruction ();
-
     if (!stalled)
     {
+        if (script)
+        {
+            operation ("prepare instruction");
+            nextinstr = script->NextInstruction ();
+        }
+
         operation ("peak messages from RHS")
         {
             for (auto i = 0; i < inports.size(); i++)
@@ -235,12 +267,16 @@ void Module::PostClock (PERMIT(Simulator))
                     DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
                 }
         }
+    }
 
+    if (pdepth > 0 && !stalled)
+    {
         operation ("call operation")
         {
             // NOTE: set nextinmsgs[i] to nullptr not to use ith input
             // NOTE: assign new message to nextoutmsgs[j] to push to jth output
-            Operation (nextinmsgs, nextoutmsgs, nextinstr);
+            uint32_t omsgidx_out = (omsgidx + pdepth) & omsgidxmask;
+            Operation (nextinmsgs, nextoutmsgs[omsgidx_out], nextinstr);
         }
         
         operation ("pop used messages from RHS")
@@ -256,20 +292,30 @@ void Module::PostClock (PERMIT(Simulator))
             }
         }
 
+        omsgidx = (omsgidx + 1) & omsgidxmask;
+
         // TODO: optimize this
-        operation ("direct assign if endpt.capacity==0")
+        for (auto i = 0; i < outports.size(); i++)
         {
-            for (auto i = 0; i < outports.size(); i++)
+            if (nextoutmsgs[omsgidx][i] && outports[i].endpt->GetCapacity() == 0)
             {
-                if (outports[i].endpt->GetCapacity() == 0)
+                operation ("ahead-of-time assign if LHS.capacity==0")
                 {
-                    if (!outports[i].endpt->Assign (nextoutmsgs[i]))
+                    #ifndef NDEBUG
+                    if (Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
+                        SIM_FATAL ("capacity=0 endpoint cannot reserve",
+                                GetName().c_str());
+                    #endif
+
+                    if (!outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]))
                         SYSTEM_ERROR ("attempted to push to full RHS");
-                    nextoutmsgs[i] = nullptr;
+                    nextoutmsgs[omsgidx][i] = nullptr;
                 }
             }
         }
     }
+
+    // XXX if (stalled || all_empty (nextoutmsgs)) then this=idle
 }
 
 
@@ -295,8 +341,11 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         id = outports.size () - 1;
         port = &outports.back ();
         
-        delete[] nextoutmsgs;
-        nextoutmsgs = new Message *[outports.size ()] ();
+        for (uint32_t i = 0; i < omsgidxmask + 1; i++)
+        {
+            delete[] nextoutmsgs[i];
+            nextoutmsgs[i] = new Message *[outports.size ()] ();
+        }
     }
     else
     {

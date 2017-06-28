@@ -4,7 +4,7 @@ template <typename T>
 class Prototype
 {
 public:
-    static Message* Get ()
+    static T* Get ()
     {
         if (proto == nullptr)
             proto = new T();

@@ -45,7 +45,7 @@ private:
 
 public:
     /* Universal */
-    Module (const char* clsname, string iname, Component *parent);
+    Module (const char* clsname, string iname, Component *parent, uint32_t pdepth);
     
     Script* GetScript () { return script; }
     Register* GetRegister () { return reg; }
@@ -78,8 +78,12 @@ private:
     vector<Port> outports;
     map<string, Port *> pname2port;
     
+    uint32_t pdepth;
     Message **nextinmsgs;
-    Message **nextoutmsgs;
+    Message ***nextoutmsgs;
+    uint32_t omsgidx;
+    uint32_t omsgidxmask;
+
     bool stalled;
 
     Script *script;

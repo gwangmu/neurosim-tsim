@@ -27,32 +27,36 @@ Endpoint::Endpoint (string name, Pathway *parent, Type type,
     this->modConn = nullptr;
     this->portConn = "";
 
-    if (capacity == 0)
-        DESIGN_FATAL ("zero-capacity endpoint not allowed", GetName().c_str());
+    if (capacity == 0 && type == RHS)
+        DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
     this->capacity = capacity;
 
+    this->resv_count = 0;
     this->selected_lhs = false;
 }
 
-
-bool Endpoint::SetCapacity (uint32_t capacity)
+void Endpoint::SetCapacity (uint32_t capacity)
 {
-    if (capacity == 0)
-    {
-        DESIGN_ERROR ("endpoint must have capacity >= 1", GetName().c_str());
-        return false;
-    }
+    if (capacity == 0 && type == RHS)
+        DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
 
     this->capacity = capacity;
-    return true;
 }
 
+
+void Endpoint::Reserve ()
+{
+    resv_count++;
+
+    if (resv_count + msgque.size() > capacity)
+        SYSTEM_ERROR ("queue size + resv_count exceeded capacity");
+}
 
 bool Endpoint::Assign (Message *msg)
 {
     if (capacity != 0 && msgque.size () == capacity)
     {
-        SIM_WARNING ("attemped to enque to full endpoint", GetName().c_str());
+        SIM_WARNING ("attempted to enque to full endpoint", GetName().c_str());
         return false;
     }
     else if (capacity == 0 && msgque.size () >= 1)
@@ -61,7 +65,14 @@ bool Endpoint::Assign (Message *msg)
         return false;
     }
     
+    #ifndef NDEBUG
+    if (msg == nullptr)
+        SYSTEM_ERROR ("attempted to push null message");
+    #endif
+
+    if (resv_count > 0) resv_count--;
     msgque.push (msg);
+
     return true;
 }
 
@@ -72,7 +83,7 @@ bool Endpoint::IsFull ()
         SYSTEM_ERROR ("endpoint queue size exceeded capacity");
     #endif
 
-    return msgque.size() >= capacity;
+    return (resv_count + msgque.size()) >= capacity;
 }
 
 
@@ -82,13 +93,6 @@ bool Endpoint::JoinTo (Module *module, string portname, PERMIT(Module))
     {
         DESIGN_WARNING ("port '%s' (of %s) has been already asigned",
                 GetName().c_str(), portname.c_str(), module->GetName().c_str());
-    }
-
-    if (capacity == 0)
-    {
-        DESIGN_ERROR ("port '%s' has zero-capacity. cannot be jointed",
-                GetName().c_str(), portname.c_str());
-        return false;
     }
 
     modConn = module;

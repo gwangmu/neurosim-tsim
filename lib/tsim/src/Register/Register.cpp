@@ -106,7 +106,7 @@ bool Register::LoadDataFromFile (string filename)
 
                         if (item[0] == "addr")
                             word_info.addr = stoi (item[1]);
-                        else if (item[1] == "data")
+                        else if (item[0] == "data")
                             word_info.data = item[1];
                         else
                         {
