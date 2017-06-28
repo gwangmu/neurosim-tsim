@@ -1,10 +1,15 @@
 #include <Component/NeuronBlock.h>
+
+#include <TSim/Utility/Prototype.h>
+#include <TSim/Utility/Logging.h>
+
 #include <Message/IndexMessage.h>
 #include <Message/StateMessage.h>
 #include <Message/DeltaGMessage.h>
 #include <Message/SignalMessage.h>
-#include <TSim/Utility/Prototype.h>
-#include <TSim/Utility/Logging.h>
+
+#include <Script/SpikeFileScript.h>
+#include <Script/SpikeInstruction.h>
 
 #include <cinttypes>
 #include <string>
@@ -13,7 +18,7 @@
 using namespace std;
 
 NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
-    : Module ("NeuronBlockModule", iname, parent)
+    : Module ("NeuronBlockModule", iname, parent, depth)
 {
     IPORT_Nidx = CreatePort ("Nidx_in", Module::PORT_INPUT, 
             Prototype<IndexMessage>::Get());
@@ -26,23 +31,12 @@ NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
             Prototype<IndexMessage>::Get());
     OPORT_Spike = CreatePort ("Spike_out", Module::PORT_OUTPUT, 
             Prototype<SignalMessage>::Get());
+    
+    // init script
+    SetScript (new SpikeFileScript ());
 
+    /* variable initialization */
     pipeline_depth_ = depth;
-    pipeline_state_ = 0;
-
-    mask_ = (1 << depth) - 1;
-
-    // DEBUG
-    for(int i=0; i<10; i++)
-    {
-        for(int j=0; j<10; j++)
-        {
-            spike_traces_.push_back(std::vector<int>());
-            auto traces = &spike_traces_.back();
-
-            traces->push_back(j);
-        }
-    }
 }
 
 void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
@@ -51,14 +45,44 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *i
     StateMessage *state_msg = static_cast<StateMessage*>(inmsgs[IPORT_State]);
     DeltaGMessage *deltaG_msg = static_cast<DeltaGMessage*>(inmsgs[IPORT_DeltaG]);
 
-    // Advance pipeline
-    pipeline_state_ = (pipeline_state_ << 1) & mask_; 
-    
-    if (idx_msg)
+    SpikeInstruction *spk_inst = static_cast<SpikeInstruction*>(instr);
+
+    if (spk_inst)
     {
-        pipeline_state_ |= 0x1;
-        DEBUG_PRINT ("state = %x", pipeline_state_);
+        DEBUG_PRINT ("instruction received");
+        std::vector<int> v = {2, 3, 3};
+        std::vector<int> f = {2, 3, 3};
+
+        spike_trace_.clear();
+        std::move( spk_inst->spike_idx.begin(),
+                    spk_inst->spike_idx.end(),
+                    spike_trace_.begin()
+                 );
+    }
+    
+    // Complete Neuronal Dynamics
+    if(pipelined_idx_.size() == pipeline_depth_)
+    {
+        uint32_t pipe_head = pipelined_idx_.front();
+        pipelined_idx_.pop_front();
+        
+        bool is_spike = (pipe_head == spike_trace_.front());
+        if(is_spike)
+            spike_trace_.pop_front();
+
+        outmsgs[OPORT_Nidx] = new IndexMessage (0, pipe_head);
+        outmsgs[OPORT_Spike] = new SignalMessage (0, is_spike);
+        
+        DEBUG_PRINT ("dynamics completed (idx: %d, spike: %d)",
+                pipe_head, is_spike);
     }
 
+    // Add job in pipeline
+    if(idx_msg)
+    {
+        uint32_t neuron_idx = idx_msg->idx;
+        pipelined_idx_.push_back(neuron_idx);
 
+        DEBUG_PRINT ("start %uth neuron dynamics", neuron_idx);
+    }
 }

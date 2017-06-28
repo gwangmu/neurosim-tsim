@@ -1,5 +1,5 @@
 #!TSim Simulation Spec
 
-FILESCRIPT_PATH(datasource): data/fscr1.script
+FILESCRIPT_PATH(neuron_block): data/spike0.script
 REGISTER_DATAPATH(reg1): data/reg1.regdata
 CLOCK_PERIOD(main): 500

@@ -11,7 +11,6 @@ using namespace std;
 
 class ExampleTestbench;
 
-
 class DataSinkModule: public Module
 {
     VISIBLE_TO(ExampleTestbench);

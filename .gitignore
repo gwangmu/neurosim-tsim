@@ -4,3 +4,4 @@
 neurosim-tsim
 *.a
 *.so
+core
