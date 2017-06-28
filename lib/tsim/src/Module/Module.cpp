@@ -125,7 +125,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
         return false;
     }
 
-    if (!(port->iotype == Module::PORT_INPUT &&
+    if (!(endpt->GetEndpointType() == Endpoint::CAP) &&
+            !(port->iotype == Module::PORT_INPUT &&
                 endpt->GetEndpointType() == Endpoint::RHS) &&
             !(port->iotype == Module::PORT_OUTPUT &&
                 endpt->GetEndpointType() == Endpoint::LHS))

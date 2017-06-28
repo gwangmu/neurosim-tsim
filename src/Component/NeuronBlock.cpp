@@ -17,17 +17,6 @@ using namespace std;
 NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
     : Module ("NeuronBlockModule", iname, parent, depth)
 {
-    //IPORT_Nidx = CreatePort ("Nidx_in", Module::PORT_INPUT, 
-    //        Prototype<IndexMessage>::Get());
-    //IPORT_State = CreatePort ("State_in", Module::PORT_INPUT, 
-    //        Prototype<StateMessage>::Get());
-    //IPORT_DeltaG = CreatePort ("DeltaG_in", Module::PORT_INPUT, 
-    //        Prototype<DeltaGMessage>::Get());
-    //OPORT_Nidx = CreatePort ("Nidx_out", Module::PORT_OUTPUT, 
-    //        Prototype<IndexMessage>::Get());
-    //OPORT_Spike = CreatePort ("Spike_out", Module::PORT_OUTPUT, 
-    //        Prototype<SignalMessage>::Get());
-
     PORT_in = CreatePort ("NeuronBlock_in", Module::PORT_INPUT, 
             Prototype<NeuronBlockInMessage>::Get());
     PORT_out = CreatePort ("NeuronBlock_out", Module::PORT_OUTPUT, 
@@ -44,10 +33,6 @@ NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
 
 void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
-    // IndexMessage *idx_msg = static_cast<IndexMessage*>(inmsgs[IPORT_Nidx]);
-    // StateMessage *state_msg = static_cast<StateMessage*>(inmsgs[IPORT_State]);
-    // DeltaGMessage *deltaG_msg = static_cast<DeltaGMessage*>(inmsgs[IPORT_DeltaG]);
-
     NeuronBlockInMessage *in_msg = static_cast<NeuronBlockInMessage*>(inmsgs[PORT_in]);
 
     SpikeInstruction *spk_inst = static_cast<SpikeInstruction*>(instr);
@@ -55,14 +40,16 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *i
     if (spk_inst)
     {
         DEBUG_PRINT ("instruction received");
-        std::vector<int> v = {2, 3, 3};
-        std::vector<int> f = {2, 3, 3};
 
         spike_trace_.clear();
-        std::move( spk_inst->spike_idx.begin(),
-                    spk_inst->spike_idx.end(),
-                    spike_trace_.begin()
-                 );
+        spike_trace_.assign (spk_inst->spike_idx.begin(), spk_inst->spike_idx.end());
+
+        // std::copy( spk_inst->spike_idx.begin(),
+        //             spk_inst->spike_idx.end(),
+        //             spike_trace_.begin()
+        //          );
+
+        DEBUG_PRINT ("SPIKE TRACE - len %zu %zu", spk_inst->spike_idx.size(), spike_trace_.size());
     }
     
     // Complete Neuronal Dynamics

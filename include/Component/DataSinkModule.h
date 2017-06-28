@@ -9,11 +9,12 @@
 
 using namespace std;
 
-//class ExampleTestbench;
+class ExampleTestbench;
 class NeuroSimTestbench;
 
 class DataSinkModule: public Module
 {
+    VISIBLE_TO(ExampleTestbench);
     VISIBLE_TO(NeuroSimTestbench);
 
 public:

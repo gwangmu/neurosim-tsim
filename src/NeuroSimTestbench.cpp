@@ -19,12 +19,10 @@ EXPORT_TESTBENCH (NeuroSimTestbench);
 NeuroSimTestbench::NeuroSimTestbench ()
     : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
 {
-    //neurosim = static_cast<NeuroSim *>(TOP_COMPONENT->GetModule ("neurosim"));
     datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
-    DEBUG_PRINT("GM BABO\n");
-    return true;
+    return (datasink->recvdata >= 10);
 }

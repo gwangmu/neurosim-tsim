@@ -1,7 +1,9 @@
 #include <TSim/Utility/String.h>
+#include <TSim/Utility/Logging.h>
 
 #include <Script/SpikeFileScript.h>
 #include <Script/SpikeInstruction.h>
+
 
 #include <cinttypes>
 #include <string>
@@ -12,7 +14,7 @@ using namespace std;
 
 Instruction* SpikeFileScript::ParseRawString (string rawstr)
 {
-    vector<string> toked = String::Tokenize (rawstr, ",");
+    vector<string> toked = String::Tokenize (rawstr, "/");
     
     SpikeInstruction *instr = new SpikeInstruction ();
 
