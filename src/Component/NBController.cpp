@@ -18,17 +18,17 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
 {
     IPORT_DeltaG = CreatePort ("deltaG", Module::PORT_INPUT, 
             Prototype<DeltaGMessage>::Get());
-    IPORT_State = CreatePort ("state", Module::PORT_INPUT, 
-            Prototype<StateMessage>::Get());
-    IPORT_Tsparity = CreatePort ("tsparity", Module::PORT_INPUT, 
-            Prototype<SignalMessage>::Get());
-    
+    //IPORT_State = CreatePort ("state", Module::PORT_INPUT, 
+    //        Prototype<StateMessage>::Get());
+    //IPORT_Tsparity = CreatePort ("tsparity", Module::PORT_INPUT, 
+    //        Prototype<SignalMessage>::Get());
+    //
     OPORT_NB = CreatePort ("nb", Module::PORT_OUTPUT, 
             Prototype<NeuronBlockInMessage>::Get());
-    OPORT_End = CreatePort ("end", Module::PORT_OUTPUT, 
-            Prototype<SignalMessage>::Get());
-    OPORT_SRAM = CreatePort ("sram", Module::PORT_OUTPUT, 
-            Prototype<IndexMessage>::Get());
+    //OPORT_End = CreatePort ("end", Module::PORT_OUTPUT, 
+    //        Prototype<SignalMessage>::Get());
+    //OPORT_SRAM = CreatePort ("sram", Module::PORT_OUTPUT, 
+    //        Prototype<IndexMessage>::Get());
 
 
     /* variable initialization */
