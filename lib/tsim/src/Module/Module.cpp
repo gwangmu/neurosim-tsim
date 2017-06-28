@@ -168,20 +168,32 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         if (!port.endpt)
         {
-            DESIGN_WARNING ("disconnected port '%s'", 
+            DESIGN_ERROR ("disconnected port '%s'. use PORTCAP", 
+                    GetFullName().c_str(), port.name.c_str());
+            icount.error++;
+        }
+        else if (port.endpt->GetEndpointType() == Endpoint::CAP)
+        {
+            DESIGN_WARNING ("port '%s' using portcap", 
                     GetFullName().c_str(), port.name.c_str());
             icount.warning++;
-        }
+        } 
     }
     
     for (Port &port : outports)
     {
         if (!port.endpt)
         {
-            DESIGN_WARNING ("disconnected port '%s'", 
+            DESIGN_ERROR ("disconnected port '%s'. use PORTCAP", 
+                    GetFullName().c_str(), port.name.c_str());
+            icount.error++;
+        }
+        else if (port.endpt->GetEndpointType() == Endpoint::CAP)
+        {
+            DESIGN_WARNING ("port '%s' using portcap", 
                     GetFullName().c_str(), port.name.c_str());
             icount.warning++;
-        }
+        } 
     }
 
     return icount;

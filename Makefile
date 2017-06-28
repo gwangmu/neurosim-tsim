@@ -35,6 +35,11 @@ OBJDIR=obj
 HDRDIR=include
 LIBDIR=lib
 
+ifdef TEST
+SRCDIR=example/src
+HDRDIR=example/include
+endif
+
 # library paths
 TSIM=TSim
 TSIM_DIR=$(LIBDIR)/tsim
@@ -80,9 +85,9 @@ all: $(USING_LIBS) $(OBJSUBDIRS) $(FRAMEWORK) $(BIN)
 
 TSIM:
 	@ $(if $(wildcard $(TSIM_HDRDIR)),,$(error non-existing $(TSIM_HDRDIR)))
-	@ $(if $(wildcard $(HDRDIR)/$(TSIM)),,	\
-		$(call print,"symlinking..",$(TSIM_HDRDIR),$(HDRDIR)/$(TSIM)) \
-		$(shell ln -s ../$(TSIM_HDRDIR) $(HDRDIR)/$(TSIM)))
+	@ $(shell $(RM) $(HDRDIR)/$(TSIM))
+	@ $(call print,"symlinking..",$(TSIM_HDRDIR),$(HDRDIR)/$(TSIM))
+	@ $(shell ln -s $(abspath $(TSIM_HDRDIR)) $(HDRDIR)/$(TSIM))
 
 $(OBJSUBDIRS):
 	@ $(call print,"creating..",$(call to_comma_list,$@))
