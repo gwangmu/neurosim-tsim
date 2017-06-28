@@ -38,6 +38,7 @@ private:
         uint32_t id;
         PortType iotype;
         Message* msgproto;
+        bool sealed;
         
         // Connected Endpoint
         Endpoint* endpt;
@@ -65,6 +66,7 @@ public:
 protected:  
     /* Called by derived 'Module' */
     uint32_t CreatePort (string portname, PortType iotype, Message* msgproto);
+    bool SealPort (string portname);
 
     /* Called by this 'Module' */
     virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr) = 0;

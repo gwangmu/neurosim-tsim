@@ -18,17 +18,20 @@ class Simulator;
 class Endpoint final: public Metadata
 {
 public:
-    enum Type { LHS, RHS };
+    enum Type { CAP, LHS, RHS };
 
 public:
     Endpoint (string name, Pathway *parent, Type type, 
             uint32_t capacity, PERMIT(Pathway));
+
+    static const Endpoint* PORTCAP;
 
     /* Universal */
     Type GetEndpointType () { return type; }
     Pathway* GetParent () { return parent; }
     Module* GetConnectedModule () { return modConn; }
     string GetConnectedPortName () { return portConn; }
+    bool IsPortCap () { return (type == CAP); }
 
     /* Called by 'Component' */
     void SetCapacity (uint32_t capacity);
@@ -52,6 +55,9 @@ public:
     bool JoinTo (Module *module, string portname, PERMIT(Module));
 
 private:
+    /* For PORTCAP */
+    Endpoint ();
+
     Type type;
     Pathway* parent;
 
@@ -61,5 +67,6 @@ private:
     uint32_t capacity;
     queue<Message *> msgque;
     uint32_t resv_count;
+
     bool selected_lhs;
 };

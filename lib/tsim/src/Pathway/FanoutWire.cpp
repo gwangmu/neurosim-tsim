@@ -14,7 +14,7 @@ FanoutWire::FanoutWire (Component *parent, ConnectionAttr conattr,
         Message *msgproto, uint32_t n_rhs)
     : Pathway ("FanoutWire", parent, conattr, msgproto)
 {
-    AddEndpoint ("lhs", Endpoint::LHS, 1);
+    AddEndpoint ("lhs", Endpoint::LHS, 0);
 
     if (n_rhs == 0)
         DESIGN_FATAL ("#rhs cannot be zero", GetName().c_str());
