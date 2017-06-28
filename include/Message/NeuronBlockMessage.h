@@ -5,6 +5,7 @@
 #pragma once
 
 #include <TSim/Pathway/Message.h>
+#include <Message/StateMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -19,7 +20,7 @@ public:
     // NOTE: must provide default constructor
     NeuronBlockInMessage () : Message ("NeuronBlockInMessage") {}
 
-    NeuronBlockInMessage (uint32_t destrhsid, uint32_t idx, uint64_t state, uint64_t deltaG)
+    NeuronBlockInMessage (uint32_t destrhsid, uint32_t idx, State state, uint64_t deltaG)
         : Message ("NeuronBlockIMessage", destrhsid)
     {
         this->idx = idx;
@@ -29,7 +30,7 @@ public:
 
 public:
     uint32_t idx;
-    uint64_t state;
+    State state;
     uint64_t deltaG;
 };
 

@@ -43,7 +43,7 @@ Module::Module (const char *clsname, string iname,
     for (uint32_t pd = pdepth; pd; omsgidxmask <<= 1, pd >>= 1);
     omsgidxmask--;
 
-    nextoutmsgs = new Message **[omsgidxmask + 1];
+    nextoutmsgs = new Message **[omsgidxmask + 1] ();
 }
 
 
@@ -97,6 +97,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
     }
 
     Port *port = pname2port[portname];
+    DEBUG_PRINT ("%s (%d)port(%p) iotype %p", 
+            portname.c_str(), port->id, port, &port->iotype);
 
     if (port->iotype == Module::PORT_UNKNOWN)
     {
@@ -352,7 +354,7 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         inports.push_back (Port ());
         id = inports.size () - 1;
         port = &inports.back ();
-        
+
         delete[] nextinmsgs;
         nextinmsgs = new Message *[inports.size ()] ();
     }
@@ -376,12 +378,15 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     }
 
     port->name = portname;
-    port->id = id;
     port->iotype = iotype;
+    port->id = id;
     port->msgproto = msgproto;
     port->endpt = nullptr;
 
     pname2port[portname] = port;
+
+    DEBUG_PRINT("%s port(%p) - iotype: %p", 
+            port->name.c_str(), pname2port[portname], &pname2port[portname]->iotype);
 
     return id;
 }
