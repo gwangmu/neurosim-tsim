@@ -1,6 +1,5 @@
 #include <TSim/Utility/AccessKey.h>
 
-#include <Component/ExampleComponent.h>
 #include <Component/NeuroSim.h>
 #include <NeuroSimTestbench.h>
 

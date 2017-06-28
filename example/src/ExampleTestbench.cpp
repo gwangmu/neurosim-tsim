@@ -13,7 +13,7 @@ using namespace std;
 class Simulator;
 
 
-//EXPORT_TESTBENCH (ExampleTestbench);
+EXPORT_TESTBENCH (ExampleTestbench);
 
 ExampleTestbench::ExampleTestbench ()
     : Testbench ("ExampleTestbench", new ExampleComponent ("top", nullptr)) 

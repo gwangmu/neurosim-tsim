@@ -241,6 +241,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
     return icount;
 }
 
+/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Pathway::PreClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("assign '%s'-->module", GetName().c_str());
@@ -293,6 +294,7 @@ void Pathway::PreClock (PERMIT(Simulator))
     }
 }
 
+/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Pathway::PostClock (PERMIT(Simulator))
 {
     operation ("update next ready state")
