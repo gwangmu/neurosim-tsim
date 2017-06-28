@@ -95,10 +95,9 @@ $(OBJSUBDIRS):
 	@ $(call print,"creating..",$(call to_comma_list,$@))
 	@ $(MKDIR) $@
 
-#$(LIBS)
-$(BIN): $(OBJFILES)
+$(BIN): $(OBJFILES) $(LIBS)
 	@ $(call print,"linking..",$(call to_comma_list,$^),$@)
-	@ $(LD) $(temp) $^  -o $@
+	@ $(LD) $^ -o $@
 
 $(OBJDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(CPPEXT)
 	@ $(call print,"compiling..",$<,$@)

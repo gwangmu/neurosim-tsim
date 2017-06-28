@@ -12,7 +12,7 @@ using namespace std;
 class Simulator;
 
 
-//EXPORT_TESTBENCH (NeuroSimTestbench);
+EXPORT_TESTBENCH (NeuroSimTestbench);
 
 
 NeuroSimTestbench::NeuroSimTestbench ()

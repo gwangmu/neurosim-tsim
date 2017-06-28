@@ -1,6 +1,5 @@
 #include <TSim/Simulation/Simulator.h>
 #include <TSim/Simulation/Testbench.h>
-#include <NeuroSimTestbench.h>
 #include <TSim/Utility/Logging.h>
 
 #include <string>
@@ -8,7 +7,7 @@
 
 using namespace std;
 
-//extern Testbench *simtb;
+extern Testbench *simtb;
 
 
 Simulator::Option LoadSimOption (int argc, char *argv[])
@@ -51,7 +50,6 @@ int main (int argc, char *argv[])
                 
     Simulator sim (argv[1], opt);
 
-    NeuroSimTestbench *simtb = new NeuroSimTestbench ();
     if (!sim.AttachTestbench (simtb))
     {
         DESIGN_ERROR ("design error(s) detected. exiting..",
