@@ -97,8 +97,6 @@ bool Module::Connect (string portname, Endpoint *endpt)
     }
 
     Port *port = pname2port[portname];
-    DEBUG_PRINT ("%s (%d)port(%p) iotype %p", 
-            portname.c_str(), port->id, port, &port->iotype);
 
     if (port->iotype == Module::PORT_UNKNOWN)
     {
@@ -127,8 +125,7 @@ bool Module::Connect (string portname, Endpoint *endpt)
         return false;
     }
 
-    if (!(endpt->GetEndpointType() == Endpoint::CAP) &&
-            !(port->iotype == Module::PORT_INPUT &&
+    if (!(port->iotype == Module::PORT_INPUT &&
                 endpt->GetEndpointType() == Endpoint::RHS) &&
             !(port->iotype == Module::PORT_OUTPUT &&
                 endpt->GetEndpointType() == Endpoint::LHS))
@@ -170,32 +167,20 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         if (!port.endpt)
         {
-            DESIGN_ERROR ("disconnected port '%s'. use PORTCAP", 
-                    GetFullName().c_str(), port.name.c_str());
-            icount.error++;
-        }
-        else if (port.endpt->GetEndpointType() == Endpoint::CAP)
-        {
-            DESIGN_WARNING ("port '%s' using portcap", 
+            DESIGN_WARNING ("disconnected port '%s'", 
                     GetFullName().c_str(), port.name.c_str());
             icount.warning++;
-        } 
+        }
     }
     
     for (Port &port : outports)
     {
         if (!port.endpt)
         {
-            DESIGN_ERROR ("disconnected port '%s'. use PORTCAP", 
-                    GetFullName().c_str(), port.name.c_str());
-            icount.error++;
-        }
-        else if (port.endpt->GetEndpointType() == Endpoint::CAP)
-        {
-            DESIGN_WARNING ("port '%s' using portcap", 
+            DESIGN_WARNING ("disconnected port '%s'", 
                     GetFullName().c_str(), port.name.c_str());
             icount.warning++;
-        } 
+        }
     }
 
     return icount;
@@ -354,7 +339,7 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         inports.push_back (Port ());
         id = inports.size () - 1;
         port = &inports.back ();
-
+        
         delete[] nextinmsgs;
         nextinmsgs = new Message *[inports.size ()] ();
     }
@@ -378,8 +363,8 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     }
 
     port->name = portname;
-    port->iotype = iotype;
     port->id = id;
+    port->iotype = iotype;
     port->msgproto = msgproto;
     port->endpt = nullptr;
 
