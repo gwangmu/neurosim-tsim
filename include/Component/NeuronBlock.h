@@ -23,6 +23,8 @@ class NeuronBlock: public Module
   private:
     /* Port IDs */
     // Input ports
+    uint32_t PORT_in, PORT_out;
+
     uint32_t IPORT_Nidx;
     uint32_t IPORT_State;
     uint32_t IPORT_DeltaG;

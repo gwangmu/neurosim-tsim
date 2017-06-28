@@ -1,7 +1,7 @@
 #pragma once
 
 #include <TSim/Simulation/Testbench.h>
-#include <Component/NeuronBlock.h>
+#include <Component/DataSinkModule.h>
 
 #include <cinttypes>
 #include <string>
@@ -17,5 +17,5 @@ public:
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:
-    NeuronBlock *neuron_block;
+    DataSinkModule *datasink;
 };

@@ -3,10 +3,7 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 
-#include <Message/IndexMessage.h>
-#include <Message/StateMessage.h>
-#include <Message/DeltaGMessage.h>
-#include <Message/SignalMessage.h>
+#include <Message/NeuronBlockMessage.h>
 
 #include <Script/SpikeFileScript.h>
 #include <Script/SpikeInstruction.h>
@@ -20,17 +17,23 @@ using namespace std;
 NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
     : Module ("NeuronBlockModule", iname, parent, depth)
 {
-    IPORT_Nidx = CreatePort ("Nidx_in", Module::PORT_INPUT, 
-            Prototype<IndexMessage>::Get());
-    IPORT_State = CreatePort ("State_in", Module::PORT_INPUT, 
-            Prototype<StateMessage>::Get());
-    IPORT_DeltaG = CreatePort ("DeltaG_in", Module::PORT_INPUT, 
-            Prototype<DeltaGMessage>::Get());
+    //IPORT_Nidx = CreatePort ("Nidx_in", Module::PORT_INPUT, 
+    //        Prototype<IndexMessage>::Get());
+    //IPORT_State = CreatePort ("State_in", Module::PORT_INPUT, 
+    //        Prototype<StateMessage>::Get());
+    //IPORT_DeltaG = CreatePort ("DeltaG_in", Module::PORT_INPUT, 
+    //        Prototype<DeltaGMessage>::Get());
+    //OPORT_Nidx = CreatePort ("Nidx_out", Module::PORT_OUTPUT, 
+    //        Prototype<IndexMessage>::Get());
+    //OPORT_Spike = CreatePort ("Spike_out", Module::PORT_OUTPUT, 
+    //        Prototype<SignalMessage>::Get());
 
-    OPORT_Nidx = CreatePort ("Nidx_out", Module::PORT_OUTPUT, 
-            Prototype<IndexMessage>::Get());
-    OPORT_Spike = CreatePort ("Spike_out", Module::PORT_OUTPUT, 
-            Prototype<SignalMessage>::Get());
+    PORT_in = CreatePort ("NeuronBlock_in", Module::PORT_INPUT, 
+            Prototype<NeuronBlockInMessage>::Get());
+    PORT_out = CreatePort ("NeuronBlock_out", Module::PORT_OUTPUT, 
+            Prototype<NeuronBlockOutMessage>::Get());
+
+
     
     // init script
     SetScript (new SpikeFileScript ());
@@ -41,9 +44,11 @@ NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
 
 void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
-    IndexMessage *idx_msg = static_cast<IndexMessage*>(inmsgs[IPORT_Nidx]);
-    StateMessage *state_msg = static_cast<StateMessage*>(inmsgs[IPORT_State]);
-    DeltaGMessage *deltaG_msg = static_cast<DeltaGMessage*>(inmsgs[IPORT_DeltaG]);
+    // IndexMessage *idx_msg = static_cast<IndexMessage*>(inmsgs[IPORT_Nidx]);
+    // StateMessage *state_msg = static_cast<StateMessage*>(inmsgs[IPORT_State]);
+    // DeltaGMessage *deltaG_msg = static_cast<DeltaGMessage*>(inmsgs[IPORT_DeltaG]);
+
+    NeuronBlockInMessage *in_msg = static_cast<NeuronBlockInMessage*>(inmsgs[PORT_in]);
 
     SpikeInstruction *spk_inst = static_cast<SpikeInstruction*>(instr);
 
@@ -70,17 +75,16 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *i
         if(is_spike)
             spike_trace_.pop_front();
 
-        outmsgs[OPORT_Nidx] = new IndexMessage (0, pipe_head);
-        outmsgs[OPORT_Spike] = new SignalMessage (0, is_spike);
+        outmsgs[PORT_out] = new NeuronBlockOutMessage (0, pipe_head, is_spike);
         
         DEBUG_PRINT ("dynamics completed (idx: %d, spike: %d)",
                 pipe_head, is_spike);
     }
 
     // Add job in pipeline
-    if(idx_msg)
+    if(in_msg)
     {
-        uint32_t neuron_idx = idx_msg->idx;
+        uint32_t neuron_idx = in_msg->idx;
         pipelined_idx_.push_back(neuron_idx);
 
         DEBUG_PRINT ("start %uth neuron dynamics", neuron_idx);

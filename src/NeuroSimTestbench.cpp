@@ -1,7 +1,7 @@
 #include <TSim/Utility/AccessKey.h>
 
 #include <Component/ExampleComponent.h>
-#include <Component/NeuronBlock.h>
+#include <Component/NeuroSim.h>
 #include <NeuroSimTestbench.h>
 
 #include <cinttypes>
@@ -17,9 +17,10 @@ EXPORT_TESTBENCH (NeuroSimTestbench);
 
 
 NeuroSimTestbench::NeuroSimTestbench ()
-    : Testbench ("NeuroSimTestbench", new ExampleComponent ("top", nullptr)) 
+    : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
 {
-    neuron_block = static_cast<NeuronBlock *>(TOP_COMPONENT->GetModule ("neuron_block"));
+    //neurosim = static_cast<NeuroSim *>(TOP_COMPONENT->GetModule ("neurosim"));
+    datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))

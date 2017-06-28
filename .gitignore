@@ -5,3 +5,4 @@ neurosim-tsim
 *.a
 *.so
 core
+*.nfs*
