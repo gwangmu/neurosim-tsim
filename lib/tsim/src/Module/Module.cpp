@@ -43,7 +43,7 @@ Module::Module (const char *clsname, string iname,
     for (uint32_t pd = pdepth; pd; omsgidxmask <<= 1, pd >>= 1);
     omsgidxmask--;
 
-    nextoutmsgs = new Message **[omsgidxmask + 1] ();
+    nextoutmsgs = new Message **[omsgidxmask + 1];
 }
 
 
@@ -384,9 +384,6 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     port->endpt = nullptr;
 
     pname2port[portname] = port;
-
-    DEBUG_PRINT("%s port(%p) - iotype: %p", 
-            port->name.c_str(), pname2port[portname], &pname2port[portname]->iotype);
 
     return id;
 }
