@@ -23,7 +23,7 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
             Module::PORT_INPUT, Prototype<ExampleMessage>::Get());
 
     // init script
-    SetScript (new ExampleFileScript ());
+    SetScript (new ExampleFileScript ("datasrc_scr"));
 
     counter = 0;
 }

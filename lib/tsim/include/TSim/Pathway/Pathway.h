@@ -63,6 +63,7 @@ public:
     Component* GetParent () { return parent; }
     virtual string GetInstanceName ();
     Message *GetMsgPrototype () { return msgproto; }
+    string GetClock ();
 
     /* Called by 'Component' */
     Endpoint* GetEndpoint (Endpoint::Type type, uint32_t idEndpt = 0);

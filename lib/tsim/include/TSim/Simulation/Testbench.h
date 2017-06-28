@@ -7,8 +7,7 @@
 #define EXPORT_TESTBENCH(TB) Testbench *simtb = new TB()
 
 /* to be used in constructor */
-#define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
-#define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
+#define SET_LOADABLE_PATH(scr,path) loadpaths[scr] = path
 #define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
 
 
@@ -28,7 +27,7 @@ class Component;
 class Testbench: public Metadata
 {
 public:
-    enum ParamType { FILESCRIPT_PATH, REGISTER_DATAPATH, CLOCK_PERIOD };
+    enum ParamType { LOADABLE_PATH, CLOCK_PERIOD };
 
 public:
     Testbench (const char *clsname, Component *topcomp)
@@ -46,8 +45,7 @@ public:
 protected:
     Component *const TOP_COMPONENT;
 
-    map<string, string> fscrpaths;
-    map<string, string> regpaths;
+    map<string, string> loadpaths;
     map<string, uint32_t> clkperiods;
 };
     

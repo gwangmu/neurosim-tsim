@@ -1,8 +1,8 @@
 #include <TSim/Module/Module.h>
 
 #include <TSim/Base/Component.h>
-#include <TSim/Script/Script.h>
-#include <TSim/Register/Register.h>
+#include <TSim/AddOn/Script.h>
+#include <TSim/AddOn/Register.h>
 #include <TSim/Pathway/Endpoint.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Message.h>
@@ -212,7 +212,8 @@ void Module::PreClock (PERMIT(Simulator))
         {
             if (outport.endpt->GetCapacity() == 0)
             {
-                if (!outport.endpt->IsSelectedLHSOfThisCycle ())
+                if (!outport.endpt->IsSelectedLHSOfThisCycle ()
+                        || outport.endpt->IsOverloaded ())
                 {
                     stalled = true;
                     break;

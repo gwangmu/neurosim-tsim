@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TSim/Script/FileScript.h>
+#include <TSim/AddOn/FileScript.h>
 #include <TSim/Utility/Prototype.h>
 #include <Script/ExampleInstruction.h>
 
@@ -14,8 +14,9 @@ using namespace std;
 class ExampleFileScript: public FileScript
 {
 public:
-    ExampleFileScript () : FileScript ("ExampleFileScript",
-            Prototype<ExampleInstruction>::Get ()) {}
+    ExampleFileScript (string iname) 
+        : FileScript ("ExampleFileScript", iname,
+                Prototype<ExampleInstruction>::Get ()) {}
 
     virtual Instruction* ParseRawString (string rawstr);
 };

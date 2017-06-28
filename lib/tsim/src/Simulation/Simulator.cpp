@@ -2,8 +2,10 @@
 
 #include <TSim/Simulation/Testbench.h>
 #include <TSim/Module/Module.h>
-#include <TSim/Register/Register.h>
-#include <TSim/Script/FileScript.h>
+#include <TSim/AddOn/AddOn.h>
+#include <TSim/AddOn/Register.h>
+#include <TSim/AddOn/FileScript.h>
+#include <TSim/Interface/ILoadable.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
@@ -98,6 +100,9 @@ bool Simulator::LoadTestbench ()
         for (Module *module : modules)
         {
             string nclock = module->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined module clock (module: %s)",
+                        tb->GetName().c_str(), module->GetName().c_str());
 
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].modules.push_back (module);
@@ -105,10 +110,10 @@ bool Simulator::LoadTestbench ()
 
         for (Pathway *pathway : pathways)
         {
-            // NOTE: pathway follows clock domain of LHS module.
-            // NOTE: all LHS endpoints must be in the same clock domain.
-            string nclock = pathway->GetEndpoint(Endpoint::LHS)->
-                GetConnectedModule()->GetClock ();
+            string nclock = pathway->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
+                        tb->GetName().c_str(), pathway->GetName().c_str());
             
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].pathways.push_back (pathway);
@@ -127,52 +132,43 @@ bool Simulator::LoadTestbench ()
     {
         for (Module *module : modules)
         {
-            if (FileScript *fscr = dynamic_cast<FileScript *>(module->GetScript ()))
-                fscrs.push_back (fscr);
+            if (AddOn *fscr = dynamic_cast<AddOn *>(module->GetScript ()))
+            {
+                DEBUG_PRINT ("found '%s'", fscr->GetFullName().c_str());
+                ld_addons.push_back (fscr);
+            }
 
-            if (Register *reg = module->GetRegister ())
-                regs.push_back (reg);
+            if (AddOn *reg = dynamic_cast<AddOn *>(module->GetRegister ()))
+            {
+                DEBUG_PRINT ("found '%s'", reg->GetFullName().c_str());
+                ld_addons.push_back (reg);
+            }
         }
 
-        PRINT ("total %zu file script(s), %zu register(s) found", fscrs.size(), regs.size());
+        PRINT ("total %zu loadable add-ons found", ld_addons.size());
 
-        task ("load file scripts") {
-            for (FileScript *fscr : fscrs)
+        task ("load loadable add-ons")
+        {
+            for (AddOn *ld_addon : ld_addons)
             {
-                string pname = fscr->GetParent()->GetInstanceName();
-                string path = tb->GetStringParam (Testbench::FILESCRIPT_PATH,
+                ILoadable *loadable = dynamic_cast<ILoadable *>(ld_addon);
+                if (!loadable)
+                    SYSTEM_ERROR ("ld_addon must be able to be castable to ILoadable");
+
+                string pname = ld_addon->GetInstanceName();
+                string path = tb->GetStringParam (Testbench::LOADABLE_PATH,
                         pname, KEY(Simulator));
 
                 if (path != "")
                 {
                     PRINT ("Loading '%s' <-- '%s'..", 
-                            fscr->GetParent()->GetName().c_str(), path.c_str());
-                    fscr->LoadScriptFromFile (path);
+                            ld_addon->GetFullName().c_str(), path.c_str());
+                    loadable->LoadFromFile (path);
                 }
                 else
                     DESIGN_WARNING ("no file for '%s' specified",
                             tb->GetName().c_str(),
-                            fscr->GetName().c_str());
-            }
-        }
-
-        task ("load register data") {
-            for (Register *reg : regs)
-            {
-                string pname = reg->GetParent()->GetInstanceName();
-                string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH,
-                        pname, KEY(Simulator));
-
-                if (path != "")
-                {
-                    PRINT ("Loading '%s' <-- '%s'..", 
-                            reg->GetParent()->GetName().c_str(), path.c_str());
-                    reg->LoadDataFromFile (path);
-                }
-                else
-                    DESIGN_WARNING ("no file for '%s' specified",
-                            tb->GetName().c_str(), 
-                            reg->GetName().c_str());
+                            ld_addon->GetName().c_str());
             }
         }
     }
@@ -189,22 +185,19 @@ bool Simulator::ValidateTestbench ()
         IssueCount icount = tb->GetTopComponent(KEY(Simulator))->
             Validate(KEY(Simulator));
 
-        for (FileScript *fscr : fscrs)
+        for (AddOn *ld_addon : ld_addons)
         {
-            IssueCount ficount = fscr->Validate (KEY(Simulator));
-            icount.error += ficount.error;
-            icount.warning += ficount.warning;
-        }
+            ILoadable *loadable = dynamic_cast<ILoadable *>(ld_addon);
+            if (!loadable)
+                SYSTEM_ERROR ("ld_addon must be able to be castable to ILoadable");
 
-        // TODO: to be implemented
-        #if 0
-        for (Register *reg : regs)
-        {
-            IssueCount ricount = reg->Validate (KEY(Simulator));
-            icount.error += ricount.error;
-            icount.warning += ricount.warning;
+            if (!loadable->IsLoaded ())
+            {
+                SIM_ERROR ("loadable addon '%s' not loaded",
+                        tb->GetName().c_str(), ld_addon->GetFullName().c_str());
+                icount.error++;
+            }
         }
-        #endif
 
         PRINT ("%d design error(s) and %d design warning(s)",
                 icount.error, icount.warning);

@@ -48,6 +48,7 @@ Endpoint::Endpoint () : Metadata ("Endpoint", "PORTCAP")
     parent = nullptr; 
 }
 
+
 void Endpoint::SetCapacity (uint32_t capacity)
 {
     if (type == CAP)
@@ -117,6 +118,16 @@ bool Endpoint::IsFull ()
         SYSTEM_ERROR ("endpoint queue size exceeded capacity");
 
     return (resv_count + msgque.size()) >= capacity;
+}
+
+bool Endpoint::IsOverloaded ()
+{
+    if (unlikely (capacity != 0 && resv_count + msgque.size () > capacity))
+        SYSTEM_ERROR ("capacity!=0 endpoint cannot exceed capacity");
+    else if (unlikely (capacity == 0 && resv_count + msgque.size () > capacity + 1))
+        SYSTEM_ERROR ("capacity==0 endpoint cannot overload by more than 1");
+
+    return (resv_count + msgque.size () > capacity);
 }
 
 

@@ -40,10 +40,8 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
             if (line == "") continue;
 
             vector<string> toked = String::Tokenize (line, ":()");
-            if (toked[0] == "FILESCRIPT_PATH")
-                SET_FILESCRIPT_PATH (toked[1], toked[2]);
-            else if (toked[0] == "REGISTER_DATAPATH")
-                SET_REGISTER_DATAPATH (toked[1], toked[2]);
+            if (toked[0] == "LOADABLE_PATH")
+                SET_LOADABLE_PATH (toked[1], toked[2]);
             else if (toked[0] == "CLOCK_PERIOD")
                 SET_CLOCK_PERIOD (toked[1], stoi (toked[2]));
             else
@@ -67,17 +65,10 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
 string Testbench::GetStringParam (Testbench::ParamType ptype, 
         string pname, PERMIT(Simulator))
 {
-    if (ptype == Testbench::FILESCRIPT_PATH)
+    if (ptype == Testbench::LOADABLE_PATH)
     {
-        if (fscrpaths.count (pname))
-            return fscrpaths[pname];
-        else
-            return "";
-    }
-    else if (ptype == Testbench::REGISTER_DATAPATH)
-    {
-        if (regpaths.count (pname))
-            return regpaths[pname];
+        if (loadpaths.count (pname))
+            return loadpaths[pname];
         else
             return "";
     }

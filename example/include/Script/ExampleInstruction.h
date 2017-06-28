@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TSim/Script/Instruction.h>
+#include <TSim/AddOn/Element/Instruction.h>
 
 #include <cinttypes>
 #include <string>
@@ -12,8 +12,13 @@ using namespace std;
 struct ExampleInstruction: public Instruction
 {
 public:
-    // NOTE: must define default constructor
-    ExampleInstruction (): Instruction ("ExampleInstruction") {}
+    // NOTE: must define default constructor w/ initialization
+    ExampleInstruction (): Instruction ("ExampleInstruction") 
+    {
+        data1 = "";
+        data2 = "";
+        data3 = 0;
+    }
 
 public:
     string data1;

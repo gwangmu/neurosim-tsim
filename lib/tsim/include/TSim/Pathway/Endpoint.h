@@ -36,6 +36,7 @@ public:
     Pathway* GetParent () { return parent; }
     Module* GetConnectedModule () { return modConn; }
     string GetConnectedPortName () { return portConn; }
+
     bool IsPortCap () { return (type == CAP); }
 
     /* Called by 'Component' */
@@ -49,6 +50,7 @@ public:
     void Pop () { msgque.pop (); }
 
     bool IsFull (); 
+    bool IsOverloaded ();
     bool IsEmpty () { return msgque.empty (); }
     uint32_t GetCapacity () { return capacity; }
     uint32_t GetNumMessages () { return msgque.size (); }

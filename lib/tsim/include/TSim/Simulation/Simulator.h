@@ -9,9 +9,8 @@ using namespace std;
 class Testbench;
 class Module;
 class Pathway;
-class FileScript;
-class Register;
-
+class AddOn;
+class ILoadable;
 
 class Simulator final
 {
@@ -59,8 +58,7 @@ private:
     string specfilename;
     Testbench *tb;
     vector<ClockDomain> cdomains;
-    vector<FileScript *> fscrs;
-    vector<Register *> regs;
+    vector<AddOn *> ld_addons;
 
     // Simulation states
     uint64_t curtime;

@@ -1,31 +1,28 @@
-#include <TSim/Script/FileScript.h>
-#include <TSim/Script/Instruction.h>
-#include <TSim/Utility/Logging.h>
+#include <TSim/AddOn/FileScript.h>
+#include <TSim/AddOn/Element/Instruction.h>
+#include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/String.h>
 
-#include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
+#include <cinttypes>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
 
-FileScript::FileScript (const char *clsname, Instruction *iproto):
-    Script (clsname)
+FileScript::FileScript (const char *clsname, string iname, Instruction *iproto):
+    Script (clsname, iname, iproto)
 {
     loaded = false;
 
     cursec = 0;
     nextinstr = 0;
     internal_cycle = 0;
-
-    if (!iproto)
-        DESIGN_FATAL ("null instructino prototype", GetName().c_str ());
-    this->iproto = iproto;
 }
 
-bool FileScript::LoadScriptFromFile (string filename)
+bool FileScript::LoadFromFile (string filename)
 {
     macrotask ("Reading script '%s'..", filename.c_str());
 
@@ -178,10 +175,10 @@ bool FileScript::LoadScriptFromFile (string filename)
                                         GetName().c_str(), filename.c_str(), lineno);
                                 return false;
                             }
-                            else if (iproto->GetClassName() != newinstr->GetClassName())
+                            else if (GetInstrPrototype()->GetClassName() != newinstr->GetClassName())
                             {
                                 DESIGN_FATAL ("parser produced incompatible instruction (%s != %s)",
-                                        GetName().c_str(), iproto->GetClassName(), 
+                                        GetName().c_str(), GetInstrPrototype()->GetClassName(), 
                                         newinstr->GetClassName());
                                 return false;
                             }
@@ -215,9 +212,9 @@ bool FileScript::LoadScriptFromFile (string filename)
         scrfile.close ();
     }
 
+    loaded = true;
     PRINT ("total %u section(s), %u instruction(s)", total_nsec, total_ninstr);
 
-    loaded = true;
     return true;
 }
 
@@ -253,16 +250,3 @@ Instruction* FileScript::NextInstruction ()
 }
 
 
-IssueCount FileScript::Validate (PERMIT(Simulator))
-{
-    IssueCount icount;
-
-    if (!loaded)
-    {
-        DESIGN_WARNING ("script file not loaded", GetName().c_str());
-        icount.warning++;
-    }
-
-    return icount;
-
-}

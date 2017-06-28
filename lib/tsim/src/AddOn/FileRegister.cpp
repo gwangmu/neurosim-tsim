@@ -1,7 +1,6 @@
-#include <TSim/Register/Register.h>
-#include <TSim/Register/RegisterWord.h>
-#include <TSim/Utility/Logging.h>
-#include <TSim/Utility/String.h>
+#include <TSim/AddOn/FileRegister.h>
+#include <TSim/AddOn/Element/RegisterWord.h>
+#include <TSim/Utility/AccessKey.h>
 
 #include <string>
 #include <vector>
@@ -11,21 +10,18 @@
 
 using namespace std;
 
+struct RegisterWord;
 
-Register::Register (const char *clsname, Register::Type type, 
-        Register::Attr attr, RegisterWord *wproto):
-    Metadata (clsname, ""), attr (attr)
+
+FileRegister::FileRegister (const char *clsname, string iname, 
+        Type type, Attr attr, RegisterWord *wproto)
+    : Register (clsname, iname, type, attr, wproto)
 {
-    if (attr.wordsize == 0 || attr.wordsize > 1024)
-        DESIGN_ERROR ("inappropriate word size (%u > 1024 or %u == 0)",
-                GetName().c_str(), attr.wordsize, attr.wordsize);
-
-    if (!wproto)
-        DESIGN_FATAL ("null register word prototype", GetName().c_str());
-    this->wproto = wproto;
+    loaded = false;
 }
 
-bool Register::LoadDataFromFile (string filename)
+
+bool FileRegister::LoadFromFile (string filename)
 {
     macrotask ("Reading register data '%s'..", filename.c_str());
 
@@ -36,13 +32,12 @@ bool Register::LoadDataFromFile (string filename)
         regfile.open (filename);
         if (!regfile.is_open ()){
             DESIGN_ERROR ("cannot open register data file '%s'",
-                    "FileScript", filename.c_str());
+                    "FileRegister", filename.c_str());
             return false;
         }
     }
     
     uint64_t total_nword = 0;
-    uint64_t max_addr = 0;
 
     task ("parse/load register data file") 
     {
@@ -53,7 +48,7 @@ bool Register::LoadDataFromFile (string filename)
         uint32_t lineno = 1;
         string line;
 
-        struct { uint64_t addr = -1; string data = ""; } word_info, prev_word_info;
+        struct { uint64_t addr = -1; string data = ""; } word_info;
 
         while (getline (regfile, line))
         {
@@ -115,35 +110,27 @@ bool Register::LoadDataFromFile (string filename)
                             return false;
                         }
                     }
-                    
-                    if (word_info.addr != -1 && prev_word_info.addr >= word_info.addr)
+
+                    RegisterWord *newword = ParseRawString (word_info.data);
+                    if (!newword)
                     {
-                        SIM_ERROR ("inverted address order (%lx > %lx)",
-                                GetName().c_str(), prev_word_info.addr,
-                                word_info.addr);
+                        SIM_ERROR ("invalid register word data (regdata: %s, line: %u)",
+                                GetName().c_str(), filename.c_str(), lineno);
                         return false;
                     }
-                    else
+                    else if (GetWordPrototype()->GetClassName() != newword->GetClassName())
                     {
-                        RegisterWord *newword = ParseRawString (word_info.data);
-                        if (!newword)
-                        {
-                            SIM_ERROR ("invalid register word data (regdata: %s, line: %u)",
-                                    GetName().c_str(), filename.c_str(), lineno);
-                            return false;
-                        }
-                        else if (wproto->GetClassName() != newword->GetClassName())
-                        {
-                            DESIGN_FATAL ("parser produced incompatible register word (%s != %s)",
-                                    GetName().c_str(), wproto->GetClassName(), 
-                                    newword->GetClassName());
-                            return false;
-                        }
-
-                        words.push_back (newword);
-                        max_addr = word_info.addr;
-                        total_nword++;
+                        DESIGN_FATAL ("parser produced incompatible register word (%s != %s)",
+                                GetName().c_str(), GetWordPrototype()->GetClassName(), 
+                                newword->GetClassName());
+                        return false;
                     }
+
+                    if (!SetWord (word_info.addr, newword))
+                        SIM_ERROR ("failed to register word at 0x%lx", 
+                                GetName().c_str(), word_info.addr);
+
+                    total_nword++;
                 } break;
                 default:
                 {
@@ -163,19 +150,8 @@ bool Register::LoadDataFromFile (string filename)
         regfile.close ();
     }
 
-    PRINT ("total %lu word(s), max address %lx", total_nword, max_addr);
+    loaded = true;
+    PRINT ("total %lu word(s)", total_nword);
 
     return true;
-}
-
-const RegisterWord* Register::GetWord (uint64_t addr)
-{
-    if (addr < words.size ())
-        return words[addr];
-    else
-    {
-        SIM_WARNING ("accessing out-of-range address (%lx)", 
-                GetName().c_str(), addr);
-        return nullptr;
-    }
 }
