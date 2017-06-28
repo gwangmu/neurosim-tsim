@@ -3,6 +3,7 @@
 #include <TSim/Base/Metadata.h>
 #include <TSim/Pathway/Endpoint.h>
 #include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/StaticBranchPred.h>
 
 #include <string>
 #include <cinttypes>
@@ -24,7 +25,11 @@ public:
     Endpoint (string name, Pathway *parent, Type type, 
             uint32_t capacity, PERMIT(Pathway));
 
-    static const Endpoint* PORTCAP;
+    static inline Endpoint *const PORTCAP ()
+    {
+        if (unlikely (!_PORTCAP)) _PORTCAP = new Endpoint ();
+        return _PORTCAP;
+    }
 
     /* Universal */
     Type GetEndpointType () { return type; }
@@ -57,6 +62,7 @@ public:
 private:
     /* For PORTCAP */
     Endpoint ();
+    static Endpoint *_PORTCAP;
 
     Type type;
     Pathway* parent;
