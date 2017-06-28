@@ -35,7 +35,7 @@ OBJDIR=obj
 HDRDIR=include
 LIBDIR=lib
 
-ifdef TEST
+ifdef EXAMPLE
 SRCDIR=example/src
 HDRDIR=example/include
 endif

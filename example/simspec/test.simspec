@@ -1,5 +1,5 @@
 #!TSim Simulation Spec
 
-FILESCRIPT_PATH(datasource): data/fscr1.script
-REGISTER_DATAPATH(reg1): data/reg1.regdata
+FILESCRIPT_PATH(datasource): example/data/fscr1.script
+REGISTER_DATAPATH(reg1): example/data/reg1.regdata
 CLOCK_PERIOD(main): 500
