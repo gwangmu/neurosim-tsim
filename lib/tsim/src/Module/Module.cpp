@@ -19,10 +19,6 @@ using namespace std;
 
 
 /* Constructors */
-Module::Port::Port ()
-{
-}
-
 Module::Module (const char *clsname, string iname, 
         Component *parent, uint32_t pdepth):
     Component (clsname, iname, parent)
@@ -39,9 +35,11 @@ Module::Module (const char *clsname, string iname,
     omsgidxmask--;
 
     nextoutmsgs = new Message **[omsgidxmask + 1];
+    for (uint32_t i = 0; i < omsgidxmask + 1; i++)
+        nextoutmsgs[i] = new Message *[1];
 
-    inports.resize (100);
-    outports.resize (100);
+    inports.resize (64);
+    outports.resize (64);
     inidx = outidx = 0;
 }
 
@@ -88,9 +86,6 @@ bool Module::SetRegister (Register *reg)
 
 bool Module::Connect (string portname, Endpoint *endpt)
 {
-    DEBUG_PRINT ("%p", pname2port[portname]);
-    DEBUG_PRINT ("pname2port.size()=%zu", pname2port.size());
-
     if (!pname2port.count (portname))
     {
         DESIGN_ERROR ("non-existing port '%s'", GetFullName().c_str(), 
@@ -375,7 +370,6 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     port->sealed = false;
 
     pname2port.insert (make_pair (portname, port));
-    DEBUG_PRINT ("mapsize=%zu (%s)", pname2port.size(), GetName().c_str());
 
     return id;
 }

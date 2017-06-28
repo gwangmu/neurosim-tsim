@@ -41,9 +41,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     //Module *deltaG_sram = new SRAMModule <DeltaGMessage, uint64_t> ("deltaG_sram", this, 64, 16);
 
     Module *datasink = new DataSinkModule ("datasink", this);
-    DEBUG_PRINT ("mapsize=%zu, %zu", datasink->pname2port.size(), datasink->testmap.size());
     Module *nb_controller = new NBController ("nb_controller", this, 16);
-    DEBUG_PRINT ("mapsize=%zu, %zu", datasink->pname2port.size(), datasink->testmap.size());
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     
@@ -58,7 +56,6 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     Wire *deltaG_sram_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
 
 
-    DEBUG_PRINT ("mapsize=%zu, %zu", datasink->pname2port.size(), datasink->testmap.size());
     // ctrl2nb->GetEndpoint (Endpoint::LHS)->SetCapacity (0);
     // nb2sink->GetEndpoint (Endpoint::LHS)->SetCapacity (0);
 
@@ -91,12 +88,10 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     // deltaG_sram->Connect ("w_addr", Endpoint::PORTCAP());
     // deltaG_sram->Connect ("w_data", Endpoint::PORTCAP());
     
-    DEBUG_PRINT ("mapsize=%zu, %zu", datasink->pname2port.size(), datasink->testmap.size());
     // Neuron block
     neuron_block->Connect ("NeuronBlock_in", ctrl2nb->GetEndpoint (Endpoint::RHS));
     neuron_block->Connect ("NeuronBlock_out", nb2sink->GetEndpoint (Endpoint::LHS));
 
-    DEBUG_PRINT ("mapsize=%zu, %zu", datasink->pname2port.size(), datasink->testmap.size());
     datasink->Connect ("datain", nb2sink->GetEndpoint (Endpoint::RHS));
 }
 

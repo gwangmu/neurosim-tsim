@@ -18,11 +18,10 @@ class Simulator;
 NeuroSimTestbench::NeuroSimTestbench ()
     : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
 {
-    //datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
+    datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
-    return true;
-    //return (datasink->recvdata >= 50);
+    return (datasink->recvdata >= 50);
 }

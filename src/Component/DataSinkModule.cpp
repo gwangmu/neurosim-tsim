@@ -16,12 +16,8 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
 {
     // create ports
     PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<NeuronBlockOutMessage>::Get());
-    DEBUG_PRINT ("size=%zu", pname2port.size());
-    CreatePort ("dummy", Module::PORT_OUTPUT, Prototype<NeuronBlockOutMessage>::Get());
 
-    DEBUG_PRINT ("size=%zu", pname2port.size());
     recvdata = 0;
-    DEBUG_PRINT ("size=%zu", pname2port.size());
 }
 
 // NOTE: called only if not stalled

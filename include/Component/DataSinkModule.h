@@ -14,8 +14,8 @@ using namespace std;
 
 class DataSinkModule: public Module
 {
-    //VISIBLE_TO(ExampleTestbench);
-    //VISIBLE_TO(NeuroSimTestbench);
+    VISIBLE_TO(ExampleTestbench);
+    VISIBLE_TO(NeuroSimTestbench);
 
 public:
     DataSinkModule (string iname, Component *parent);

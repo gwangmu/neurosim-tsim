@@ -31,7 +31,7 @@ private:
             return strs[ty];
         }
 
-        Port ();
+        Port () {};
 
         // Port Info
         string name;
@@ -63,8 +63,6 @@ public:
 
     virtual bool Connect (string portname, Endpoint *endpt) final;
 
-    map<string, Port *> pname2port;
-    map<string, uint32_t> testmap;
 protected:  
     /* Called by derived 'Module' */
     uint32_t CreatePort (string portname, PortType iotype, Message* msgproto);
@@ -88,6 +86,8 @@ private:
     Message ***nextoutmsgs;
     uint32_t omsgidx;
     uint32_t omsgidxmask;
+
+    map<string, Port *> pname2port;
 
     bool stalled;
 
