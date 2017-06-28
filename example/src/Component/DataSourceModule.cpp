@@ -4,7 +4,7 @@
 #include <Component/DataSourceModule.h>
 #include <Script/ExampleFileScript.h>
 #include <Script/ExampleInstruction.h>
-#include <Message/NeuronBlockMessage.h>
+#include <Message/ExampleMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -18,7 +18,7 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
 {
     // create ports
     PORT_DATAOUT = CreatePort ("dataout",
-            Module::PORT_OUTPUT, Prototype<NeuronBlockInMessage>::Get());
+            Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
 
     // init script
     SetScript (new ExampleFileScript ());
@@ -38,7 +38,7 @@ void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, Instructi
                 ininstr->data1.c_str(), ininstr->data2.c_str(), ininstr->data3);
 
 
-    outmsgs[PORT_DATAOUT] = new NeuronBlockInMessage (0, counter, 0, 0);
+    outmsgs[PORT_DATAOUT] = new ExampleMessage (0, counter + instrval);
     counter++;
 
     // If condition satisfied, proceed to next section.
