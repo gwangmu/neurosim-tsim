@@ -11,7 +11,7 @@ using namespace std;
 struct Instruction;
 class Module;
 
-class Script: public Metadata, public IValidatable
+class Script: public Metadata
 {
 public:
     Script (const char *clsname): Metadata (clsname, "") {}

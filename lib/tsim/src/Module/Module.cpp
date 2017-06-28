@@ -21,11 +21,6 @@ using namespace std;
 /* Constructors */
 Module::Port::Port ()
 {
-    name = "";
-    iotype = Module::PORT_UNKNOWN;
-    msgproto = nullptr;
-    endpt = nullptr;
-    sealed = false;
 }
 
 Module::Module (const char *clsname, string iname, 
@@ -44,6 +39,10 @@ Module::Module (const char *clsname, string iname,
     omsgidxmask--;
 
     nextoutmsgs = new Message **[omsgidxmask + 1];
+
+    inports.resize (100);
+    outports.resize (100);
+    inidx = outidx = 0;
 }
 
 
@@ -89,6 +88,9 @@ bool Module::SetRegister (Register *reg)
 
 bool Module::Connect (string portname, Endpoint *endpt)
 {
+    DEBUG_PRINT ("%p", pname2port[portname]);
+    DEBUG_PRINT ("pname2port.size()=%zu", pname2port.size());
+
     if (!pname2port.count (portname))
     {
         DESIGN_ERROR ("non-existing port '%s'", GetFullName().c_str(), 
@@ -125,7 +127,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
         return false;
     }
 
-    if (!(port->iotype == Module::PORT_INPUT &&
+    if (!(endpt->GetEndpointType() == Endpoint::CAP) &&
+            !(port->iotype == Module::PORT_INPUT &&
                 endpt->GetEndpointType() == Endpoint::RHS) &&
             !(port->iotype == Module::PORT_OUTPUT &&
                 endpt->GetEndpointType() == Endpoint::LHS))
@@ -137,7 +140,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
     }
 
     port->endpt = endpt;
-    endpt->JoinTo (this, portname, KEY(Module));
+    if (!endpt->IsPortCap())
+        endpt->JoinTo (this, portname, KEY(Module));
 
     return true;
 }
@@ -199,7 +203,8 @@ void Module::PreClock (PERMIT(Simulator))
         {
             if (outport.endpt->GetCapacity() == 0)
             {
-                if (!outport.endpt->IsSelectedLHSOfThisCycle ())
+                if (!outport.endpt->IsSelectedLHSOfThisCycle ()
+                        || outport.endpt->IsOverloaded ())
                 {
                     stalled = true;
                     break;
@@ -336,8 +341,8 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
 
     if (iotype == Module::PORT_INPUT)
     {
-        inports.push_back (Port ());
-        id = inports.size () - 1;
+        //inports.push_back (Port ());
+        id = inidx++;
         port = &inports.back ();
         
         delete[] nextinmsgs;
@@ -345,8 +350,8 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     }
     else if (iotype == Module::PORT_OUTPUT)
     {
-        outports.push_back (Port ());
-        id = outports.size () - 1;
+        //outports.push_back (Port ());
+        id = outidx++;
         port = &outports.back ();
         
         for (uint32_t i = 0; i < omsgidxmask + 1; i++)
@@ -367,8 +372,10 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     port->iotype = iotype;
     port->msgproto = msgproto;
     port->endpt = nullptr;
+    port->sealed = false;
 
-    pname2port[portname] = port;
+    pname2port.insert (make_pair (portname, port));
+    DEBUG_PRINT ("mapsize=%zu (%s)", pname2port.size(), GetName().c_str());
 
     return id;
 }

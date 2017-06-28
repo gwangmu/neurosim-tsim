@@ -50,11 +50,11 @@ public:
     }
 
     /* Called by 'Simulator' */
-    auto ChildBegin (PERMIT(Simulator)) { return children.begin (); }
-    auto ChildEnd (PERMIT(Simulator)) { return children.end (); }
+    vector<Component *>::iterator ChildBegin (PERMIT(Simulator)) { return children.begin (); }
+    vector<Component *>::iterator ChildEnd (PERMIT(Simulator)) { return children.end (); }
 
-    auto PathwayBegin (PERMIT(Simulator)) { return pathways.begin (); }
-    auto PathwayEnd (PERMIT(Simulator)) { return pathways.end (); }
+    vector<Pathway *>::iterator PathwayBegin (PERMIT(Simulator)) { return pathways.begin (); }
+    vector<Pathway *>::iterator PathwayEnd (PERMIT(Simulator)) { return pathways.end (); }
 
     virtual IssueCount Validate (PERMIT(Simulator));
 

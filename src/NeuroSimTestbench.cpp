@@ -12,16 +12,17 @@ using namespace std;
 class Simulator;
 
 
-EXPORT_TESTBENCH (NeuroSimTestbench);
+//EXPORT_TESTBENCH (NeuroSimTestbench);
 
 
 NeuroSimTestbench::NeuroSimTestbench ()
     : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
 {
-    datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
+    //datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
-    return (datasink->recvdata >= 50);
+    return true;
+    //return (datasink->recvdata >= 50);
 }

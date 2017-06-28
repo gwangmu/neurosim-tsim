@@ -176,7 +176,26 @@ bool Pathway::SetConnectionAttr (Pathway::ConnectionAttr conattr)
 
     return true;
 }
-    
+
+string Pathway::GetClock ()
+{
+    // NOTE: pathway follows clock domain of LHS module.
+    // NOTE: all LHS endpoints must be in the same clock domain.
+    string clockname = "";
+
+    for (Endpoint &ept : endpts.lhs)
+    {
+        Module *connmod = ept.GetConnectedModule ();
+        if (!connmod)
+            return "";
+        else if (clockname != "" && connmod->GetClock() != clockname)
+            return "";
+        else if (clockname == "")
+            clockname = connmod->GetClock();
+    }
+
+    return clockname;
+}
 
 
 IssueCount Pathway::Validate (PERMIT(Simulator))

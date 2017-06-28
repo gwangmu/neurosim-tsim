@@ -63,6 +63,8 @@ public:
 
     virtual bool Connect (string portname, Endpoint *endpt) final;
 
+    map<string, Port *> pname2port;
+    map<string, uint32_t> testmap;
 protected:  
     /* Called by derived 'Module' */
     uint32_t CreatePort (string portname, PortType iotype, Message* msgproto);
@@ -78,7 +80,8 @@ protected:
 private:
     vector<Port> inports;
     vector<Port> outports;
-    map<string, Port *> pname2port;
+    uint32_t inidx;
+    uint32_t outidx;
     
     uint32_t pdepth;
     Message **nextinmsgs;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <TSim/Script/Script.h>
+#include <TSim/Interface/IValidatable.h>
 #include <TSim/Utility/AccessKey.h>
 
 #include <string>
@@ -11,7 +12,7 @@ using namespace std;
 
 struct Instruction;
 
-class FileScript: public Script
+class FileScript: public Script, public IValidatable
 {
 private:
     struct CycleInstrPair
@@ -31,7 +32,8 @@ public:
 
     bool LoadScriptFromFile (string filename);
     virtual Instruction* ParseRawString (string rawstr) = 0;
-    virtual IssueCount Validate (PERMIT(Simulator));
+
+    virtual IssueCount Validate (PERMIT(Simulator)) final;
 
 private:
     typedef vector<CycleInstrPair> ScriptSection;

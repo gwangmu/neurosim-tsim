@@ -49,6 +49,7 @@ public:
     void Pop () { msgque.pop (); }
 
     bool IsFull (); 
+    bool IsOverloaded ();
     bool IsEmpty () { return msgque.empty (); }
     uint32_t GetCapacity () { return capacity; }
     uint32_t GetNumMessages () { return msgque.size (); }

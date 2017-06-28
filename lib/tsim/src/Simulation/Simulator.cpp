@@ -2,7 +2,7 @@
 
 #include <TSim/Simulation/Testbench.h>
 #include <TSim/Module/Module.h>
-#include <TSim/Register/Register.h>
+#include <TSim/Register/FileRegister.h>
 #include <TSim/Script/FileScript.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Utility/AccessKey.h>
@@ -98,6 +98,10 @@ bool Simulator::LoadTestbench ()
         for (Module *module : modules)
         {
             string nclock = module->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined module clock (module: %s)",
+                        tb->GetName().c_str(), module->GetName().c_str());
+
 
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].modules.push_back (module);
@@ -105,10 +109,10 @@ bool Simulator::LoadTestbench ()
 
         for (Pathway *pathway : pathways)
         {
-            // NOTE: pathway follows clock domain of LHS module.
-            // NOTE: all LHS endpoints must be in the same clock domain.
-            string nclock = pathway->GetEndpoint(Endpoint::LHS)->
-                GetConnectedModule()->GetClock ();
+            string nclock = pathway->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
+                        tb->GetName().c_str(), pathway->GetName().c_str());
             
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].pathways.push_back (pathway);
@@ -130,7 +134,7 @@ bool Simulator::LoadTestbench ()
             if (FileScript *fscr = dynamic_cast<FileScript *>(module->GetScript ()))
                 fscrs.push_back (fscr);
 
-            if (Register *reg = module->GetRegister ())
+            if (FileRegister *reg = dynamic_cast<FileRegister *>(module->GetRegister ()))
                 regs.push_back (reg);
         }
 
@@ -157,7 +161,7 @@ bool Simulator::LoadTestbench ()
         }
 
         task ("load register data") {
-            for (Register *reg : regs)
+            for (FileRegister *reg : regs)
             {
                 string pname = reg->GetParent()->GetInstanceName();
                 string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH,
@@ -196,15 +200,12 @@ bool Simulator::ValidateTestbench ()
             icount.warning += ficount.warning;
         }
 
-        // TODO: to be implemented
-        #if 0
-        for (Register *reg : regs)
+        for (FileRegister *reg : regs)
         {
             IssueCount ricount = reg->Validate (KEY(Simulator));
             icount.error += ricount.error;
             icount.warning += ricount.warning;
         }
-        #endif
 
         PRINT ("%d design error(s) and %d design warning(s)",
                 icount.error, icount.warning);

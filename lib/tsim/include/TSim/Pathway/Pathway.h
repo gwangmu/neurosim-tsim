@@ -63,6 +63,7 @@ public:
     Component* GetParent () { return parent; }
     virtual string GetInstanceName ();
     Message *GetMsgPrototype () { return msgproto; }
+    string GetClock ();
 
     /* Called by 'Component' */
     Endpoint* GetEndpoint (Endpoint::Type type, uint32_t idEndpt = 0);
@@ -80,10 +81,10 @@ public:
 protected:
     bool AddEndpoint (string name, Endpoint::Type type, uint32_t capacity); 
 
-    auto BeginLHSEndpoint () { return endpts.lhs.begin (); }
-    auto EndLHSEndpoint () { return endpts.lhs.end (); }
-    auto BeginRHSEndpoint () { return endpts.rhs.begin (); }
-    auto EndRHSEndpoint () { return endpts.rhs.end (); }
+    vector<Endpoint>::iterator BeginLHSEndpoint () { return endpts.lhs.begin (); }
+    vector<Endpoint>::iterator EndLHSEndpoint () { return endpts.lhs.end (); }
+    vector<Endpoint>::iterator BeginRHSEndpoint () { return endpts.rhs.begin (); }
+    vector<Endpoint>::iterator EndRHSEndpoint () { return endpts.rhs.end (); }
 
 private:
     // ready state
