@@ -23,5 +23,5 @@ NeuroSimTestbench::NeuroSimTestbench ()
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
-    return (datasink->recvdata >= 50);
+    return (datasink->recvdata >= 10);
 }

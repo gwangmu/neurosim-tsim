@@ -22,9 +22,9 @@ public:
     DeltaGMessage (uint32_t destrhsid, uint64_t deltaG)
         : Message ("DeltaGMessage", destrhsid)
     {
-        this->deltaG = deltaG;
+        this->value = deltaG;
     }
 
 public:
-    uint64_t deltaG;
+    uint64_t value;
 };

@@ -33,8 +33,6 @@ private:
     uint32_t max_idx_;
     uint32_t idx_counter_;
     bool ts_parity_;
-    bool deltaG_ready, state_ready;
-    bool is_idle;
 
     /* Internal Registers */
     uint64_t deltaG_reg;
