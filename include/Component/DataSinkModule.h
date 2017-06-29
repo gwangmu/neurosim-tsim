@@ -10,8 +10,9 @@
 using namespace std;
 
 //class ExampleTestbench;
-//class NeuroSimTestbench;
+class NeuroSimTestbench;
 
+template <class M, class T>
 class DataSinkModule: public Module
 {
     VISIBLE_TO(ExampleTestbench);
@@ -26,5 +27,5 @@ private:
     uint32_t PORT_DATAIN;
 
     // Internal states
-    uint32_t recvdata;
+    T recvdata;
 };

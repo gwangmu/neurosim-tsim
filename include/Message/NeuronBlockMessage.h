@@ -43,11 +43,11 @@ public:
     NeuronBlockOutMessage (uint32_t destrhsid, uint32_t idx, bool spike)
         : Message ("NeuronBlockOutMessage", destrhsid)
     {
-        this->idx = idx;
+        this->value = idx;
         this->spike = spike;
     }
 
 public:
-    uint32_t idx;
+    uint32_t value;
     bool spike;
 };

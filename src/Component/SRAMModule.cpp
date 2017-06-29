@@ -29,15 +29,19 @@ SRAMModule<M, T>::SRAMModule (string iname, Component* parent,
 template <class M, typename T>
 void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
+    DEBUG_PRINT("[SRAM] Operation");
+    
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[RPORT_addr]);
 
     if(raddr_msg)
     {
-        uint32_t read_addr = raddr_msg->idx;
+        uint32_t read_addr = raddr_msg->value;
 
         T value = 0;
-        outmsgs[RPORT_data] = new M (0, value);
+        //outmsgs[RPORT_data] = new M (0, value);
+
+        DEBUG_PRINT("[SRAM] Send message");
     }
 
 
@@ -47,7 +51,7 @@ void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instructi
 
     if(waddr_msg)
     {
-        uint32_t write_addr = waddr_msg->idx;
+        uint32_t write_addr = waddr_msg->value;
 
     }
 

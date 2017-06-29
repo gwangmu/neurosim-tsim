@@ -22,9 +22,9 @@ public:
     IndexMessage (uint32_t destrhsid, uint32_t idx)
         : Message ("IndexMessage", destrhsid)
     {
-        this->idx = idx;
+        this->value = idx;
     }
 
 public:
-    uint32_t idx;
+    uint32_t value;
 };

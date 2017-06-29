@@ -21,5 +21,6 @@ private:
     uint32_t PORT_DATAOUT;
 
     // Internal states
+    bool is_idle;
     uint32_t counter;
 };

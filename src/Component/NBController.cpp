@@ -36,10 +36,13 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
     max_idx_ = max_index;
     idx_counter_ = 0;
     ts_parity_ = false;
+    is_idle = true;
 }
 
 void NBController::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
+    DEBUG_PRINT ("[NBC] Operation ");
+    
     /* Process Inputs */
     StateMessage *state_msg = static_cast<StateMessage*>(inmsgs[IPORT_State]);
     DeltaGMessage *deltaG_msg = static_cast<DeltaGMessage*>(inmsgs[IPORT_DeltaG]);
@@ -53,11 +56,13 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, Instruction *
 
     if(state_msg)
     {
+        DEBUG_PRINT ("Receive state message from SRAM");
         state_reg = state_msg->value;
         state_ready = true;
     }
     if(deltaG_msg)
     {
+        DEBUG_PRINT ("Receive delta message from SRAM");
         deltaG_reg = deltaG_msg->deltaG;
         deltaG_ready = true;
     }
@@ -80,6 +85,7 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         else
         {
             // Make SRAM request
+            DEBUG_PRINT ("[NBC] Read Reqest");
             outmsgs[OPORT_SRAM] = new IndexMessage (-1, idx_counter_);
         }
 
@@ -87,7 +93,12 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         deltaG_ready = false;
         state_ready = false;
     }
-
+    else if (is_idle)
+    {
+        DEBUG_PRINT ("[NBC] Read Reqest");
+        outmsgs[OPORT_SRAM] = new IndexMessage (-1, idx_counter_);
+        is_idle = false;
+    }
 
 
 

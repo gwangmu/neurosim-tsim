@@ -6,6 +6,7 @@
 #include <Script/ExampleInstruction.h>
 #include <Message/NeuronBlockMessage.h>
 #include <Message/StateMessage.h>
+#include <Message/SignalMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -19,12 +20,13 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
 {
     // create ports
     PORT_DATAOUT = CreatePort ("dataout",
-            Module::PORT_OUTPUT, Prototype<NeuronBlockInMessage>::Get());
+            Module::PORT_OUTPUT, Prototype<SignalMessage>::Get());
 
     // init script
     SetScript (new ExampleFileScript ());
 
     counter = 0;
+    is_idle = true;
 }
 
 // NOTE: called only if not stalled
@@ -38,9 +40,15 @@ void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, Instructi
         DEBUG_PRINT ("instruction received (%s, %s, %u)",
                 ininstr->data1.c_str(), ininstr->data2.c_str(), ininstr->data3);
 
-    State s;
-    outmsgs[PORT_DATAOUT] = new NeuronBlockInMessage (0, counter, s, 0);
-    counter++;
+    //State s;
+    //counter++;
+    //outmsgs[PORT_DATAOUT] = new SignalMessage (0, counter, s, 0);
+    
+    if (is_idle)
+    {
+        outmsgs[PORT_DATAOUT] = new SignalMessage (0, false);
+        is_idle = false;
+    }
 
     // If condition satisfied, proceed to next section.
     // NOTE: you can call 'NextSection' anywhere within 'Operation'

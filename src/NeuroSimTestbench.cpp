@@ -10,7 +10,7 @@
 using namespace std;
 
 class Simulator;
-
+struct NeuronBlockOutMessage;
 
 EXPORT_TESTBENCH (NeuroSimTestbench);
 
@@ -18,7 +18,7 @@ EXPORT_TESTBENCH (NeuroSimTestbench);
 NeuroSimTestbench::NeuroSimTestbench ()
     : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
 {
-    datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
+    datasink = static_cast<DataSinkModule<NeuronBlockOutMessage, uint32_t> *>(TOP_COMPONENT->GetModule ("datasink"));
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))

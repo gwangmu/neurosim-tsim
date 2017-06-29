@@ -5,6 +5,7 @@
 #pragma once
 
 #include <TSim/Pathway/Message.h>
+#include <TSim/Utility/Logging.h>
 
 #include <cinttypes>
 #include <string>

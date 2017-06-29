@@ -121,12 +121,10 @@ bool Module::Connect (string portname, Endpoint *endpt)
     if (!endpt->IsPortCap() && 
             endpt->GetParent()->GetMsgPrototype() != port->msgproto)
     {
-        DESIGN_ERROR ("mismatching message proto %s (of '%s') "
-                "and %s (of port '%s')",
                 GetFullName().c_str(), 
                 endpt->GetParent()->GetMsgPrototype()->GetClassName (),
                 endpt->GetParent()->GetName().c_str(), 
-                port->msgproto->GetClassName (), portname.c_str());
+                port->msgproto->GetClassName (), portname.c_str();
         return false;
     }
 
@@ -209,12 +207,15 @@ void Module::PreClock (PERMIT(Simulator))
                 if (!outport->endpt->IsSelectedLHSOfThisCycle ()
                         || outport->endpt->IsOverloaded ())
                 {
+                    DEBUG_PRINT("%s is stalled (capacity %d)"
+                            , outport->endpt->GetConnectedPortName().c_str(), outport->endpt->GetCapacity());
                     stalled = true;
                     break;
                 }
             }
             else if (outport->endpt->IsFull ())
             {
+                DEBUG_PRINT("%s is full (stall)", GetFullName().c_str());
                 stalled = true;
                 break;
             }
@@ -259,7 +260,8 @@ void Module::PreClock (PERMIT(Simulator))
 /*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Module::PostClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
+    MICRODEBUG_PRINT ("calc '%s' (stall: %d)"
+            , GetFullName().c_str(), stalled);
 
     Instruction *nextinstr = nullptr;
     if (likely (!stalled))

@@ -9,6 +9,7 @@
 
 using namespace std;
 
+struct NeuronBlockOutMessage;
 
 class NeuroSimTestbench: public Testbench
 {
@@ -17,5 +18,5 @@ public:
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:
-    DataSinkModule *datasink;
+    DataSinkModule<NeuronBlockOutMessage, uint32_t> *datasink;
 };

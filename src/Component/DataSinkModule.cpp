@@ -2,6 +2,13 @@
 #include <TSim/Utility/Logging.h>
 
 #include <Component/DataSinkModule.h>
+
+#include <Message/ExampleMessage.h>
+#include <Message/NeuronBlockMessage.h>
+#include <Message/DeltaGMessage.h>
+#include <Message/StateMessage.h>
+#include <Message/SignalMessage.h>
+#include <Message/IndexMessage.h>
 #include <Message/NeuronBlockMessage.h>
 
 #include <cinttypes>
@@ -11,23 +18,28 @@
 using namespace std;
 
 
-DataSinkModule::DataSinkModule (string iname, Component *parent)
+template <class M, class T>
+DataSinkModule<M, T>::DataSinkModule (string iname, Component *parent)
     : Module ("DataSinkModule", iname, parent, 1)
 {
     // create ports
-    PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<NeuronBlockOutMessage>::Get());
+    PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<M>::Get());
 
     recvdata = 0;
 }
 
 // NOTE: called only if not stalled
-void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+template <class M, class T>
+void DataSinkModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
-    NeuronBlockOutMessage *inmsg = static_cast<NeuronBlockOutMessage *>(inmsgs[PORT_DATAIN]);
+    M *inmsg = static_cast<M*>(inmsgs[PORT_DATAIN]);
 
     if (inmsg) 
     {
-        recvdata = inmsg->idx;
-        DEBUG_PRINT ("idx = %u, spike = %d", recvdata, inmsg->spike);
+        recvdata = inmsg->value;
+        DEBUG_PRINT ("idx = %u", recvdata);
     }
 }
+
+template class DataSinkModule <NeuronBlockOutMessage, uint32_t>;
+template class DataSinkModule <SignalMessage, bool>;

@@ -27,10 +27,8 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     Wire *d2dwire = new Wire (this, conattr, Prototype<ExampleMessage>::Get());
-    d2dwire->GetEndpoint (Endpoint::LHS)->SetCapacity (0);
-
     // connect modules
     datasource->Connect ("dataout", d2dwire->GetEndpoint (Endpoint::LHS));
-    datasource->Connect ("dummy", Endpoint::PORTCAP());
+    //datasource->Connect ("dummy", Endpoint::PORTCAP());
     datasink->Connect ("datain", d2dwire->GetEndpoint (Endpoint::RHS));
 }

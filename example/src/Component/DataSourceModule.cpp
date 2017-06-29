@@ -4,10 +4,6 @@
 #include <Component/DataSourceModule.h>
 #include <Script/ExampleFileScript.h>
 #include <Script/ExampleInstruction.h>
-<<<<<<< HEAD
-=======
-
->>>>>>> 46d8c3e593f0b721784d6541cdcd2dd92da1e7c4
 #include <Message/ExampleMessage.h>
 
 #include <cinttypes>
@@ -23,8 +19,8 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
     // create ports
     PORT_DATAOUT = CreatePort ("dataout",
             Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
-    PORT_DATAOUT = CreatePort ("dummy",
-            Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
+    //PORT_DATAOUT = CreatePort ("dummy",
+    //        Module::PORT_OUTPUT, Prototype<ExampleMessage>::Get());
 
     // init script
     SetScript (new ExampleFileScript ());

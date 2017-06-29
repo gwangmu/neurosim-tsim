@@ -45,8 +45,8 @@ public:
     // FIXME enforcing LHS, RHS caller classes?
     void Reserve ();
     bool Assign (Message *msg);
-    Message* Peek () { return msgque.front (); }
-    void Pop () { msgque.pop (); }
+    Message* Peek () { return (msgque.empty())? nullptr : msgque.front (); }
+    void Pop () { if(!msgque.empty()) msgque.pop (); }
 
     bool IsFull (); 
     bool IsOverloaded ();
