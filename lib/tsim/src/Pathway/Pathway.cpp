@@ -176,7 +176,26 @@ bool Pathway::SetConnectionAttr (Pathway::ConnectionAttr conattr)
 
     return true;
 }
-    
+
+string Pathway::GetClock ()
+{
+    // NOTE: pathway follows clock domain of LHS module.
+    // NOTE: all LHS endpoints must be in the same clock domain.
+    string clockname = "";
+
+    for (Endpoint &ept : endpts.lhs)
+    {
+        Module *connmod = ept.GetConnectedModule ();
+        if (!connmod)
+            return "";
+        else if (clockname != "" && connmod->GetClock() != clockname)
+            return "";
+        else if (clockname == "")
+            clockname = connmod->GetClock();
+    }
+
+    return clockname;
+}
 
 
 IssueCount Pathway::Validate (PERMIT(Simulator))
@@ -241,7 +260,6 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
     return icount;
 }
 
-/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Pathway::PreClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("assign '%s'-->module", GetName().c_str());
@@ -294,7 +312,6 @@ void Pathway::PreClock (PERMIT(Simulator))
     }
 }
 
-/*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Pathway::PostClock (PERMIT(Simulator))
 {
     operation ("update next ready state")

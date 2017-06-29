@@ -9,8 +9,8 @@
 
 using namespace std;
 
-class ExampleTestbench;
-class NeuroSimTestbench;
+//class ExampleTestbench;
+//class NeuroSimTestbench;
 
 class DataSinkModule: public Module
 {

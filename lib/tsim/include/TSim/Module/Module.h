@@ -31,7 +31,7 @@ private:
             return strs[ty];
         }
 
-        Port ();
+        Port () {};
 
         // Port Info
         string name;
@@ -78,13 +78,16 @@ protected:
 private:
     vector<Port> inports;
     vector<Port> outports;
-    map<string, Port *> pname2port;
+    uint32_t inidx;
+    uint32_t outidx;
     
     uint32_t pdepth;
     Message **nextinmsgs;
     Message ***nextoutmsgs;
     uint32_t omsgidx;
     uint32_t omsgidxmask;
+
+    map<string, Port *> pname2port;
 
     bool stalled;
 

@@ -10,7 +10,7 @@ class Testbench;
 class Module;
 class Pathway;
 class FileScript;
-class Register;
+class FileRegister;
 
 
 class Simulator final
@@ -60,7 +60,7 @@ private:
     Testbench *tb;
     vector<ClockDomain> cdomains;
     vector<FileScript *> fscrs;
-    vector<Register *> regs;
+    vector<FileRegister *> regs;
 
     // Simulation states
     uint64_t curtime;

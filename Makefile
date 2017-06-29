@@ -23,7 +23,7 @@ LD=clang++
 AR=ar
 
 # compiler flags
-CXXFLAGS=-O3 --std=c++14 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG)
+CXXFLAGS= --std=c++11 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG) -g
 LDFLAGS=-O3
 ARFLAGS=-rc
 #################
@@ -68,6 +68,8 @@ SRCSUBDIRS:=$(shell find $(SRCDIR) -type d)
 OBJSUBDIRS:=$(subst $(SRCDIR),$(OBJDIR),$(SRCSUBDIRS))
 CODEFILES:=$(addsuffix /*,$(SRCSUBDIRS))
 CODEFILES:=$(wildcard $(CODEFILES))
+
+temp:=$(filter %.$(OBJEXT),$(wildcard $(addsuffix /*,$(shell find $(TSIM_DIR)/obj -type d))))
 
 SRCFILES:=$(filter %.$(CPPEXT),$(CODEFILES))
 OBJFILES:=$(subst $(SRCDIR),$(OBJDIR),$(SRCFILES:%.$(CPPEXT)=%.$(OBJEXT)))

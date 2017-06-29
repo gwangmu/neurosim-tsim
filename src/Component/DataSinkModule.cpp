@@ -1,7 +1,6 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 
-#include <Script/ExampleFileScript.h>
 #include <Component/DataSinkModule.h>
 #include <Message/NeuronBlockMessage.h>
 

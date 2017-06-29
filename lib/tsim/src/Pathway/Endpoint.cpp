@@ -111,12 +111,23 @@ bool Endpoint::Assign (Message *msg)
     return true;
 }
 
+
 bool Endpoint::IsFull () 
 { 
     if (unlikely (msgque.size () > capacity))
         SYSTEM_ERROR ("endpoint queue size exceeded capacity");
 
     return (resv_count + msgque.size()) >= capacity;
+}
+
+bool Endpoint::IsOverloaded ()
+{
+    if (unlikely (capacity != 0 && resv_count + msgque.size () > capacity))
+        SYSTEM_ERROR ("capacity!=0 endpoint cannot exceed capacity");
+    else if (unlikely (capacity == 0 && resv_count + msgque.size () > 1))
+        SYSTEM_ERROR ("capacity==0 endpoint cannot overload by more than 1");
+
+    return (resv_count + msgque.size () > capacity);
 }
 
 

@@ -12,10 +12,12 @@
 
 using namespace std;
 
-struct State
-{
-    uint32_t value;
-};
+typedef uint64_t State;
+
+// struct State
+// {
+//     uint32_t value;
+// };
 
 
 struct StateMessage: public Message

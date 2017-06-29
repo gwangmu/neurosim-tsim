@@ -4,6 +4,10 @@
 #include <Component/DataSourceModule.h>
 #include <Script/ExampleFileScript.h>
 #include <Script/ExampleInstruction.h>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 46d8c3e593f0b721784d6541cdcd2dd92da1e7c4
 #include <Message/ExampleMessage.h>
 
 #include <cinttypes>

@@ -29,6 +29,6 @@ void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, Instruction
     if (inmsg) 
     {
         recvdata = inmsg->value;
-        DEBUG_PRINT ("val = %u", recvdata);
+        DEBUG_PRINT ("val = %u,", recvdata);
     }
 }

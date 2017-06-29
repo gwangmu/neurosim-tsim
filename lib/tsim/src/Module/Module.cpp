@@ -19,15 +19,6 @@ using namespace std;
 
 
 /* Constructors */
-Module::Port::Port ()
-{
-    name = "";
-    iotype = Module::PORT_UNKNOWN;
-    msgproto = nullptr;
-    endpt = nullptr;
-    sealed = false;
-}
-
 Module::Module (const char *clsname, string iname, 
         Component *parent, uint32_t pdepth):
     Component (clsname, iname, parent)
@@ -44,6 +35,12 @@ Module::Module (const char *clsname, string iname,
     omsgidxmask--;
 
     nextoutmsgs = new Message **[omsgidxmask + 1];
+    for (uint32_t i = 0; i < omsgidxmask + 1; i++)
+        nextoutmsgs[i] = new Message *[1];
+
+    inports.resize (64);
+    outports.resize (64);
+    inidx = outidx = 0;
 }
 
 
@@ -138,7 +135,8 @@ bool Module::Connect (string portname, Endpoint *endpt)
     }
 
     port->endpt = endpt;
-    endpt->JoinTo (this, portname, KEY(Module));
+    if (!endpt->IsPortCap())
+        endpt->JoinTo (this, portname, KEY(Module));
 
     return true;
 }
@@ -168,32 +166,20 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         if (!port.endpt)
         {
-            DESIGN_ERROR ("disconnected port '%s'. use PORTCAP", 
-                    GetFullName().c_str(), port.name.c_str());
-            icount.error++;
-        }
-        else if (port.endpt->GetEndpointType() == Endpoint::CAP)
-        {
-            DESIGN_WARNING ("port '%s' using portcap", 
+            DESIGN_WARNING ("disconnected port '%s'", 
                     GetFullName().c_str(), port.name.c_str());
             icount.warning++;
-        } 
+        }
     }
     
     for (Port &port : outports)
     {
         if (!port.endpt)
         {
-            DESIGN_ERROR ("disconnected port '%s'. use PORTCAP", 
-                    GetFullName().c_str(), port.name.c_str());
-            icount.error++;
-        }
-        else if (port.endpt->GetEndpointType() == Endpoint::CAP)
-        {
-            DESIGN_WARNING ("port '%s' using portcap", 
+            DESIGN_WARNING ("disconnected port '%s'", 
                     GetFullName().c_str(), port.name.c_str());
             icount.warning++;
-        } 
+        }
     }
 
     return icount;
@@ -212,7 +198,8 @@ void Module::PreClock (PERMIT(Simulator))
         {
             if (outport.endpt->GetCapacity() == 0)
             {
-                if (!outport.endpt->IsSelectedLHSOfThisCycle ())
+                if (!outport.endpt->IsSelectedLHSOfThisCycle ()
+                        || outport.endpt->IsOverloaded ())
                 {
                     stalled = true;
                     break;
@@ -349,8 +336,8 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
 
     if (iotype == Module::PORT_INPUT)
     {
-        inports.push_back (Port ());
-        id = inports.size () - 1;
+        //inports.push_back (Port ());
+        id = inidx++;
         port = &inports.back ();
         
         delete[] nextinmsgs;
@@ -358,8 +345,8 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     }
     else if (iotype == Module::PORT_OUTPUT)
     {
-        outports.push_back (Port ());
-        id = outports.size () - 1;
+        //outports.push_back (Port ());
+        id = outidx++;
         port = &outports.back ();
         
         for (uint32_t i = 0; i < omsgidxmask + 1; i++)
@@ -380,8 +367,9 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     port->iotype = iotype;
     port->msgproto = msgproto;
     port->endpt = nullptr;
+    port->sealed = false;
 
-    pname2port[portname] = port;
+    pname2port.insert (make_pair (portname, port));
 
     return id;
 }
