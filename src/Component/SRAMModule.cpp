@@ -39,7 +39,7 @@ void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instructi
         T value = 0;
         outmsgs[RPORT_data] = new M (0, value);
 
-        DEBUG_PRINT("[SRAM] Receive message, and send message");
+        DEBUG_PRINT("[SRAM] Receive read request, and send message");
     }
 
 
@@ -47,10 +47,15 @@ void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instructi
     IndexMessage *waddr_msg = static_cast<IndexMessage*>(inmsgs[WPORT_addr]);
     M *wdata_msg = static_cast<M*>(inmsgs[WPORT_data]);
 
-    if(waddr_msg)
+    if(waddr_msg && wdata_msg)
     {
+        DEBUG_PRINT("[SRAM] Receive write request");
         uint32_t write_addr = waddr_msg->value;
-
+    }
+    else if (unlikely (waddr_msg || wdata_msg))
+    {
+        SIM_ERROR ("SRAM receive only either an addr or data", GetFullName().c_str()); 
+        return;
     }
 
 }
