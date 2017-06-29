@@ -25,13 +25,12 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
     IPORT_Tsparity = CreatePort ("tsparity", Module::PORT_INPUT, 
             Prototype<SignalMessage>::Get());
     
-    OPORT_NB = CreatePort ("nb", Module::PORT_OUTPUT, 
-            Prototype<NeuronBlockInMessage>::Get());
     OPORT_End = CreatePort ("end", Module::PORT_OUTPUT, 
             Prototype<SignalMessage>::Get());
     OPORT_SRAM = CreatePort ("sram", Module::PORT_OUTPUT, 
             Prototype<IndexMessage>::Get());
-
+    OPORT_NB = CreatePort ("neuron_block", Module::PORT_OUTPUT, 
+            Prototype<NeuronBlockInMessage>::Get());
 
     /* variable initialization */
     max_idx_ = max_index;

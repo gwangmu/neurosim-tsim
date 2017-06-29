@@ -47,7 +47,8 @@ private:
 public:
     /* Universal */
     Module (const char* clsname, string iname, Component *parent, uint32_t pdepth);
-    
+    ~Module();
+
     Script* GetScript () { return script; }
     Register* GetRegister () { return reg; }
     virtual Module* GetModule (string name);
@@ -76,8 +77,8 @@ protected:
     virtual bool AddChild (Component *) { PROHIBITED; return false;}
 
 private:
-    vector<Port> inports;
-    vector<Port> outports;
+    vector<Port*> inports;
+    vector<Port*> outports;
     uint32_t inidx;
     uint32_t outidx;
     

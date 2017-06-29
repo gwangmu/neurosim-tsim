@@ -38,9 +38,17 @@ Module::Module (const char *clsname, string iname,
     for (uint32_t i = 0; i < omsgidxmask + 1; i++)
         nextoutmsgs[i] = new Message *[1];
 
-    inports.resize (64);
-    outports.resize (64);
+    //inports.resize (64);
+    //outports.resize (64);
     inidx = outidx = 0;
+}
+
+Module::~Module ()
+{
+    for (int i=0; i<inports.size(); i++)
+        delete inports[i];     
+    for (int i=0; i<outports.size(); i++)
+        delete outports[i];     
 }
 
 
@@ -162,22 +170,22 @@ IssueCount Module::Validate (PERMIT(Simulator))
         icount.error++;
     }
 
-    for (Port &port : inports)
+    for (Port *port : inports)
     {
-        if (!port.endpt)
+        if (!port->endpt)
         {
             DESIGN_WARNING ("disconnected port '%s'", 
-                    GetFullName().c_str(), port.name.c_str());
+                    GetFullName().c_str(), port->name.c_str());
             icount.warning++;
         }
     }
     
-    for (Port &port : outports)
+    for (Port *port : outports)
     {
-        if (!port.endpt)
+        if (!port->endpt)
         {
             DESIGN_WARNING ("disconnected port '%s'", 
-                    GetFullName().c_str(), port.name.c_str());
+                    GetFullName().c_str(), port->name.c_str());
             icount.warning++;
         }
     }
@@ -194,18 +202,18 @@ void Module::PreClock (PERMIT(Simulator))
     {
         stalled = false;
 
-        for (Port &outport: outports)
+        for (Port *outport: outports)
         {
-            if (outport.endpt->GetCapacity() == 0)
+            if (outport->endpt->GetCapacity() == 0)
             {
-                if (!outport.endpt->IsSelectedLHSOfThisCycle ()
-                        || outport.endpt->IsOverloaded ())
+                if (!outport->endpt->IsSelectedLHSOfThisCycle ()
+                        || outport->endpt->IsOverloaded ())
                 {
                     stalled = true;
                     break;
                 }
             }
-            else if (outport.endpt->IsFull ())
+            else if (outport->endpt->IsFull ())
             {
                 stalled = true;
                 break;
@@ -225,7 +233,7 @@ void Module::PreClock (PERMIT(Simulator))
                     {
                         if (Message::IsReserveMsg (nextoutmsgs[omsgidx][i]))
                         {
-                            outports[i].endpt->Reserve ();
+                            outports[i]->endpt->Reserve ();
                             nextoutmsgs[omsgidx][i] = nullptr;
                             continue;
                         }
@@ -236,7 +244,7 @@ void Module::PreClock (PERMIT(Simulator))
                         SIM_FATAL ("pdepth!=0 cannot produce RESERVE msg",
                                 GetName().c_str());
                     
-                    bool assnres = outports[i].endpt->Assign 
+                    bool assnres = outports[i]->endpt->Assign 
                         (nextoutmsgs[omsgidx][i]);
                     if (unlikely (!assnres))
                         SYSTEM_ERROR ("attemped to push to full RHS queue.");
@@ -267,7 +275,7 @@ void Module::PostClock (PERMIT(Simulator))
             for (auto i = 0; i < inports.size(); i++)
                 if (!nextinmsgs[i])
                 {
-                    nextinmsgs[i] = inports[i].endpt->Peek ();
+                    nextinmsgs[i] = inports[i]->endpt->Peek ();
                     DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
                 }
         }
@@ -289,7 +297,7 @@ void Module::PostClock (PERMIT(Simulator))
             {
                 if (nextinmsgs[i])
                 {
-                    inports[i].endpt->Pop ();
+                    inports[i]->endpt->Pop ();
                     nextinmsgs[i]->Dispose ();
                     nextinmsgs[i] = nullptr;
                 }
@@ -307,7 +315,7 @@ void Module::PostClock (PERMIT(Simulator))
         // TODO: optimize this
         for (auto i = 0; i < outports.size(); i++)
         {
-            if (nextoutmsgs[omsgidx][i] && outports[i].endpt->GetCapacity() == 0)
+            if (nextoutmsgs[omsgidx][i] && outports[i]->endpt->GetCapacity() == 0)
             {
                 operation ("ahead-of-time assign if LHS.capacity==0")
                 {
@@ -315,7 +323,7 @@ void Module::PostClock (PERMIT(Simulator))
                         SIM_FATAL ("capacity=0 endpoint cannot reserve",
                                 GetName().c_str());
 
-                    bool assnres = outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]);
+                    bool assnres = outports[i]->endpt->Assign (nextoutmsgs[omsgidx][i]);
                     if (unlikely (!assnres))
                         SYSTEM_ERROR ("attempted to push to full RHS");
 
@@ -332,23 +340,29 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         Message* msgproto)
 {
     uint32_t id = -1;
-    Port *port = nullptr;
+    Port *port = new Port();
+    
+    port->name = portname;
+    port->iotype = iotype;
+    port->msgproto = msgproto;
+    port->endpt = nullptr;
+    port->sealed = false;
 
     if (iotype == Module::PORT_INPUT)
     {
-        //inports.push_back (Port ());
         id = inidx++;
-        port = &inports.back ();
-        
+        port->id = id;
+        inports.push_back(port);
+
         delete[] nextinmsgs;
         nextinmsgs = new Message *[inports.size ()] ();
     }
     else if (iotype == Module::PORT_OUTPUT)
     {
-        //outports.push_back (Port ());
         id = outidx++;
-        port = &outports.back ();
-        
+        port->id = id;
+        outports.push_back(port);
+
         for (uint32_t i = 0; i < omsgidxmask + 1; i++)
         {
             delete[] nextoutmsgs[i];
@@ -361,13 +375,6 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
                 Module::Port::GetTypeString (iotype));
         return -1;
     }
-
-    port->name = portname;
-    port->id = id;
-    port->iotype = iotype;
-    port->msgproto = msgproto;
-    port->endpt = nullptr;
-    port->sealed = false;
 
     pname2port.insert (make_pair (portname, port));
 
