@@ -123,7 +123,7 @@ bool Component::SetClock (string clockname)
 
 bool Component::Connect (string portname, Endpoint *endpt)
 {
-    if (portname2tag.count (portname))
+    if (!portname2tag.count (portname))
     {
         DESIGN_ERROR ("non-existing port '%s'",
                 GetFullName().c_str(), portname.c_str());

@@ -6,3 +6,5 @@ neurosim-tsim
 *.so
 core
 *.nfs*
+tags
+bin/
