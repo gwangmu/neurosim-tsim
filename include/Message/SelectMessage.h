@@ -13,18 +13,18 @@
 using namespace std;
 
 
-struct DeltaGMessage: public Message
+struct SelectMessage: public Message
 {
 public:
     // NOTE: must provide default constructor
-    DeltaGMessage () : Message ("DeltaGMessage") {}
+    SelectMessage () : Message ("SelectMessage") {}
 
-    DeltaGMessage (uint32_t destrhsid, uint64_t deltaG)
-        : Message ("DeltaGMessage", destrhsid)
+    SelectMessage (uint32_t destrhsid, uint8_t value)
+        : Message ("SelectMessage", destrhsid)
     {
-        this->value = deltaG;
+        this->value = value;
     }
 
 public:
-    uint64_t value;
+    uint8_t value;
 };

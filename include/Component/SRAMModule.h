@@ -9,15 +9,14 @@
 
 using namespace std;
 
-template <class M, typename T>
 class SRAMModule: public Module
 {
 public:
-    SRAMModule (string iname, Component *parent, uint32_t row_size, uint32_t col_size);
+    SRAMModule (const char* clsname, string iname, Component *parent, uint32_t row_size, uint32_t col_size);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+            const uint32_t *outque_size, Instruction *instr) = 0;
 
-private:
+protected:
     /* Port IDs */
     // Read port  
     uint32_t RPORT_addr;

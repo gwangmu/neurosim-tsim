@@ -24,13 +24,13 @@ class NeuronBlock: public Module
   private:
     /* Port IDs */
     uint32_t PORT_in, PORT_out;
-    uint32_t OPORT_write, OPORT_idle;
+    uint32_t OPORT_waddr, OPORT_wdata, OPORT_idle;
 
     /* Spike traces */
     std::list<int> spike_trace_;
 
     // Internal state
-    std::list<uint32_t> pipelined_idx_;
-
     uint32_t pipeline_depth_;
+    uint32_t idle_time_;
+    bool is_idle_;
 };

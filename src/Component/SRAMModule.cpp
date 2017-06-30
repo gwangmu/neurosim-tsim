@@ -7,55 +7,14 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 
-template <class M, typename T>
-SRAMModule<M, T>::SRAMModule (string iname, Component* parent,
+SRAMModule::SRAMModule (const char* clsname, string iname, Component* parent,
         uint32_t row_size, uint32_t col_size)
-    : Module ("SRAMModule", iname, parent, 1)
+    : Module (clsname, iname, parent, 1)
 {
-     RPORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
-             Prototype<IndexMessage>::Get());
-     RPORT_data = CreatePort ("r_data", Module::PORT_OUTPUT,
-             Prototype<M>::Get());
-
-     WPORT_addr = CreatePort ("w_addr", Module::PORT_INPUT,
-             Prototype<IndexMessage>::Get());
-     WPORT_data = CreatePort ("w_data", Module::PORT_INPUT,
-             Prototype<M>::Get());
-
     this->row_size_ = row_size;
     this->col_size_ = col_size;
+
+    read_n = 0;
+    write_n = 0;
 }
 
-template <class M, typename T>
-void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
-{
-    DEBUG_PRINT("[SRAM] Operation");
-    
-    /* Read */
-    IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[RPORT_addr]);
-
-    if(raddr_msg)
-    {
-        uint32_t read_addr = raddr_msg->value;
-
-        T value = 0;
-        //outmsgs[RPORT_data] = new M (0, value);
-
-        DEBUG_PRINT("[SRAM] Send message");
-    }
-
-
-    /* Write */
-    IndexMessage *waddr_msg = static_cast<IndexMessage*>(inmsgs[WPORT_addr]);
-    M *wdata_msg = static_cast<M*>(inmsgs[WPORT_data]);
-
-    if(waddr_msg)
-    {
-        uint32_t write_addr = waddr_msg->value;
-
-    }
-
-}
-
-template class SRAMModule <DeltaGMessage, uint64_t>;
-template class SRAMModule <StateMessage, State>;

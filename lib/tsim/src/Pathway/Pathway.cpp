@@ -345,16 +345,12 @@ void Pathway::PostClock (PERMIT(Simulator))
 
         if (GetTargetLHSID () != (uint32_t)-1)
         {
-            DEBUG_PRINT ("GetTargetLHSID : %d", GetTargetLHSID());
             msg_to_assign = endpts.lhs[GetTargetLHSID ()].Peek ();
         }
         if (msg_to_assign)
         {
             if (IsReady (msg_to_assign->DEST_RHS_ID))
             {
-                DEBUG_PRINT("Assign message %s %s", msg_to_assign->GetClassName(), 
-                        endpts.lhs[0].GetConnectedPortName().c_str())
-
                 endpts.lhs[GetTargetLHSID ()].Pop ();
                 conn.Assign (msg_to_assign);
             }
