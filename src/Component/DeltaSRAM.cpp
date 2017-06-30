@@ -24,7 +24,8 @@ DeltaSRAM::DeltaSRAM (string iname, Component* parent,
 }
 
 
-void DeltaSRAM::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void DeltaSRAM::Operation (Message **inmsgs, Message **outmsgs, 
+        const uint32_t *outque_size, Instruction *instr)
 {
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[RPORT_addr]);
@@ -65,7 +66,8 @@ DeltaStorage::DeltaStorage (string iname, Component* parent,
 
 }
 
-void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs, 
+        const uint32_t *outque_size, Instruction *instr)
 {
 
 }
