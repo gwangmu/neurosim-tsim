@@ -45,13 +45,17 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     
     // Dummy modules
     Module *ds_reset = new DataSinkModule <SignalMessage, bool> ("ds_reset", this);
-    Module *ds_amq_empty = new DataSinkModule <SignalMessage, bool> ("ds_amq_empty", this);
-    Module *ds_acc_idle = new DataSinkModule <SignalMessage, bool> ("ds_acc_idle", this);
-    Module *ds_sdq_empty = new DataSinkModule <SignalMessage, bool> ("ds_sdq_empty", this);
+    Module *ds_parity = new DataSinkModule <SignalMessage, bool> ("ds_parity", this);
 
+    Module *de_amq_empty = new DataEndptModule <SignalMessage> ("de_amq_empty", this);
+    Module *de_acc_idle = new DataEndptModule <SignalMessage>  ("de_acc_idle", this);
+    Module *de_sdq_empty = new DataEndptModule <SignalMessage> ("de_sdq_empty", this);
     Module *de_d_waddr = new DataEndptModule <IndexMessage> ("de_d_waddr", this);
     Module *de_d_wdata = new DataEndptModule <DeltaGMessage> ("de_d_wdata", this);
-    
+   
+
+    /*******************************************************************************/
+    /** Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     
@@ -76,6 +80,7 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     Wire *sdq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
     
     Wire *deltaG_reset = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
 
     // Dummy wire
     Wire *de_d_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
@@ -86,10 +91,11 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     /*** Connect modules ***/
     // Dummy Connection
     ds_reset->Connect ("datain", deltaG_reset->GetEndpoint (Endpoint::RHS));
-    ds_amq_empty->Connect ("datain", amq_empty->GetEndpoint (Endpoint::RHS));
-    ds_acc_idle->Connect ("datain", acc_idle->GetEndpoint (Endpoint::RHS));
-    ds_sdq_empty->Connect ("datain", sdq_empty->GetEndpoint (Endpoint::RHS));
-    
+    ds_parity->Connect ("datain", core_TSParity->GetEndpoint (Endpoint::RHS));
+
+    de_amq_empty->Connect ("dataend", amq_empty->GetEndpoint (Endpoint::LHS));
+    de_acc_idle->Connect ("dataend", acc_idle->GetEndpoint (Endpoint::LHS));
+    de_sdq_empty->Connect ("dataend", sdq_empty->GetEndpoint (Endpoint::LHS));
     de_d_waddr->Connect ("dataend", de_d_waddr_wire->GetEndpoint (Endpoint::LHS));
     de_d_wdata->Connect ("dataend", de_d_wdata_wire->GetEndpoint (Endpoint::LHS));
 
@@ -126,28 +132,17 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     core_tsmgr->Connect ("AMQ_empty", amq_empty->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("Acc_idle", acc_idle->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("SDQ_empty", sdq_empty->GetEndpoint (Endpoint::RHS));
+    
     core_tsmgr->Connect ("reset", deltaG_reset->GetEndpoint (Endpoint::LHS));
+    core_tsmgr->Connect ("Tsparity", core_TSParity->GetEndpoint (Endpoint::LHS));
 
     datasource->Connect ("dataout", core_ts_parity->GetEndpoint (Endpoint::LHS));
     
     /*** Export port ***/    
     ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
-    ExportPort ("TSParity", core_tsmgr, "Tsparity");
+    //ExportPort ("TSParity", core_tsmgr, "Tsparity");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
