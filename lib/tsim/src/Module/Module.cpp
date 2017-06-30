@@ -46,6 +46,9 @@ Module::Module (const char *clsname, string iname,
     ninports = noutports = 0;
 
     pbusy_state = 0;
+
+    dynpower = -1;
+    stapower = -1;
 }
 
 
@@ -153,6 +156,24 @@ Module* Module::GetModule (string name)
         return nullptr;
 }
 
+Component::CycleClass<double> Module::GetAggregateCycleClass ()
+{
+    CycleClass<double> cclass_conv;
+    cclass_conv.active = cclass.active;
+    cclass_conv.idle = cclass.idle;
+
+    return cclass_conv;
+}
+
+Component::EventCount<double> Module::GetAggregateEventCount ()
+{
+    EventCount<double> ecount_conv;
+    ecount_conv.stalled = ecount.stalled;
+    // NOTE: ecount.oport_full is non-aggregatable
+
+    return ecount_conv;
+}
+
 
 /* functions for 'Simulator' */
 IssueCount Module::Validate (PERMIT(Simulator))
@@ -163,6 +184,18 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         SYSTEM_ERROR ("module '%s' has no parent", GetFullName().c_str());
         icount.error++;
+    }
+
+    if (dynpower == -1)
+    {
+        DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
+        icount.warning++;
+    }
+
+    if (stapower == -1)
+    {
+        DESIGN_WARNING ("no static power info", GetFullName().c_str());
+        icount.warning++;
     }
 
     for (auto i = 0; i < ninports; i++)
@@ -218,6 +251,7 @@ void Module::PreClock (PERMIT(Simulator))
             {
                 DEBUG_PRINT("%s is full (stall)", GetFullName().c_str());
                 stalled = true;
+                ecount.oport_full[p]++;
                 break;
             }
         }
@@ -324,14 +358,15 @@ void Module::PostClock (PERMIT(Simulator))
         CommitPipeline ();
     }
 
-    operation ("activity check")
+    operation ("status check")
     {
         // NOTE: if (all_empty (nextoutmsgs)) at this point, then idle
         //  else if (stalled), then inactive but forced to stop (stalled)
         //  else active
-        if (IsIdle ())          cclass.idle++;
-        else if (stalled)       cclass.stalled++;
-        else                    cclass.active++;
+        if (IsIdle () || stalled)   cclass.idle++;
+        else                        cclass.active++;
+
+        if (stalled) ecount.stalled++;
     }
 
     if (likely (pdepth == 0 || !stalled))
@@ -370,10 +405,12 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     port.iotype = iotype;
     port.msgproto = msgproto;
     port.endpt = nullptr;
-    port.sealed = false;
 
     if (iotype == Module::PORT_INPUT)
     {
+        if (ninports > MAX_MODULE_PORTS)
+            DESIGN_FATAL ("#lhs > %u not allowed", GetName().c_str(), MAX_MODULE_PORTS);
+
         id = ninports++;
         port.id = id;
         inports[id] = port;
@@ -384,6 +421,9 @@ uint32_t Module::CreatePort (string portname, Module::PortType iotype,
     }
     else if (iotype == Module::PORT_OUTPUT)
     {
+        if (noutports > MAX_MODULE_PORTS)
+            DESIGN_FATAL ("#rhs > %u not allowed", GetName().c_str(), MAX_MODULE_PORTS);
+
         id = noutports++;
         port.id = id;
         outports[id] = port;

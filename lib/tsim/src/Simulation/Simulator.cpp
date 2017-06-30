@@ -8,6 +8,7 @@
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
 
+#include <chrono>
 #include <vector>
 #include <map>
 
@@ -62,14 +63,14 @@ bool Simulator::LoadTestbench ()
             Component *nextcomp = queComps.front ();
             queComps.pop ();
 
-            for (auto ipath = nextcomp->PathwayBegin (KEY(Simulator));
-                    ipath != nextcomp->PathwayEnd (KEY(Simulator)); ipath++)
+            for (auto ipath = nextcomp->PathwayBegin ();
+                    ipath != nextcomp->PathwayEnd (); ipath++)
             {
                 pathways.push_back (*ipath);
             }
 
-            for (auto icomp = nextcomp->ChildBegin (KEY(Simulator));
-                    icomp != nextcomp->ChildEnd (KEY(Simulator)); icomp++)
+            for (auto icomp = nextcomp->ChildBegin ();
+                    icomp != nextcomp->ChildEnd (); icomp++)
             {
                 Component *comp = *icomp;
                 if (Module *module = dynamic_cast<Module *>(comp))
@@ -105,6 +106,15 @@ bool Simulator::LoadTestbench ()
 
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].modules.push_back (module);
+
+            module->SetDynamicPower 
+                (tb->GetUIntParam (Testbench::MODULE_DYNAMIC_POWER, 
+                                   module->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
+            module->SetStaticPower 
+                (tb->GetUIntParam (Testbench::MODULE_STATIC_POWER, 
+                                   module->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
         }
 
         for (Pathway *pathway : pathways)
@@ -116,6 +126,11 @@ bool Simulator::LoadTestbench ()
             
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].pathways.push_back (pathway);
+
+            pathway->SetDissipationPower 
+                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
+                                   pathway->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
         }
         
         for (auto &centry : mapCDoms)
@@ -249,6 +264,8 @@ bool Simulator::ValidateTestbench ()
 /* function Simulate */
 bool Simulator::Simulate ()
 {
+    auto start = chrono::steady_clock::now ();
+
     macrotask ("Initializing clocks..")
     {
         // offset clock start time by 1ns,
@@ -314,7 +331,193 @@ bool Simulator::Simulate ()
         }
     }
 
+    auto end = chrono::steady_clock::now ();
+    runtime = chrono::duration_cast<chrono::milliseconds>(end - start).count ();
+
     PRINT ("Simulation finished at %lu ns", curtime);
 
     return true;
+}
+
+
+void Simulator::ReportDesignSummary ()
+{
+    macrotask ("< Design summary >");
+
+#define STROKE PRINT ("%s", string(46, '-').c_str())
+#define ROW(f, v) PRINT (" %-29s %14s ", f, v);
+
+    STROKE;
+    ROW ("Specification", "Value");
+    STROKE;
+
+    uint32_t nmodules = 0;
+    for (ClockDomain &cdom : cdomains)
+        nmodules += cdom.modules.size ();
+    ROW ("Number of modules", to_string (nmodules).c_str());
+
+    for (auto i = 0; i < cdomains.size(); i++)
+    {
+        ClockDomain &cdom = cdomains[i];
+
+        float freq = 1.0f / cdom.period * 1000;
+        const char *fieldname = "";
+        if (i == 0) fieldname = "Clock frequency (MHz)";
+
+        ROW (fieldname, ("(" + cdom.name + ") " + to_string (freq)).c_str());
+    }
+
+    ROW ("Total SRAM size (KB)", "???");
+    ROW ("Total FF size (KB)", "???");
+
+    STROKE;
+    PRINT ("");
+
+#undef STROKE
+#undef ROW
+}
+
+void Simulator::ReportSimulationSummary ()
+{
+    macrotask ("< Simulation summary >");
+
+#define STROKE PRINT ("%s", string(46, '-').c_str())
+#define ROW(f, v) PRINT (" %-29s %14s ", f, v);
+        
+    STROKE;
+    ROW ("Result", "Value");
+    STROKE;
+
+    ROW ("Execution time (s)", to_string((double)runtime / 10E3).c_str());
+    ROW ("Total SRAM read access", "???");
+    ROW ("Total SRAM write access", "???");
+
+    Component::CycleClass<double> cclass = 
+        tb->GetTopComponent(KEY(Simulator))->GetAggregateCycleClass();
+    uint32_t nmodules = tb->GetTopComponent(KEY(Simulator))->GetNumChildModules ();
+    ROW ("Overall activity (%)", 
+            to_string(cclass.active / (cclass.active + cclass.idle) /
+                nmodules * 100).c_str());
+
+    STROKE;
+
+    ROW ("Simulation time (s)", to_string((double)curtime / 10E9).c_str());
+    ROW ("Estimated power (W)", "???");
+
+    STROKE;
+    PRINT ("");
+
+#undef STROKE
+#undef ROW
+}
+
+void Simulator::ReportActivityEvents ()
+{
+    macrotask ("< Activity and Events >");
+
+#define STROKE PRINT ("%s", string(100, '-').c_str())
+#define LABEL(f, v, e) PRINT (" %-50s  %16s  %s ", f, v, e);
+#define ROW(f, v, e) PRINT (" %-60s  % 6.2lf  %s ", f, v, e);
+
+    STROKE;
+    LABEL ("Component Name", "Activity (%)", "Events");
+    STROKE;
+    ReportComponentRec (tb->GetTopComponent(KEY(Simulator)), 0);
+    STROKE;
+
+#undef STROKE
+#undef ROW
+}
+
+
+void Simulator::ReportComponentRec (Component *comp, uint32_t level)
+{
+#define ROW(f, v, e) PRINT (" %-60s  % 6.2lf  %s ", f, v, e);
+
+    if (Module *module = dynamic_cast<Module *>(comp))
+    {
+        const Component::CycleClass<uint64_t>& cclass = module->GetCycleClass ();
+        const Component::EventCount<uint64_t>& ecount = module->GetEventCount ();
+
+        string indented_name = string(level * 2, ' ') + "[Module] " + module->GetName();
+        if (indented_name.size() > 60)
+        {
+            indented_name[58] = indented_name[59] = '.';
+            indented_name.resize (60);
+        }
+
+        string eventstr = "";
+        if (ecount.stalled != 0)
+            eventstr += string("stalled (") + to_string(ecount.stalled) + " cycle(s))";
+
+        double avgactive = (double)cclass.active / (cclass.active + cclass.idle) * 100;
+
+        ROW (indented_name.c_str(), avgactive, eventstr.c_str());
+        
+        for (auto p = 0; p < module->GetNumOutPorts (); p++)
+        {
+            if (ecount.oport_full[p] != 0)
+                PRINT ("%s  - %-6s: full (%lu cycle(s))", 
+                        string (level + 2, ' ').c_str(),
+                        module->GetOutPortName(p).c_str(), 
+                        ecount.oport_full[p]);
+        }
+    }
+    else
+    {
+        Component::CycleClass<double> aggcclass;
+        Component::EventCount<double> aggecount;
+        aggcclass = comp->GetAggregateCycleClass ();
+        aggecount = comp->GetAggregateEventCount ();
+
+        string indented_name = string(level * 2, ' ') + "[Component] " + comp->GetName();
+        if (indented_name.size() > 60)
+        {
+            indented_name[58] = indented_name[59] = '.';
+            indented_name.resize (60);
+        }
+
+        string eventstr = "";
+        if (aggecount.stalled != 0)
+            eventstr += string("stalled (") + to_string(aggecount.stalled / comp->GetNumChildModules ()) + " cycle(s) / module)";
+
+        double avgactive = aggcclass.active / comp->GetNumChildModules() / (aggcclass.active + aggcclass.idle) * 100;
+
+        ROW (indented_name.c_str(), avgactive, eventstr.c_str());
+
+        for (auto it = comp->PathwayBegin (); it != comp->PathwayEnd (); it++)
+        {
+            Pathway *pathway = *it;
+            const Pathway::CycleClass<uint64_t>& pcclass = pathway->GetCycleClass ();
+            const Pathway::EventCount<uint64_t>& pecount = pathway->GetEventCount ();
+
+            double avgpactive = (double)pcclass.propagating / (pcclass.propagating + pcclass.idle) * 100;
+
+            string indented_name = string(level * 2 + 2, ' ') + "(Path) " + pathway->GetName();
+            if (indented_name.size() > 60)
+            {
+                indented_name[58] = indented_name[59] = '.';
+                indented_name.resize (60);
+            }
+
+            string eventstr = "";
+            if (pecount.msgdrop != 0)
+                eventstr += string ("msgdrop (") + to_string(pecount.msgdrop) + " msg(s))";
+
+            ROW (indented_name.c_str(), avgpactive, eventstr.c_str());
+
+            for (auto p = 0; p < pathway->GetNumRHS(); p++)
+            {
+                if (pecount.rhs_blocked[p] != 0)
+                    PRINT ("%s  - %-6s: blocked (%lu cycle(s))", 
+                            string (level + 2, ' ').c_str(),
+                            pathway->GetRHS(p).GetInstanceName().c_str(), 
+                            pecount.rhs_blocked[p]);
+            }
+        }
+
+        for (auto it = comp->ChildBegin (); it != comp->ChildEnd (); it++)
+            ReportComponentRec (*it, level + 1);
+    }
+#undef ROW
 }

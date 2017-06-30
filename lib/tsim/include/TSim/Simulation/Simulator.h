@@ -7,6 +7,7 @@
 using namespace std;
 
 class Testbench;
+class Component;
 class Module;
 class Pathway;
 class FileScript;
@@ -45,9 +46,14 @@ public:
 
     bool AttachTestbench (Testbench *tb);
     bool Simulate ();
-    // void Report (); TODO
+
+    void ReportDesignSummary ();
+    void ReportSimulationSummary ();
+    void ReportActivityEvents ();
 
 private:
+    void ReportComponentRec (Component *comp, uint32_t level);
+
     // 'AttachTestbench' subfunctions
     bool LoadTestbench ();
     bool ValidateTestbench ();
@@ -64,6 +70,7 @@ private:
 
     // Simulation states
     uint64_t curtime;
+    uint32_t runtime;
 };
 
 

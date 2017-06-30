@@ -51,6 +51,15 @@ string Component::GetFullNameWOClass ()
         return (familyname + "::" + GetInstanceName());
 }
 
+uint32_t Component::GetNumChildModules ()
+{
+    uint32_t nmods = 0;
+    for (Component *child : children)
+        nmods += child->GetNumChildModules ();
+
+    return nmods;
+}
+
 
 Module* Component::GetModule (string name)
 {
@@ -62,6 +71,38 @@ Module* Component::GetModule (string name)
     }
 
     return tar;
+}
+
+Component::CycleClass<double> Component::GetAggregateCycleClass ()
+{
+    CycleClass<double> cclass;
+
+    for (Component *child : children)
+    {
+        CycleClass<double> child_cclass;
+        child_cclass = child->GetAggregateCycleClass ();
+        
+        cclass.active += child_cclass.active;
+        cclass.idle += child_cclass.idle;
+    }
+
+    return cclass;
+}
+
+Component::EventCount<double> Component::GetAggregateEventCount ()
+{
+    EventCount<double> ecount;
+
+    for (Component *child : children)
+    {
+        EventCount<double> child_ecount;
+        child_ecount = child->GetAggregateEventCount ();
+        
+        ecount.stalled += child_ecount.stalled;
+        // NOTE: ecount.oport_full is non-aggregatable
+    }
+
+    return ecount;
 }
 
 

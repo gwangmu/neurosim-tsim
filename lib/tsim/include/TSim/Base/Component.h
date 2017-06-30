@@ -18,6 +18,24 @@ class Pathway;
 
 class Component: public Metadata, public IValidatable
 {
+protected:
+    static const uint32_t MAX_MODULE_PORTS = 64;
+    
+public:
+    template <typename T>
+    struct CycleClass
+    {
+        T active = 0;
+        T idle = 0;
+    };
+
+    template <typename T>
+    struct EventCount
+    {
+        T stalled = 0;
+        T oport_full[MAX_MODULE_PORTS] = {0};
+    };
+
 private:
     struct PortExportTag
     {
@@ -33,8 +51,11 @@ public:
     string GetFullName ();
     string GetFullNameWOClass ();
     Component* GetParent () { return parent; }
+    virtual uint32_t GetNumChildModules ();
 
     virtual Module* GetModule (string name);
+    virtual CycleClass<double> GetAggregateCycleClass ();
+    virtual EventCount<double> GetAggregateEventCount ();
 
     bool IsAncestor (Component *comp) 
     { return (!parent) ? false : parent->IsAncestor (comp); }
@@ -50,11 +71,11 @@ public:
     }
 
     /* Called by 'Simulator' */
-    vector<Component *>::iterator ChildBegin (PERMIT(Simulator)) { return children.begin (); }
-    vector<Component *>::iterator ChildEnd (PERMIT(Simulator)) { return children.end (); }
+    vector<Component *>::iterator ChildBegin () { return children.begin (); }
+    vector<Component *>::iterator ChildEnd () { return children.end (); }
 
-    vector<Pathway *>::iterator PathwayBegin (PERMIT(Simulator)) { return pathways.begin (); }
-    vector<Pathway *>::iterator PathwayEnd (PERMIT(Simulator)) { return pathways.end (); }
+    vector<Pathway *>::iterator PathwayBegin () { return pathways.begin (); }
+    vector<Pathway *>::iterator PathwayEnd () { return pathways.end (); }
 
     virtual IssueCount Validate (PERMIT(Simulator));
 
