@@ -35,17 +35,25 @@ public:
         uint32_t bitwidth;
     };
 
+    struct CycleClass
+    {
+        uint64_t propagating = 0;
+        uint64_t stabilizing = 0;
+        uint64_t idle = 0;
+    };
+
 protected:
     class Connection
     {
     public:
-        Connection ();
+        Connection (Pathway *parent);
 
         Message* Sample ();
         void Flow ();
         void Assign (Message *newmsg);
 
     //private:      // FIXME for the sake of convenience XD
+        Pathway *const parent;
         ConnectionAttr conattr;
 
         Message **msgprop;
@@ -79,12 +87,27 @@ public:
     virtual uint32_t NextTargetLHSEndpointID () = 0;
 
 protected:
+    /* Called by derived 'Pathway' */
     bool AddEndpoint (string name, Endpoint::Type type, uint32_t capacity); 
 
-    vector<Endpoint>::iterator BeginLHSEndpoint () { return endpts.lhs.begin (); }
-    vector<Endpoint>::iterator EndLHSEndpoint () { return endpts.lhs.end (); }
-    vector<Endpoint>::iterator BeginRHSEndpoint () { return endpts.rhs.begin (); }
-    vector<Endpoint>::iterator EndRHSEndpoint () { return endpts.rhs.end (); }
+    Endpoint& GetLHS (uint32_t idx) 
+    { 
+        if (unlikely (idx > endpts.lhs.size ()))
+            SIM_ERROR ("attempted to access out-of-bound endpoint", GetName().c_str());
+
+        return endpts.lhs[idx]; 
+    }
+
+    Endpoint& GetRHS (uint32_t idx)
+    { 
+        if (unlikely (idx > endpts.rhs.size ()))
+            SIM_ERROR ("attempted to access out-of-bound endpoint", GetName().c_str());
+
+        return endpts.rhs[idx]; 
+    }
+
+    uint32_t GetNumLHS () { return endpts.lhs.size (); }
+    uint32_t GetNumRHS () { return endpts.rhs.size (); }
 
 private:
     // ready state
@@ -115,6 +138,8 @@ private:
 
     uint32_t lhsid;
     uint32_t stabilize_cycle;
+
+    CycleClass cclass;
 };
 
 

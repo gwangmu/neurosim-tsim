@@ -21,6 +21,7 @@ OBJEXT=o
 CXX=clang++
 LD=clang++
 AR=ar
+MAKE=make -j12
 
 # compiler flags
 CXXFLAGS= --std=c++11 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG) -g
@@ -45,6 +46,8 @@ TSIM=TSim
 TSIM_DIR=$(LIBDIR)/tsim
 TSIM_HDRDIR=$(TSIM_DIR)/include/TSim
 TSIM_LIB=$(TSIM_DIR)/libtsim.a
+TSIM_SRC=$(filter %.$(CPPEXT),\
+		 $(wildcard $(addsuffix /*,$(shell find $(TSIM_DIR)/src -type d))))
 
 # TODO: add variables for new library
 #[lib]=[lib_name]
@@ -95,6 +98,9 @@ $(OBJSUBDIRS):
 	@ $(call print,"creating..",$(call to_comma_list,$@))
 	@ $(MKDIR) $@
 
+$(LIBS): $(TSIM_SRC)
+	@ $(MAKE) -C $(TSIM_DIR)
+
 $(BIN): $(OBJFILES) $(LIBS)
 	@ $(call print,"linking..",$(call to_comma_list,$^),$@)
 	@ $(LD) $^ -o $@
@@ -108,3 +114,7 @@ clean:
 	@ $(call print,"removing..",$(call to_comma_list,$(RMFILES)))
 	@ $(RM) $(RMFILES)
 	@ $(call print,"done.")
+
+superclean:
+	@ $(MAKE) -C $(TSIM_DIR) clean
+	@ $(MAKE) clean

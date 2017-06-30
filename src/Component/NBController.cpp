@@ -38,7 +38,7 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
     ts_parity_ = false;
 }
 
-void NBController::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
 {
     /* Process Inputs */
     StateMessage *state_msg = static_cast<StateMessage*>(inmsgs[IPORT_State]);

@@ -3,6 +3,7 @@
 #include <TSim/Base/Metadata.h>
 #include <TSim/Pathway/Endpoint.h>
 #include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 #include <TSim/Utility/StaticBranchPred.h>
 
 #include <string>
@@ -45,13 +46,19 @@ public:
     // FIXME enforcing LHS, RHS caller classes?
     void Reserve ();
     bool Assign (Message *msg);
-    Message* Peek () { return (msgque.empty())? nullptr : msgque.front (); }
-    void Pop () { if(!msgque.empty()) msgque.pop (); }
+    Message* Peek () { return (msgque.empty() ? nullptr : msgque.front ()); }
+    void Pop () 
+    { 
+        if (unlikely (msgque.empty()))
+           SYSTEM_ERROR ("cannot pop from empty queue (endpt: %s)", GetName().c_str());
+        msgque.pop (); 
+    }
 
     bool IsFull (); 
     bool IsOverloaded ();
     bool IsEmpty () { return msgque.empty (); }
     uint32_t GetCapacity () { return capacity; }
+    uint32_t GetNumReserved () { return resv_count; }
     uint32_t GetNumMessages () { return msgque.size (); }
 
     void SetSelectedLHS (bool val) { selected_lhs = val; }

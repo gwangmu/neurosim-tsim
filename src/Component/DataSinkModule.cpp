@@ -30,7 +30,8 @@ DataSinkModule<M, T>::DataSinkModule (string iname, Component *parent)
 
 // NOTE: called only if not stalled
 template <class M, class T>
-void DataSinkModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void DataSinkModule<M, T>::Operation (Message **inmsgs, Message **outmsgs,
+        const uint32_t *outque_size, Instruction *instr)
 {
     M *inmsg = static_cast<M*>(inmsgs[PORT_DATAIN]);
 
