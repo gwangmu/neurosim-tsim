@@ -379,7 +379,6 @@ void Simulator::ReportDesignSummary ()
     ROW ("Total FF size (KB)", "???");
 
     STROKE;
-    PRINT ("");
 
 #undef STROKE
 #undef ROW
@@ -418,7 +417,6 @@ void Simulator::ReportSimulationSummary ()
     ROW ("Estimated power (W)", (energy == -1 ? "Unknown" : to_string(power).c_str()));
 
     STROKE;
-    PRINT ("");
 
 #undef STROKE
 #undef ROW
