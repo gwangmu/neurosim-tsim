@@ -30,7 +30,8 @@ DataSourceModule::DataSourceModule (string iname, Component *parent)
 }
 
 // NOTE: called only if not stalled
-void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, 
+        const uint32_t *outque_size, Instruction *instr)
 {
     ExampleInstruction *ininstr = static_cast<ExampleInstruction *>(instr);
 

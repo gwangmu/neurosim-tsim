@@ -10,7 +10,8 @@
 using namespace std;
 
 
-Pathway::Connection::Connection ()
+Pathway::Connection::Connection (Pathway *parent)
+    : parent (parent)
 {
     msgprop = nullptr;
     nprop = 0;
@@ -21,6 +22,7 @@ Pathway::Connection::Connection ()
 
 Message* Pathway::Connection::Sample ()
 {
+    if (msgprop[curidx]) nprop--;
     return msgprop[curidx];
 }
 
@@ -33,15 +35,20 @@ void Pathway::Connection::Flow ()
 
 void Pathway::Connection::Assign (Message *newmsg)
 {
+    if (unlikely (!newmsg))
+        SYSTEM_ERROR ("attempted to assign null message (pathway: %s)",
+                parent->GetName().c_str());
+
     msgprop[(curidx + conattr.latency) & PROPIDX_MASK] = newmsg;
     DEBUG_PRINT ("Assign new message %s\n", newmsg->GetClassName()); 
+    nprop++;
 }
     
 
 
 Pathway::Pathway (const char *clsname, Component *parent, 
         Pathway::ConnectionAttr conattr, Message *msgproto)
-    : Metadata (clsname, "")
+    : Metadata (clsname, ""), conn (this)
 {
     if (!parent)
         DESIGN_ERROR ("pathway must have parent", clsname);
@@ -358,6 +365,13 @@ void Pathway::PostClock (PERMIT(Simulator))
     {
         UpdateStabilizeCycle ();
         SetNewTargetLHSID (NextTargetLHSEndpointID ());
+    }
+
+    operation ("activity check")
+    {
+        if (conn.nprop > 0)             cclass.propagating++;
+        else if (stabilize_cycle > 0)   cclass.stabilizing++;
+        else                            cclass.idle++;
     }
 }
 

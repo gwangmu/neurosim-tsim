@@ -27,7 +27,7 @@ SRAMModule<M, T>::SRAMModule (string iname, Component* parent,
 }
 
 template <class M, typename T>
-void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void SRAMModule<M, T>::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
 {
     DEBUG_PRINT("[SRAM] Operation");
     

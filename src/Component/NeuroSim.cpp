@@ -45,11 +45,11 @@ NeuroSim::NeuroSim (string iname, Component *parent)
    
     
     // Dummy modules
-    Module *ds_end = new DataSinkModule <SignalMessage, bool> ("ds_end", this);
-    Module *de_s_waddr = new DataEndptModule <IndexMessage> ("de_s_waddr", this);
-    Module *de_d_waddr = new DataEndptModule <IndexMessage> ("de_d_waddr", this);
-    Module *de_s_wdata = new DataEndptModule <StateMessage> ("de_s_wdata", this);
-    Module *de_d_wdata = new DataEndptModule <DeltaGMessage> ("de_d_wdata", this);
+    //Module *ds_end = new DataSinkModule <SignalMessage, bool> ("ds_end", this);
+    //Module *de_s_waddr = new DataEndptModule <IndexMessage> ("de_s_waddr", this);
+    //Module *de_d_waddr = new DataEndptModule <IndexMessage> ("de_d_waddr", this);
+    //Module *de_s_wdata = new DataEndptModule <StateMessage> ("de_s_wdata", this);
+    //Module *de_d_wdata = new DataEndptModule <DeltaGMessage> ("de_d_wdata", this);
 
     
     // create pathways
@@ -71,27 +71,27 @@ NeuroSim::NeuroSim (string iname, Component *parent)
 
     
     // Dummy wire
-    Wire *ds_end_wire = new Wire (this, conattr, Prototype<SignalMessage>::Get());
-    Wire *de_s_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
-    Wire *de_d_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    //Wire *ds_end_wire = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    //Wire *de_s_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    //Wire *de_d_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
     
-    Wire *de_s_wdata_wire = new Wire (this, conattr, Prototype<StateMessage>::Get());
-    Wire *de_d_wdata_wire = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
+    //Wire *de_s_wdata_wire = new Wire (this, conattr, Prototype<StateMessage>::Get());
+    //Wire *de_d_wdata_wire = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
 
     // Dummy Connection
-    ds_end->Connect ("datain", ds_end_wire->GetEndpoint (Endpoint::RHS));
-    de_s_waddr->Connect ("dataend", de_s_waddr_wire->GetEndpoint (Endpoint::LHS));
-    de_d_waddr->Connect ("dataend", de_d_waddr_wire->GetEndpoint (Endpoint::LHS));
-    de_s_wdata->Connect ("dataend", de_s_wdata_wire->GetEndpoint (Endpoint::LHS));
-    de_d_wdata->Connect ("dataend", de_d_wdata_wire->GetEndpoint (Endpoint::LHS));
+    //ds_end->Connect ("datain", ds_end_wire->GetEndpoint (Endpoint::RHS));
+    //de_s_waddr->Connect ("dataend", de_s_waddr_wire->GetEndpoint (Endpoint::LHS));
+    //de_d_waddr->Connect ("dataend", de_d_waddr_wire->GetEndpoint (Endpoint::LHS));
+    //de_s_wdata->Connect ("dataend", de_s_wdata_wire->GetEndpoint (Endpoint::LHS));
+    //de_d_wdata->Connect ("dataend", de_d_wdata_wire->GetEndpoint (Endpoint::LHS));
 
 
     /*** Connect modules ***/
     // Neuron block controller
     nb_controller->Connect ("neuron_block", ctrl2nb->GetEndpoint (Endpoint::LHS));
     nb_controller->Connect ("sram", core_sram_raddr->GetEndpoint (Endpoint::LHS));
-    //nb_controller->Connect ("end", Endpoint::PORTCAP());
-    nb_controller->Connect ("end", ds_end_wire->GetEndpoint (Endpoint::LHS));
+    nb_controller->Connect ("end", Endpoint::PORTCAP());
+    //nb_controller->Connect ("end", ds_end_wire->GetEndpoint (Endpoint::LHS));
 
     nb_controller->Connect ("deltaG", deltaG_sram_rdata->GetEndpoint (Endpoint::RHS));
     nb_controller->Connect ("state", state_sram_rdata->GetEndpoint (Endpoint::RHS));
@@ -101,18 +101,18 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     // State & Delta-G SRAM
     state_sram->Connect ("r_addr", core_sram_raddr->GetEndpoint (Endpoint::RHS, 0)); 
     state_sram->Connect ("r_data", state_sram_rdata->GetEndpoint (Endpoint::LHS)); 
-    //state_sram->Connect ("w_addr", Endpoint::PORTCAP());
-    //state_sram->Connect ("w_data", Endpoint::PORTCAP());
-    state_sram->Connect ("w_addr", de_s_waddr_wire->GetEndpoint (Endpoint::RHS));
-    state_sram->Connect ("w_data", de_s_wdata_wire->GetEndpoint (Endpoint::RHS));
+    state_sram->Connect ("w_addr", Endpoint::PORTCAP());
+    state_sram->Connect ("w_data", Endpoint::PORTCAP());
+    //state_sram->Connect ("w_addr", de_s_waddr_wire->GetEndpoint (Endpoint::RHS));
+    //state_sram->Connect ("w_data", de_s_wdata_wire->GetEndpoint (Endpoint::RHS));
     
 
     deltaG_sram->Connect ("r_addr", core_sram_raddr->GetEndpoint (Endpoint::RHS, 1)); 
     deltaG_sram->Connect ("r_data", deltaG_sram_rdata->GetEndpoint (Endpoint::LHS)); 
-    //deltaG_sram->Connect ("w_addr", Endpoint::PORTCAP());
-    //deltaG_sram->Connect ("w_data", Endpoint::PORTCAP());
-    deltaG_sram->Connect ("w_addr", de_d_waddr_wire->GetEndpoint (Endpoint::RHS));
-    deltaG_sram->Connect ("w_data", de_d_wdata_wire->GetEndpoint (Endpoint::RHS));
+    deltaG_sram->Connect ("w_addr", Endpoint::PORTCAP());
+    deltaG_sram->Connect ("w_data", Endpoint::PORTCAP());
+    //deltaG_sram->Connect ("w_addr", de_d_waddr_wire->GetEndpoint (Endpoint::RHS));
+    //deltaG_sram->Connect ("w_data", de_d_wdata_wire->GetEndpoint (Endpoint::RHS));
     
     // Neuron block
     neuron_block->Connect ("NeuronBlock_in", ctrl2nb->GetEndpoint (Endpoint::RHS));

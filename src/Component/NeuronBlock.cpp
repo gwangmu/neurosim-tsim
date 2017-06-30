@@ -31,7 +31,7 @@ NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
     pipeline_depth_ = depth;
 }
 
-void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
 {
     NeuronBlockInMessage *in_msg = static_cast<NeuronBlockInMessage*>(inmsgs[PORT_in]);
 

@@ -39,7 +39,7 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
     is_idle = true;
 }
 
-void NBController::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
 {
     DEBUG_PRINT ("[NBC] Operation ");
     
