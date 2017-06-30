@@ -56,6 +56,7 @@ public:
     virtual Module* GetModule (string name);
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();
+    virtual double GetAggregateConsumedEnergy ();
 
     bool IsAncestor (Component *comp) 
     { return (!parent) ? false : parent->IsAncestor (comp); }

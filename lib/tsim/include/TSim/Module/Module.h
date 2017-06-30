@@ -52,13 +52,17 @@ public:
     virtual Module* GetModule (string name);
     virtual uint32_t GetNumChildModules () final { return 1; }
 
+    void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
+
     void SetDynamicPower (uint32_t pow, PERMIT(Simulator)) { dynpower = pow; }
     void SetStaticPower (uint32_t pow, PERMIT(Simulator)) { stapower = pow; }
-    uint32_t GetDynamicPower (PERMIT(Simulator)) { return dynpower; }
-    uint32_t GetStaticPower (PERMIT(Simulator)) { return stapower; }
+    uint32_t GetDynamicPower () { return dynpower; }
+    uint32_t GetStaticPower () { return stapower; }
+    double GetConsumedEnergy ();
 
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();
+    virtual double GetAggregateConsumedEnergy ();
     
     const CycleClass<uint64_t>& GetCycleClass () { return cclass; }
     const EventCount<uint64_t>& GetEventCount () { return ecount; }
@@ -97,6 +101,7 @@ private:
     static const uint32_t MAX_PDEPTH = 64;
 
     // property
+    uint32_t clkperiod;
     uint32_t dynpower;
     uint32_t stapower;
 

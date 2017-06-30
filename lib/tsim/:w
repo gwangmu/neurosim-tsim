@@ -430,6 +430,7 @@ void Simulator::ReportActivityEvents ()
 
 #define STROKE PRINT ("%s", string(120, '-').c_str())
 #define LABEL(f, v, en, p, e) PRINT (" %-50s  %16s %12s %12s  %s ", f, v, en, p, e);
+#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf % 6.2lf % 6.2lf  %s ", f, v, en, p, e);
 
     STROKE;
     LABEL ("Component Name", "Activity (%)", "Energy (mJ)", "Power (mW)", "Events");
@@ -444,7 +445,7 @@ void Simulator::ReportActivityEvents ()
 
 void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 {
-#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf %12s %12s  %s ", f, v, en, p, e);
+#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf % 6.2lf % 6.2lf  %s ", f, v, en, p, e);
 
     if (Module *module = dynamic_cast<Module *>(comp))
     {
@@ -464,13 +465,12 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
                 to_string(ecount.stalled) + " cycle(s))";
 
         double avgactive = (double)cclass.active / (cclass.active + cclass.idle) * 100;
-        double oenergy = module->GetConsumedEnergy (); 
-        double energy = oenergy * 1000;
+        double energy = module->GetConsumedEnergy () * 1000;
         double power = energy / (curtime * 10E-9);
 
         ROW (indented_name.c_str(), avgactive, 
-                (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
-                (oenergy == -1) ? "Unknown" : to_string(power).c_str(),
+                (energy == -1) ? "Unknown" : energy,
+                (energy == -1) ? "Unknown" : power,
                 eventstr.c_str());
         
         for (auto p = 0; p < module->GetNumOutPorts (); p++)
@@ -505,13 +505,12 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 
         double avgactive = aggcclass.active / comp->GetNumChildModules() /
             (aggcclass.active + aggcclass.idle) * 100;
-        double oenergy = comp->GetAggregateConsumedEnergy (); 
-        double energy = oenergy * 1000;
+        double energy = comp->GetAggregateConsumedEnergy () * 1000;
         double power = energy / (curtime * 10E-9);
 
         ROW (indented_name.c_str(), avgactive,
-                (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
-                (oenergy == -1) ? "Unknown" : to_string(power).c_str(),
+                (energy == -1) ? "Unknown" : energy,
+                (energy == -1) ? "Unknown" : power,
                 eventstr.c_str());
 
         for (auto it = comp->PathwayBegin (); it != comp->PathwayEnd (); it++)
@@ -536,13 +535,12 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
                 eventstr += string ("msgdrop (") + 
                     to_string(pecount.msgdrop) + " msg(s))";
 
-            double oenergy = pathway->GetConsumedEnergy (); 
-            double energy = oenergy * 1000;
+            double energy = pathway->GetConsumedEnergy () * 1000;
             double power = energy / (curtime * 10E-9);
 
-            ROW (indented_name.c_str(), avgpactive,
-                    (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
-                    (oenergy == -1) ? "Unknown" : to_string(power).c_str(),
+            ROW (indented_name.c_str(), avgactive,
+                    (energy == -1) ? "Unknown" : energy,
+                    (energy == -1) ? "Unknown" : power,
                     eventstr.c_str());
 
             for (auto p = 0; p < pathway->GetNumRHS(); p++)

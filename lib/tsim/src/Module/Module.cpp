@@ -47,6 +47,7 @@ Module::Module (const char *clsname, string iname,
 
     pbusy_state = 0;
 
+    clkperiod = -1;
     dynpower = -1;
     stapower = -1;
 }
@@ -156,6 +157,22 @@ Module* Module::GetModule (string name)
         return nullptr;
 }
 
+
+double Module::GetConsumedEnergy ()
+{
+    if (clkperiod == -1)
+        SYSTEM_ERROR ("zero module clock period (module: %s)",
+                GetFullName().c_str());
+
+    if (dynpower == -1 || stapower == -1)
+        return -1;
+    else
+        return (clkperiod * 10E-9 * 
+                (stapower * 10E-9 * (cclass.active + cclass.idle) +
+                 dynpower * 10E-9 * cclass.active));
+}
+
+
 Component::CycleClass<double> Module::GetAggregateCycleClass ()
 {
     CycleClass<double> cclass_conv;
@@ -172,6 +189,11 @@ Component::EventCount<double> Module::GetAggregateEventCount ()
     // NOTE: ecount.oport_full is non-aggregatable
 
     return ecount_conv;
+}
+
+double Module::GetAggregateConsumedEnergy ()
+{
+    return GetConsumedEnergy ();
 }
 
 
@@ -196,6 +218,12 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         DESIGN_WARNING ("no static power info", GetFullName().c_str());
         icount.warning++;
+    }
+
+    if (clkperiod == -1)
+    {
+        SYSTEM_ERROR ("no clock period (module: %s)", GetFullName().c_str());
+        icount.error++;
     }
 
     for (auto i = 0; i < ninports; i++)

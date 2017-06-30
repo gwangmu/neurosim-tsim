@@ -83,8 +83,11 @@ public:
     Message *GetMsgPrototype () { return msgproto; }
     string GetClock ();
 
+    void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
+
     void SetDissipationPower (uint32_t pow, PERMIT(Simulator)) { dispower = pow; }
-    uint32_t GetDissipationPower (PERMIT(Simulator)) { return dispower; }
+    uint32_t GetDissipationPower () { return dispower; }
+    double GetConsumedEnergy ();
 
     Endpoint& GetLHS (uint32_t idx) 
     { 
@@ -141,6 +144,7 @@ private:
     Component *parent;
 
     // property
+    uint32_t clkperiod;
     uint32_t dispower;
 
     // connection

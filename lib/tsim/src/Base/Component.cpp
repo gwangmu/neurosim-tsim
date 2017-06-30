@@ -105,6 +105,30 @@ Component::EventCount<double> Component::GetAggregateEventCount ()
     return ecount;
 }
 
+double Component::GetAggregateConsumedEnergy ()
+{
+    double energy = 0;
+
+    for (Component *child : children)
+    {
+        double cenergy = child->GetAggregateConsumedEnergy ();
+        if (cenergy != -1)
+            energy += cenergy;
+        else
+            return -1;
+    }
+    for (Pathway *pathway : pathways)
+    {
+        double penergy = pathway->GetConsumedEnergy ();
+        if (penergy != -1)
+            energy += penergy;
+        else
+            return -1;
+    }
+
+    return energy;
+}
+
 
 bool Component::AddChildPathway (Pathway *pathway, PERMIT(Pathway))
 {
