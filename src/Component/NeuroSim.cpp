@@ -6,10 +6,13 @@
 
 #include <Component/NeuronBlock.h>
 #include <Component/NBController.h>
-#include <Component/SRAMModule.h>
 #include <Component/DataSourceModule.h>
 #include <Component/DataSinkModule.h>
 #include <Component/DataEndpt.h>
+
+#include <Component/SRAMModule.h>
+#include <Component/StateSRAM.h>
+#include <Component/DeltaSRAM.h>
 
 #include <Message/ExampleMessage.h>
 #include <Message/NeuronBlockMessage.h>
@@ -37,8 +40,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     Module *datasource = new DataSourceModule ("datasource", this);
     Module *neuron_block = new NeuronBlock ("neuron_block", this, 2);
    
-    Module *state_sram = new SRAMModule <StateMessage, State> ("state_sram", this, 64, 16);
-    Module *deltaG_sram = new SRAMModule <DeltaGMessage, uint64_t> ("deltaG_sram", this, 64, 16);
+    Module *state_sram = new StateSRAM ("state_sram", this, 64, 16);
+    Module *deltaG_sram = new DeltaSRAM ("deltaG_sram", this, 64, 16);
 
     Module *datasink = new DataSinkModule <NeuronBlockOutMessage, uint32_t> ("datasink", this);
     Module *nb_controller = new NBController ("nb_controller", this, 16);

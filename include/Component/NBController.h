@@ -1,7 +1,6 @@
 #pragma once
 
 #include <TSim/Module/Module.h>
-#include <TSim/Simulation/Testbench.h>
 #include <Message/StateMessage.h>
 
 #include <cinttypes>
