@@ -45,7 +45,6 @@ NeuroSim::NeuroSim (string iname, Component *parent)
 
     Module *datasink = new DataSinkModule <NeuronBlockOutMessage, uint32_t> ("datasink", this);
     Module *nb_controller = new NBController ("nb_controller", this, 16);
-   
     
     // Dummy modules
     Module *ds_end = new DataSinkModule <SignalMessage, bool> ("ds_end", this);

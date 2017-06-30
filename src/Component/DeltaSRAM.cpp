@@ -21,8 +21,6 @@ DeltaSRAM::DeltaSRAM (string iname, Component* parent,
      WPORT_data = CreatePort ("w_data", Module::PORT_INPUT,
              Prototype<DeltaGMessage>::Get());
 
-
-
 }
 
 
@@ -58,3 +56,17 @@ void DeltaSRAM::Operation (Message **inmsgs, Message **outmsgs, Instruction *ins
     }
 
 }
+
+DeltaStorage::DeltaStorage (string iname, Component* parent,
+        uint32_t row_size, uint32_t col_size)
+    : Module ("DeltaStorage", iname, parent, 1)
+{
+    
+
+}
+
+void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+{
+
+}
+
