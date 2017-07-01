@@ -4,6 +4,7 @@
 #include <TSim/Pathway/FanoutWire.h>
 #include <TSim/Utility/Prototype.h>
 
+#include <Component/Accumulator.h>
 #include <Component/NeuronBlock.h>
 #include <Component/NBController.h>
 #include <Component/CoreTSMgr.h>
@@ -20,6 +21,7 @@
 #include <Message/DeltaGMessage.h>
 #include <Message/StateMessage.h>
 #include <Message/SignalMessage.h>
+#include <Message/SynapseMessage.h>
 #include <Message/IndexMessage.h>
 #include <Message/NeuronBlockMessage.h>
 
@@ -38,16 +40,15 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     Module *nb_controller = new NBController ("nb_controller", this, 16);
    
     Module *state_sram = new StateSRAM ("state_sram", this, 64, 16);
-    Module *deltaG_sram = new DeltaSRAM ("deltaG_sram", this, 64, 16, 0);
+    Module *deltaG_storage = new DeltaStorage ("delta_storage", this, 64, 16); 
 
     Module *core_tsmgr = new CoreTSMgr ("core_tsmgr", this);
-    
+    Module *accumulator = new Accumulator ("accumulator", this);
+
     // Dummy modules
     Module *de_amq_empty = new DataEndptModule <SignalMessage> ("de_amq_empty", this);
-    Module *de_acc_idle = new DataEndptModule <SignalMessage>  ("de_acc_idle", this);
     Module *de_sdq_empty = new DataEndptModule <SignalMessage> ("de_sdq_empty", this);
-    Module *de_d_waddr = new DataEndptModule <IndexMessage> ("de_d_waddr", this);
-    Module *de_d_wdata = new DataEndptModule <DeltaGMessage> ("de_d_wdata", this);
+    Module *synapse_data = new DataEndptModule <SynapseMessage> ("synapse_dummy", this);
    
 
     /*******************************************************************************/
@@ -62,61 +63,50 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     
     // Neuron Block Controller 
     Wire *ctrl2nb = new Wire (this, conattr, Prototype<NeuronBlockInMessage>::Get());
-    FanoutWire *core_sram_raddr = new FanoutWire (this, conattr, Prototype<IndexMessage>::Get(), 2);
+    Wire *core_ssram_raddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    Wire *nbc_dsram_raddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
     Wire *nbc_end = new Wire (this, conattr, Prototype<SignalMessage>::Get());
 
     // State SRAM
     Wire *state_sram_rdata = new Wire (this, conattr, Prototype<StateMessage>::Get());
 
     // Delta G SRAM
-    Wire *deltaG_sram_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
+    Wire *deltaG_nbc_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
+    Wire *deltaG_acc_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
 
     // Axon Metadata Queue
     Wire *amq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
     
     // Accumulator
     Wire *acc_idle = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    Wire *acc_dsram_raddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    Wire *deltaG_waddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    Wire *deltaG_wdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
 
     // Synapse Data Queue
     Wire *sdq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    Wire *synapse_info = new Wire (this, conattr, Prototype<SynapseMessage>::Get());
 
     // Core Timestep Manager
-    FanoutWire *core_TSParity = new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 2);// Fanout Wire
+    FanoutWire *core_TSParity = 
+        new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 3);
 
-    // Dummy wire
-    Wire *de_d_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
-    Wire *de_d_wdata_wire = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
-  
 
     /*******************************************************************************/
     /*** Connect modules ***/
     // Dummy Connection
     de_amq_empty->Connect ("dataend", amq_empty->GetEndpoint (Endpoint::LHS));
-    de_acc_idle->Connect ("dataend", acc_idle->GetEndpoint (Endpoint::LHS));
     de_sdq_empty->Connect ("dataend", sdq_empty->GetEndpoint (Endpoint::LHS));
-    de_d_waddr->Connect ("dataend", de_d_waddr_wire->GetEndpoint (Endpoint::LHS));
-    de_d_wdata->Connect ("dataend", de_d_wdata_wire->GetEndpoint (Endpoint::LHS));
+    synapse_data->Connect ("dataend", synapse_info->GetEndpoint (Endpoint::LHS));
 
     // Neuron block controller
-    nb_controller->Connect ("deltaG", deltaG_sram_rdata->GetEndpoint (Endpoint::RHS));
+    nb_controller->Connect ("deltaG", deltaG_nbc_rdata->GetEndpoint (Endpoint::RHS));
     nb_controller->Connect ("state", state_sram_rdata->GetEndpoint (Endpoint::RHS));
     nb_controller->Connect ("tsparity", core_TSParity->GetEndpoint (Endpoint::RHS, 0)); 
     nb_controller->Connect ("neuron_block", ctrl2nb->GetEndpoint (Endpoint::LHS));
-    nb_controller->Connect ("sram", core_sram_raddr->GetEndpoint (Endpoint::LHS));
+    nb_controller->Connect ("ssram", core_ssram_raddr->GetEndpoint (Endpoint::LHS));
+    nb_controller->Connect ("dsram", nbc_dsram_raddr->GetEndpoint (Endpoint::LHS));
     nb_controller->Connect ("end", nbc_end->GetEndpoint (Endpoint::LHS)); 
-        
-    // State SRAM
-    state_sram->Connect ("r_addr", core_sram_raddr->GetEndpoint (Endpoint::RHS, 0)); 
-    state_sram->Connect ("r_data", state_sram_rdata->GetEndpoint (Endpoint::LHS)); 
-    state_sram->Connect ("w_addr", state_waddr->GetEndpoint (Endpoint::RHS));
-    state_sram->Connect ("w_data", state_wdata->GetEndpoint (Endpoint::RHS));
-
-    // Delta G SRAM
-    deltaG_sram->Connect ("r_addr", core_sram_raddr->GetEndpoint (Endpoint::RHS, 1)); 
-    deltaG_sram->Connect ("r_data", deltaG_sram_rdata->GetEndpoint (Endpoint::LHS)); 
-    deltaG_sram->Connect ("w_addr", de_d_waddr_wire->GetEndpoint (Endpoint::RHS)); // portcap
-    deltaG_sram->Connect ("w_data", de_d_wdata_wire->GetEndpoint (Endpoint::RHS)); // portcap
-    deltaG_sram->Connect ("TSparity", core_TSParity->GetEndpoint (Endpoint::RHS, 1)); // portcap
     
     // Neuron block
     neuron_block->Connect ("NeuronBlock_in", ctrl2nb->GetEndpoint (Endpoint::RHS));
@@ -124,6 +114,21 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     neuron_block->Connect ("w_addr", state_waddr->GetEndpoint (Endpoint::LHS));
     neuron_block->Connect ("w_data", state_wdata->GetEndpoint (Endpoint::LHS));
     neuron_block->Connect ("idle", nb_idle->GetEndpoint (Endpoint::LHS)); 
+        
+    // State SRAM
+    state_sram->Connect ("r_addr", core_ssram_raddr->GetEndpoint (Endpoint::RHS, 0)); 
+    state_sram->Connect ("r_data", state_sram_rdata->GetEndpoint (Endpoint::LHS)); 
+    state_sram->Connect ("w_addr", state_waddr->GetEndpoint (Endpoint::RHS));
+    state_sram->Connect ("w_data", state_wdata->GetEndpoint (Endpoint::RHS));
+
+    // Delta G SRAM
+    deltaG_storage->Connect ("nr_addr", nbc_dsram_raddr->GetEndpoint (Endpoint::RHS)); 
+    deltaG_storage->Connect ("nr_data", deltaG_nbc_rdata->GetEndpoint (Endpoint::LHS)); 
+    deltaG_storage->Connect ("ar_addr", acc_dsram_raddr->GetEndpoint (Endpoint::RHS)); 
+    deltaG_storage->Connect ("ar_data", deltaG_acc_rdata->GetEndpoint (Endpoint::LHS)); 
+    deltaG_storage->Connect ("w_addr", deltaG_waddr->GetEndpoint (Endpoint::RHS)); // portcap
+    deltaG_storage->Connect ("w_data", deltaG_wdata->GetEndpoint (Endpoint::RHS)); // portcap
+    deltaG_storage->Connect ("TSparity", core_TSParity->GetEndpoint (Endpoint::RHS, 1)); // portcap
 
     // Core Timestep Manager
     core_tsmgr->Connect ("NBC_end", nbc_end->GetEndpoint (Endpoint::RHS));
@@ -132,7 +137,18 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     core_tsmgr->Connect ("Acc_idle", acc_idle->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("SDQ_empty", sdq_empty->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("Tsparity", core_TSParity->GetEndpoint (Endpoint::LHS));
-    
+   
+    // Accumulator
+    // synapse
+    // r_addr, r_data, w_addr, w_data, idle
+    accumulator->Connect("synapse", synapse_info->GetEndpoint (Endpoint::RHS));
+    accumulator->Connect("tsparity", core_TSParity->GetEndpoint (Endpoint::RHS, 2));
+    accumulator->Connect("r_addr", acc_dsram_raddr->GetEndpoint (Endpoint::LHS)); 
+    accumulator->Connect("r_data", deltaG_acc_rdata->GetEndpoint (Endpoint::RHS)); 
+    accumulator->Connect("w_addr", deltaG_waddr->GetEndpoint (Endpoint::LHS));
+    accumulator->Connect("w_data", deltaG_wdata->GetEndpoint (Endpoint::LHS));
+    accumulator->Connect("idle", acc_idle->GetEndpoint (Endpoint::LHS)); 
+
     /*** Export port ***/    
     ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
     ExportPort ("CurTSParity", core_tsmgr, "curTS");

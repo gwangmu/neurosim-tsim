@@ -27,7 +27,9 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
     
     OPORT_End = CreatePort ("end", Module::PORT_OUTPUT, 
             Prototype<SignalMessage>::Get());
-    OPORT_SRAM = CreatePort ("sram", Module::PORT_OUTPUT, 
+    OPORT_sSRAM = CreatePort ("ssram", Module::PORT_OUTPUT, 
+            Prototype<IndexMessage>::Get());
+    OPORT_dSRAM = CreatePort ("dsram", Module::PORT_OUTPUT, 
             Prototype<IndexMessage>::Get());
     OPORT_NB = CreatePort ("neuron_block", Module::PORT_OUTPUT, 
             Prototype<NeuronBlockInMessage>::Get());
@@ -70,7 +72,8 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
     if(idx_counter_ != max_idx_)
     {
         DEBUG_PRINT ("[NBC] Read Reqest");
-        outmsgs[OPORT_SRAM] = new IndexMessage (-1, idx_counter_);
+        outmsgs[OPORT_sSRAM] = new IndexMessage (0, idx_counter_);
+        outmsgs[OPORT_dSRAM] = new IndexMessage (ts_parity_, idx_counter_);
         idx_counter_++;
     }
     else

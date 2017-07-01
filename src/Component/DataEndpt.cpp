@@ -8,6 +8,7 @@
 #include <Message/NeuronBlockMessage.h>
 #include <Message/DeltaGMessage.h>
 #include <Message/StateMessage.h>
+#include <Message/SynapseMessage.h>
 #include <Message/SignalMessage.h>
 #include <Message/IndexMessage.h>
 #include <Message/NeuronBlockMessage.h>
@@ -32,3 +33,4 @@ template class DataEndptModule <IndexMessage>;
 template class DataEndptModule <StateMessage>;
 template class DataEndptModule <DeltaGMessage>;
 template class DataEndptModule <SignalMessage>;
+template class DataEndptModule <SynapseMessage>;

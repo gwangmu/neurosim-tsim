@@ -25,7 +25,8 @@ private:
     uint32_t IPORT_Tsparity;
 
     // Output port
-    uint32_t OPORT_SRAM; // Connect to SRAM
+    uint32_t OPORT_sSRAM; // Connect to state SRAM
+    uint32_t OPORT_dSRAM; // Connect to delta-g SRAM
     uint32_t OPORT_NB; // Connect to Neuron block
     uint32_t OPORT_End;
     

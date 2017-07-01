@@ -11,26 +11,27 @@
 
 using namespace std;
 
-class DeltaSRAM: public SRAMModule
+class DeltaStorage: public Module
 {
 public:
-    DeltaSRAM (string iname, Component *parent, uint32_t row_size, 
-            uint32_t col_size, bool parity);
+    DeltaStorage (string iname, Component *parent, uint32_t row_size, 
+            uint32_t col_size);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             const uint32_t *outque_size, Instruction *instr);
 
 private:
+    uint32_t NPORT_raddr, NPORT_rdata;
+    uint32_t APORT_raddr, APORT_rdata;
+    uint32_t PORT_waddr, PORT_wdata;
     uint32_t PORT_TSparity;
 
     // Internal State
     bool cur_parity;
-    bool SRAM_parity;
+    
+    /* SRAM features */
+    uint32_t row_size_;
+    uint32_t col_size_;
 
-
-};
-
-class DeltaStorage: public Component
-{
-public:
-    DeltaStorage (string iname, Component *parent, uint32_t row_size, uint32_t col_size);
+    /* Statistics */
+    uint32_t read_n, write_n;
 };
