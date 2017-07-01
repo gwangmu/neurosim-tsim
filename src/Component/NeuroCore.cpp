@@ -34,7 +34,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     : Component ("NeuroCore", iname, parent)
 {
     // add child modules/components
-    Module *datasource = new DataSourceModule ("datasource", this);
     Module *neuron_block = new NeuronBlock ("neuron_block", this, 2);
     Module *nb_controller = new NBController ("nb_controller", this, 16);
    
@@ -45,7 +44,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     
     // Dummy modules
     Module *ds_reset = new DataSinkModule <SignalMessage, bool> ("ds_reset", this);
-    Module *ds_parity = new DataSinkModule <SignalMessage, bool> ("ds_parity", this);
 
     Module *de_amq_empty = new DataEndptModule <SignalMessage> ("de_amq_empty", this);
     Module *de_acc_idle = new DataEndptModule <SignalMessage>  ("de_acc_idle", this);
@@ -70,7 +68,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
 
     Wire *state_sram_rdata = new Wire (this, conattr, Prototype<StateMessage>::Get());
     Wire *deltaG_sram_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
-    Wire *core_ts_parity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
 
     // Core Timestep Manager
     Wire *nbc_end = new Wire (this, conattr, Prototype<SignalMessage>::Get());
@@ -80,7 +77,7 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     Wire *sdq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
     
     Wire *deltaG_reset = new Wire (this, conattr, Prototype<SignalMessage>::Get());
-    Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());// Fanout Wire
 
     // Dummy wire
     Wire *de_d_waddr_wire = new Wire (this, conattr, Prototype<IndexMessage>::Get());
@@ -91,7 +88,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     /*** Connect modules ***/
     // Dummy Connection
     ds_reset->Connect ("datain", deltaG_reset->GetEndpoint (Endpoint::RHS));
-    ds_parity->Connect ("datain", core_TSParity->GetEndpoint (Endpoint::RHS));
 
     de_amq_empty->Connect ("dataend", amq_empty->GetEndpoint (Endpoint::LHS));
     de_acc_idle->Connect ("dataend", acc_idle->GetEndpoint (Endpoint::LHS));
@@ -106,7 +102,7 @@ NeuroCore::NeuroCore (string iname, Component *parent)
 
     nb_controller->Connect ("deltaG", deltaG_sram_rdata->GetEndpoint (Endpoint::RHS));
     nb_controller->Connect ("state", state_sram_rdata->GetEndpoint (Endpoint::RHS));
-    nb_controller->Connect ("tsparity", core_ts_parity->GetEndpoint (Endpoint::RHS)); // conn w/ data src
+    nb_controller->Connect ("tsparity", core_TSParity->GetEndpoint (Endpoint::RHS)); // conn w/ data src
         
     // State & Delta-G SRAM
     state_sram->Connect ("r_addr", core_sram_raddr->GetEndpoint (Endpoint::RHS, 0)); 
@@ -135,12 +131,10 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     
     core_tsmgr->Connect ("reset", deltaG_reset->GetEndpoint (Endpoint::LHS));
     core_tsmgr->Connect ("Tsparity", core_TSParity->GetEndpoint (Endpoint::LHS));
-
-    datasource->Connect ("dataout", core_ts_parity->GetEndpoint (Endpoint::LHS));
     
     /*** Export port ***/    
     ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
-    //ExportPort ("TSParity", core_tsmgr, "Tsparity");
+    ExportPort ("CurTSParity", core_tsmgr, "curTS");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
 }
 

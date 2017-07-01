@@ -18,6 +18,8 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
             Prototype<SignalMessage>::Get());
     PORT_SDQ = CreatePort ("SDQ_empty", Module::PORT_INPUT,
             Prototype<SignalMessage>::Get());
+    PORT_curTS = CreatePort ("curTS", Module::PORT_INPUT,
+            Prototype<SignalMessage>::Get());
 
     PORT_TSparity = CreatePort ("Tsparity", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
@@ -27,10 +29,10 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
             Prototype<SignalMessage>::Get());
 
     for (int i=0; i<5; i++)
-        state[i] = false;
+        state[i] = true;
 
-    cur_tsparity_ = 0;
-    next_tsparity_ = 0;
+    cur_tsparity_ = -1;
+    next_tsparity_ = -1;
 }
 
 void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, 
@@ -70,35 +72,38 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
 
 
-    // /*** Check state of dynamics modules  ***/
-    // bool dynfin = state[NBC] && state[NB] && state[AMQ];
-    // if(dynfin)
-    // {
-    //     DEBUG_PRINT ("[TSMgr] Dynamics finished");
-    //     outmsgs[PORT_DynFin] = new SignalMessage (0, true);
-    // }
+    /*** Check state of dynamics modules  ***/
+    bool dynfin = state[NBC] && state[NB] && state[AMQ];
+    if(dynfin)
+    {
+        DEBUG_PRINT ("[TSMgr] Dynamics finished");
+        outmsgs[PORT_DynFin] = new SignalMessage (0, true);
+    }
 
     /*** Update TS parity ***/
-    // SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[PORT_TSparity]);
-    // if(parity_msg)
-    // {
-    //     next_tsparity_ = parity_msg->value;
-    //     DEBUG_PRINT ("[TSMgr] Update TS parity to %d", next_tsparity_);
-    // }
+    SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[PORT_curTS]);
+    if(parity_msg)
+    {
+        next_tsparity_ = parity_msg->value;
+        DEBUG_PRINT ("[TSMgr] Update TS parity to %d", next_tsparity_);
+    }
 
-    // if(cur_tsparity_ != next_tsparity_)
-    // {
-    //     bool all_finish = true;
-    //     for (int i=0; i<5; i++)
-    //         all_finish = all_finish && state[i];
+    if(cur_tsparity_ != next_tsparity_)
+    {
+        bool all_finish = true;
+        for (int i=0; i<5; i++)
+            all_finish = all_finish && state[i];
 
-    //     if (all_finish)
-    //     {
-    //         cur_tsparity_ = next_tsparity_;
-    //         //outmsgs[PORT_TSparity] = new SignalMessage (0, cur_tsparity_);
-    //         outmsgs[PORT_reset] = new SignalMessage (0, true);
-    //     }
-    // }
+        if (all_finish)
+        {
+            cur_tsparity_ = next_tsparity_;
+            outmsgs[PORT_TSparity] = new SignalMessage (0, cur_tsparity_);
+            outmsgs[PORT_reset] = new SignalMessage (0, true);
+
+            // Initiate Neuron Block Controller, change its state
+            state[NBC] = false;
+        }
+    }
 }
 
 

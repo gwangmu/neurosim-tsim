@@ -48,12 +48,12 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     // Modules
     Module *datasink = new DataSinkModule <NeuronBlockOutMessage, uint32_t> ("datasink", this);
     Module *ds_dynfin = new DataSinkModule <SignalMessage, bool> ("ds_dynfin", this);
-    //Module *ds_parity = new DataSinkModule <SignalMessage, bool> ("ds_parity", this);
+    Module *ds_parity = new DataSourceModule ("ds_parity", this);
     
     // Wires
     Wire *nb2sink = new Wire (this, conattr, Prototype<NeuronBlockOutMessage>::Get());
     Wire *core_DynFin = new Wire (this, conattr, Prototype<SignalMessage>::Get());
-    //Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
    
     /** Connect **/
     neurocore->Connect ("Core_out", nb2sink->GetEndpoint (Endpoint::LHS));
@@ -62,7 +62,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     neurocore->Connect ("DynFin", core_DynFin->GetEndpoint (Endpoint::LHS));
     ds_dynfin->Connect ("datain", core_DynFin->GetEndpoint (Endpoint::RHS));
     
-    //de_parity->Connect ("dataend", core_TSParity->GetEndpoint (Endpoint::LHS));
-    //neurocore->Connect ("TSParity", core_TSParity->GetEndpoint (Endpoint::RHS));
+    ds_parity->Connect ("dataout", core_TSParity->GetEndpoint (Endpoint::LHS));
+    neurocore->Connect ("CurTSParity", core_TSParity->GetEndpoint (Endpoint::RHS));
 }
 
