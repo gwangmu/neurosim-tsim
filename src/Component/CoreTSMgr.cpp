@@ -25,8 +25,6 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
             Prototype<SignalMessage>::Get());
     PORT_DynFin = CreatePort ("DynFin", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
-    PORT_reset = CreatePort ("reset", Module::PORT_OUTPUT,
-            Prototype<SignalMessage>::Get());
 
     for (int i=0; i<5; i++)
         state[i] = true;
@@ -98,7 +96,6 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
         {
             cur_tsparity_ = next_tsparity_;
             outmsgs[PORT_TSparity] = new SignalMessage (0, cur_tsparity_);
-            outmsgs[PORT_reset] = new SignalMessage (0, true);
 
             // Initiate Neuron Block Controller, change its state
             state[NBC] = false;

@@ -26,7 +26,7 @@ private:
     uint32_t PORT_curTS;
 
     // Write port
-    uint32_t PORT_TSparity, PORT_DynFin, PORT_reset; 
+    uint32_t PORT_TSparity, PORT_DynFin; 
 
     /* Internal State */
     bool state[5];

@@ -8,7 +8,7 @@
 #include <TSim/Utility/Logging.h>
 
 DeltaSRAM::DeltaSRAM (string iname, Component* parent,
-        uint32_t row_size, uint32_t col_size)
+        uint32_t row_size, uint32_t col_size, bool parity)
     : SRAMModule ("DeltaSRAM", iname, parent, row_size, col_size)
 {
 
@@ -22,8 +22,11 @@ DeltaSRAM::DeltaSRAM (string iname, Component* parent,
      WPORT_data = CreatePort ("w_data", Module::PORT_INPUT,
              Prototype<DeltaGMessage>::Get());
 
-     PORT_reset = CreatePort ("reset", Module::PORT_INPUT,
+     PORT_TSparity = CreatePort ("TSparity", Module::PORT_INPUT,
              Prototype<SignalMessage>::Get());
+
+     cur_parity = false;
+     SRAM_parity = parity;
 }
 
 
@@ -60,12 +63,14 @@ void DeltaSRAM::Operation (Message **inmsgs, Message **outmsgs,
     }
 
     /* reset */
-    SignalMessage *reset_msg = static_cast<SignalMessage*>(inmsgs[PORT_reset]);
-    if(reset_msg)
+    SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[PORT_TSparity]);
+    if(parity_msg)
     {
-        if(reset_msg->value)
+        cur_parity = parity_msg->value;
+        if(cur_parity == SRAM_parity)
         {
-            DEBUG_PRINT("[DeltaG SRAM] reset SRAM");
+            // Reset
+            DEBUG_PRINT ("[Delta G] Reset SRAM");
         }
     }
 }
@@ -74,18 +79,18 @@ DeltaStorage::DeltaStorage (string iname, Component* parent,
         uint32_t row_size, uint32_t col_size)
     : Component ("DeltaStorage", iname, parent)
 {
-    Module *odd_sram = new DeltaSRAM ("odd_sram", this, row_size, col_size);
-    Module *even_sram = new DeltaSRAM ("even_sram", this, row_size, col_size);
+    Module *odd_sram = new DeltaSRAM ("odd_sram", this, row_size, col_size, true);
+    Module *even_sram = new DeltaSRAM ("even_sram", this, row_size, col_size, false);
 
     ExportPort ("ORAddr", odd_sram, "r_addr");
     ExportPort ("ORData", odd_sram, "r_data");
     ExportPort ("OWAddr", odd_sram, "w_addr");
     ExportPort ("OWData", odd_sram, "w_data");
-    ExportPort ("Oreset", odd_sram, "reset");
+    ExportPort ("OTSparity", odd_sram, "TSparity");
     
     ExportPort ("ERAddr", even_sram, "r_addr");
     ExportPort ("ERData", even_sram, "r_data");
     ExportPort ("EWAddr", even_sram, "w_addr");
     ExportPort ("EWData", even_sram, "w_data");
-    ExportPort ("Ereset", even_sram, "reset");
+    ExportPort ("ETSparity", even_sram, "TSparity");
 }
