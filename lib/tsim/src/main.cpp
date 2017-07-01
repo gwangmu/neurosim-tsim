@@ -46,19 +46,26 @@ int main (int argc, char *argv[])
         return 0;
     }
 
-    Simulator::Option opt = LoadSimOption (argc, argv);
-                
+    Simulator::Option opt = LoadSimOption (argc, argv);                
     Simulator sim (argv[1], opt);
 
     if (!sim.AttachTestbench (simtb))
-    {
-        DESIGN_ERROR ("design error(s) detected. exiting..",
+        DESIGN_FATAL ("design error(s) detected. exiting..",
                 simtb->GetName().c_str());
-        abort ();
-    }
+
+    PRINT ("");
+    sim.ReportDesignSummary ();
+    PRINT ("");
 
     sim.Simulate ();
-    // sim.Report (); TODO
+
+    PRINT ("");
+    sim.ReportSimulationSummary ();
+    PRINT ("");
+    sim.ReportActivityEvents();
+    PRINT ("");
+
+    PRINT ("Done.");
 
     return 0;
 }

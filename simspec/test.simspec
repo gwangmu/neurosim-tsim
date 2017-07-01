@@ -1,6 +1,12 @@
 #!TSim Simulation Spec
 
-#FILESCRIPT_PATH(datasource): data/fscr1.script
+# External file
 FILESCRIPT_PATH(neuron_block): data/spike0.script
 #REGISTER_DATAPATH(reg1): data/reg1.regdata
+
+# Clock
 CLOCK_PERIOD(main): 500
+
+# Module power
+MODULE_DYNAMIC_POWER(neuron_block): 300
+MODULE_STATIC_POWER(neuron_block): 500

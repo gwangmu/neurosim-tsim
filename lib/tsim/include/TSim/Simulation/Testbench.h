@@ -10,6 +10,9 @@
 #define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
 #define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
 #define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
+#define SET_MODULE_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
+#define SET_MODULE_STATIC_POWER(mod,pow) modstapow[mod] = pow
+#define SET_PATHWAY_DIS_POWER(path,pow) pathdispow[path] = pow
 
 
 #include <TSim/Base/Metadata.h>
@@ -28,7 +31,15 @@ class Component;
 class Testbench: public Metadata
 {
 public:
-    enum ParamType { FILESCRIPT_PATH, REGISTER_DATAPATH, CLOCK_PERIOD };
+    enum ParamType 
+    { 
+        FILESCRIPT_PATH, 
+        REGISTER_DATAPATH, 
+        CLOCK_PERIOD,
+        MODULE_DYNAMIC_POWER,
+        MODULE_STATIC_POWER,
+        PATHWAY_DIS_POWER
+    };
 
 public:
     Testbench (const char *clsname, Component *topcomp)
@@ -49,5 +60,8 @@ protected:
     map<string, string> fscrpaths;
     map<string, string> regpaths;
     map<string, uint32_t> clkperiods;
+    map<string, uint32_t> moddynpow;
+    map<string, uint32_t> modstapow;
+    map<string, uint32_t> pathdispow;
 };
     

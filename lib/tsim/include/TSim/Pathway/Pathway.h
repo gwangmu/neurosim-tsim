@@ -19,6 +19,9 @@ class Message;
 
 class Pathway: public Metadata, public IValidatable, public IClockable
 {
+private:
+    static const uint32_t MAX_ENDPOINTS = 64;
+
 public:
     struct ConnectionAttr
     {
@@ -35,11 +38,18 @@ public:
         uint32_t bitwidth;
     };
 
+    template <typename T>
     struct CycleClass
     {
-        uint64_t propagating = 0;
-        uint64_t stabilizing = 0;
-        uint64_t idle = 0;
+        T propagating = 0;
+        T idle = 0;
+    };
+
+    template <typename T>
+    struct EventCount
+    {
+        T rhs_blocked[MAX_ENDPOINTS] = {0};
+        T msgdrop = 0;
     };
 
 protected:
@@ -73,22 +83,11 @@ public:
     Message *GetMsgPrototype () { return msgproto; }
     string GetClock ();
 
-    /* Called by 'Component' */
-    Endpoint* GetEndpoint (Endpoint::Type type, uint32_t idEndpt = 0);
+    void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
 
-    ConnectionAttr GetConnectionAttr () { return conn.conattr; }
-    bool SetConnectionAttr (ConnectionAttr conattr);
-
-    /* Called by 'Simulator' */
-    virtual IssueCount Validate (PERMIT(Simulator)) final;
-    virtual void PreClock (PERMIT(Simulator)) final;
-    virtual void PostClock (PERMIT(Simulator)) final;
-
-    virtual uint32_t NextTargetLHSEndpointID () = 0;
-
-protected:
-    /* Called by derived 'Pathway' */
-    bool AddEndpoint (string name, Endpoint::Type type, uint32_t capacity); 
+    void SetDissipationPower (uint32_t pow, PERMIT(Simulator)) { dispower = pow; }
+    uint32_t GetDissipationPower () { return dispower; }
+    double GetConsumedEnergy ();
 
     Endpoint& GetLHS (uint32_t idx) 
     { 
@@ -109,6 +108,26 @@ protected:
     uint32_t GetNumLHS () { return endpts.lhs.size (); }
     uint32_t GetNumRHS () { return endpts.rhs.size (); }
 
+    const CycleClass<uint64_t>& GetCycleClass () { return cclass; }
+    const EventCount<uint64_t>& GetEventCount () { return ecount; }
+
+    /* Called by 'Component' */
+    Endpoint* GetEndpoint (Endpoint::Type type, uint32_t idEndpt = 0);
+
+    ConnectionAttr GetConnectionAttr () { return conn.conattr; }
+    bool SetConnectionAttr (ConnectionAttr conattr);
+
+    /* Called by 'Simulator' */
+    virtual IssueCount Validate (PERMIT(Simulator)) final;
+    virtual void PreClock (PERMIT(Simulator)) final;
+    virtual void PostClock (PERMIT(Simulator)) final;
+
+    virtual uint32_t NextTargetLHSEndpointID () = 0;
+
+protected:
+    /* Called by derived 'Pathway' */
+    bool AddEndpoint (string name, Endpoint::Type type, uint32_t capacity); 
+
 private:
     // ready state
     inline void InitReadyState ();
@@ -124,9 +143,15 @@ private:
 private:
     Component *parent;
 
+    // property
+    uint32_t clkperiod;
+    uint32_t dispower;
+
+    // connection
     Connection conn;
     Message *msgproto;
 
+    // endpoints
     struct
     {
         vector<Endpoint> lhs;
@@ -139,7 +164,9 @@ private:
     uint32_t lhsid;
     uint32_t stabilize_cycle;
 
-    CycleClass cclass;
+    // report
+    CycleClass<uint64_t> cclass;
+    EventCount<uint64_t> ecount;
 };
 
 

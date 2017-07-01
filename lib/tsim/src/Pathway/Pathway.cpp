@@ -66,6 +66,9 @@ Pathway::Pathway (const char *clsname, Component *parent,
 
     lhsid = -1;
     stabilize_cycle = 0;
+
+    clkperiod = -1;
+    dispower = -1;
 }
 
 
@@ -206,9 +209,34 @@ string Pathway::GetClock ()
 }
 
 
+double Pathway::GetConsumedEnergy ()
+{
+    if (clkperiod == -1)
+        SYSTEM_ERROR ("zero module clock period (module: %s)",
+                GetName().c_str());
+
+    if (dispower == -1)
+        return -1;
+    else
+        return (clkperiod * 10E-9 * dispower * 10E-9 * cclass.propagating);
+}
+
+
 IssueCount Pathway::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
+
+    if (dispower == -1)
+    {
+        DESIGN_WARNING ("no dissipation power info", GetName().c_str());
+        icount.warning++;
+    }
+
+    if (clkperiod == -1)
+    {
+        SYSTEM_ERROR ("no clock period (pathway: %s)", GetName().c_str());
+        icount.error++;
+    }
 
     if (conn.conattr.latency > Pathway::ConnectionAttr::CONN_LATENCY_LIMIT)
     {
@@ -291,6 +319,7 @@ void Pathway::PreClock (PERMIT(Simulator))
                         {
                             SIM_WARNING ("message dropped (portname: %s)",
                                     GetName().c_str(), ept.GetConnectedPortName().c_str());
+                            ecount.msgdrop++;
                             sampledmsg->Dispose ();
                         }
                     }
@@ -314,6 +343,7 @@ void Pathway::PreClock (PERMIT(Simulator))
                     {
                         SIM_WARNING ("message dropped (portname: %s)",
                                 GetName().c_str(), ept.GetConnectedPortName().c_str());
+                        ecount.msgdrop++;
                         sampledmsg->Dispose ();
                     }
                 }
@@ -354,6 +384,18 @@ void Pathway::PostClock (PERMIT(Simulator))
                 endpts.lhs[GetTargetLHSID ()].Pop ();
                 conn.Assign (msg_to_assign);
             }
+            else 
+            {
+                if (msg_to_assign->DEST_RHS_ID != -1)
+                {
+                    ecount.rhs_blocked[msg_to_assign->DEST_RHS_ID]++;
+                }
+                else
+                {
+                    for (auto i = 0; i < endpts.rhs.size(); i++)
+                        ecount.rhs_blocked[i]++;
+                }
+            }
         }
     }
 
@@ -366,7 +408,6 @@ void Pathway::PostClock (PERMIT(Simulator))
     operation ("activity check")
     {
         if (conn.nprop > 0)             cclass.propagating++;
-        else if (stabilize_cycle > 0)   cclass.stabilizing++;
         else                            cclass.idle++;
     }
 }

@@ -22,15 +22,6 @@ class Module: public Component, public IClockable
 public:
     enum PortType { PORT_UNKNOWN, PORT_INPUT, PORT_OUTPUT };
 
-    struct CycleClass
-    {
-        //CycleClass (): active (0), stalled (0), idle (0) {}
-
-        uint64_t active = 0;
-        uint64_t stalled = 0;
-        uint64_t idle = 0;
-    };
-
 private:
     struct Port
     {
@@ -47,7 +38,6 @@ private:
         uint32_t id;
         PortType iotype;
         Message* msgproto;
-        bool sealed;
         
         // Connected Endpoint
         Endpoint* endpt;
@@ -60,13 +50,34 @@ public:
     Script* GetScript () { return script; }
     Register* GetRegister () { return reg; }
     virtual Module* GetModule (string name);
+    virtual uint32_t GetNumChildModules () final { return 1; }
+
+    void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
+
+    void SetDynamicPower (uint32_t pow, PERMIT(Simulator)) { dynpower = pow; }
+    void SetStaticPower (uint32_t pow, PERMIT(Simulator)) { stapower = pow; }
+    uint32_t GetDynamicPower () { return dynpower; }
+    uint32_t GetStaticPower () { return stapower; }
+    double GetConsumedEnergy ();
+
+    virtual CycleClass<double> GetAggregateCycleClass ();
+    virtual EventCount<double> GetAggregateEventCount ();
+    virtual double GetAggregateConsumedEnergy ();
+    
+    const CycleClass<uint64_t>& GetCycleClass () { return cclass; }
+    const EventCount<uint64_t>& GetEventCount () { return ecount; }
+
+    uint32_t GetNumInPorts () { return ninports; }
+    uint32_t GetNumOutPorts () { return noutports; }
+    string GetInPortName (uint32_t idx) { return inports[idx].name; }
+    string GetOutPortName (uint32_t idx) { return outports[idx].name; }
+    Endpoint* GetInEndpoint (uint32_t idx) { return inports[idx].endpt; }
+    Endpoint* GetOutEndpoint (uint32_t idx) { return outports[idx].endpt; }
 
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator));
     virtual void PreClock (PERMIT(Simulator)) final;
     virtual void PostClock (PERMIT(Simulator)) final;
-
-    const CycleClass& GetCycleClass () { return cclass; }
 
     /* Called by parent 'Component' */
     bool SetScript (Script *script); 
@@ -87,12 +98,16 @@ protected:
     virtual bool AddChild (Component *) { PROHIBITED; return false;}
 
 private:
-    static const uint32_t MAX_PORTS = 64;
     static const uint32_t MAX_PDEPTH = 64;
 
+    // property
+    uint32_t clkperiod;
+    uint32_t dynpower;
+    uint32_t stapower;
+
     // port management
-    Port inports[MAX_PORTS];
-    Port outports[MAX_PORTS];
+    Port inports[MAX_MODULE_PORTS];
+    Port outports[MAX_MODULE_PORTS];
     uint32_t ninports;
     uint32_t noutports;
     uint32_t *outque_size;
@@ -119,5 +134,6 @@ private:
     Register *reg;
 
     // report
-    CycleClass cclass;
+    CycleClass<uint64_t> cclass;
+    EventCount<uint64_t> ecount;
 };
