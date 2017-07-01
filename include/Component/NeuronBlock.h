@@ -10,12 +10,8 @@
 
 using namespace std;
 
-class NeuroSimTestbench;
-
 class NeuronBlock: public Module
 {
-    VISIBLE_TO(NeuroSimTestbench);
-
   public:
     NeuronBlock (string iname, Component *parent, uint32_t depth);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 

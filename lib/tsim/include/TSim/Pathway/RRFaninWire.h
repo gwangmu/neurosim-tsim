@@ -16,7 +16,7 @@ class RRFaninWire: public Pathway
 {
 public:
     RRFaninWire (Component *parent, ConnectionAttr conattr, 
-            Message *msgproto, uint32_t n_rhs);
+            Message *msgproto, uint32_t n_lhs);
     virtual uint32_t NextTargetLHSEndpointID ();
 
 private:
