@@ -8,3 +8,4 @@ core
 *.nfs*
 tags
 bin/
+*out
