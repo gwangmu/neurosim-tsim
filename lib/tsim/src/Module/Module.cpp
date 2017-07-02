@@ -37,6 +37,8 @@ Module::Module (const char *clsname, string iname,
     for (uint32_t pd = pdepth; pd; omsgidxmask <<= 1, pd >>= 1);
     omsgidxmask--;
 
+    nextinmsgs = new Message *[0];
+
     nextoutmsgs = new Message **[omsgidxmask + 1];
     for (uint32_t i = 0; i < omsgidxmask + 1; i++)
         nextoutmsgs[i] = new Message *[1];
@@ -122,10 +124,12 @@ bool Module::Connect (string portname, Endpoint *endpt)
     if (!endpt->IsPortCap() && 
             endpt->GetParent()->GetMsgPrototype() != port->msgproto)
     {
+        DESIGN_ERROR ("mismatching message proto %s (of '%s') "
+                "and %s (of port '%s')",
                 GetFullName().c_str(), 
                 endpt->GetParent()->GetMsgPrototype()->GetClassName (),
                 endpt->GetParent()->GetName().c_str(), 
-                port->msgproto->GetClassName (), portname.c_str();
+                port->msgproto->GetClassName (), portname.c_str());
         return false;
     }
 
@@ -143,7 +147,7 @@ bool Module::Connect (string portname, Endpoint *endpt)
 
     port->endpt = endpt;
     if (!endpt->IsPortCap())
-        endpt->JoinTo (this, portname, KEY(Module));
+        endpt->JoinTo (this, portname);
 
     return true;
 }
@@ -334,25 +338,44 @@ void Module::PostClock (PERMIT(Simulator))
             operation ("prepare instruction");
             nextinstr = script->NextInstruction ();
         }
+    }
 
-        operation ("peak messages from RHS")
+    operation ("peak messages from RHS")
+    {
+        for (auto i = 0; i < ninports; i++)
         {
-            for (auto i = 0; i < ninports; i++)
+            if (!nextinmsgs[i])
             {
-                if (!nextinmsgs[i])
+                if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
                 {
-                    nextinmsgs[i] = inports[i].endpt->Peek ();
-                    DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
+                    if (likely (!stalled))
+                    {
+                        nextinmsgs[i] = inports[i].endpt->Peek ();
+                        DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
+                    }
+                }
+                else /* TOGGLE */
+                {
+                    Message *inmsg = inports[i].endpt->Peek ();
+                    if (inmsg)
+                    {
+                        inports[i].endpt->Pop ();
+                        nextinmsgs[i]->Dispose ();
+                        nextinmsgs[i] = inmsg;
+                    }
                 }
             }
         }
-
-        for (auto i = 0; i < noutports; i++)
-            outque_size[i] = outports[i].endpt->GetNumMessages ();
     }
 
     if (likely (pdepth == 0 || !stalled))
     {
+        operation ("load output que size")
+        {
+            for (auto i = 0; i < noutports; i++)
+                outque_size[i] = outports[i].endpt->GetNumMessages ();
+        }
+
         operation ("call operation")
         {
             // NOTE: set nextinmsgs[i] to nullptr not to use ith input
@@ -373,11 +396,14 @@ void Module::PostClock (PERMIT(Simulator))
         {
             for (auto i = 0; i < ninports; i++)
             {
-                if (nextinmsgs[i])
+                if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
                 {
-                    inports[i].endpt->Pop ();
-                    nextinmsgs[i]->Dispose ();
-                    nextinmsgs[i] = nullptr;
+                    if (nextinmsgs[i])
+                    {
+                        inports[i].endpt->Pop ();
+                        nextinmsgs[i]->Dispose ();
+                        nextinmsgs[i] = nullptr;
+                    }
                 }
             }
         }
@@ -412,7 +438,7 @@ void Module::PostClock (PERMIT(Simulator))
 
                     bool assnres = outports[i].endpt->Assign (nextoutmsgs[omsgidx][i]);
                     if (unlikely (!assnres))
-                        SYSTEM_ERROR ("attempted to push to full RHS");
+                        SYSTEM_ERROR ("attempted to push to full LHS");
 
                     nextoutmsgs[omsgidx][i] = nullptr;
                 }

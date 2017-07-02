@@ -22,13 +22,13 @@ Pathway::Connection::Connection (Pathway *parent)
 
 Message* Pathway::Connection::Sample ()
 {
-    if (msgprop[curidx]) nprop--;
     return msgprop[curidx];
 }
 
 void Pathway::Connection::Flow ()
 {
     // advance
+    if (msgprop[curidx]) nprop--;
     msgprop[curidx] = nullptr;
     curidx = (curidx + 1) & PROPIDX_MASK;
 }
@@ -40,7 +40,7 @@ void Pathway::Connection::Assign (Message *newmsg)
                 parent->GetName().c_str());
 
     msgprop[(curidx + conattr.latency) & PROPIDX_MASK] = newmsg;
-    DEBUG_PRINT ("Assign new message %s", newmsg->GetClassName()); 
+    DEBUG_PRINT ("Assign new message %s\n", newmsg->GetClassName()); 
     nprop++;
 }
     
@@ -136,8 +136,8 @@ bool Pathway::AddEndpoint (string name, Endpoint::Type type, uint32_t capacity)
             return false;
         }
         
-        endpts.lhs.push_back (Endpoint (name, this, Endpoint::LHS, 
-                    capacity, KEY(Pathway)));
+        endpts.lhs.push_back (Endpoint (name, endpts.lhs.size(), this, 
+                    Endpoint::LHS, capacity, KEY(Pathway)));
     }
     else if (type == Endpoint::RHS)
     {
@@ -147,8 +147,8 @@ bool Pathway::AddEndpoint (string name, Endpoint::Type type, uint32_t capacity)
             return false;
         }
 
-        endpts.rhs.push_back (Endpoint (name, this, Endpoint::RHS, 
-                    capacity, KEY(Pathway)));
+        endpts.rhs.push_back (Endpoint (name, endpts.rhs.size(), this, 
+                    Endpoint::RHS, capacity, KEY(Pathway)));
     }
     else
     {
@@ -310,11 +310,11 @@ void Pathway::PreClock (PERMIT(Simulator))
             {
                 operation ("broadcast message")
                 {
-                    sampledmsg->SetNumDestination (endpts.rhs.size());
-
                     for (auto i = 0; i < endpts.rhs.size(); i++)
                     {
                         Endpoint &ept = endpts.rhs[i];
+
+                        // TODO: assign only if ept.capacity != 0
                         if (!ept.Assign (sampledmsg))
                         {
                             SIM_WARNING ("message dropped (portname: %s)",
@@ -334,9 +334,9 @@ void Pathway::PreClock (PERMIT(Simulator))
                                 GetName().c_str(), sampledmsg->GetClassName(),
                                 sampledmsg->DEST_RHS_ID, endpts.rhs.size());
 
-                    sampledmsg->SetNumDestination (1);
-
                     Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
+
+                    // TODO: assign only if ept.capacity != 0
                     bool assnres = ept.Assign (sampledmsg);
 
                     if (unlikely (!assnres))
@@ -374,14 +374,19 @@ void Pathway::PostClock (PERMIT(Simulator))
         Message *msg_to_assign = nullptr;
 
         if (GetTargetLHSID () != (uint32_t)-1)
-        {
             msg_to_assign = endpts.lhs[GetTargetLHSID ()].Peek ();
-        }
+
         if (msg_to_assign)
         {
             if (IsReady (msg_to_assign->DEST_RHS_ID))
             {
                 endpts.lhs[GetTargetLHSID ()].Pop ();
+
+                if (msg_to_assign->DEST_RHS_ID != -1)
+                    msg_to_assign->SetNumDestination (1);
+                else
+                    msg_to_assign->SetNumDestination (endpts.rhs.size());
+
                 conn.Assign (msg_to_assign);
             }
             else 
@@ -399,10 +404,66 @@ void Pathway::PostClock (PERMIT(Simulator))
         }
     }
 
+    // NOTE: for each rhs, if rhs.capacity==0, sample/assign
+    // TODO: optimize this (cache RHSs whos capacity is 0)
+    Message *sampledmsg = conn.Sample ();
+
+    if (sampledmsg)
+    {
+        if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
+        {
+            operation ("ahead-of-time broadcast message")
+            {
+                for (auto i = 0; i < endpts.rhs.size(); i++)
+                {
+                    Endpoint &ept = endpts.rhs[i];
+
+                    // TODO: assign only if ept.capacity != 0
+                    if (ept.GetCapacity() == 0)
+                    {
+                        if (!ept.Assign (sampledmsg))
+                        {
+                            SIM_WARNING ("message dropped (portname: %s)",
+                                    GetName().c_str(), ept.GetConnectedPortName().c_str());
+                            ecount.msgdrop++;
+                            sampledmsg->Dispose ();
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            operation ("ahead-of-time send message to specific RHS")
+            {
+                if (unlikely (sampledmsg->DEST_RHS_ID >= endpts.rhs.size ()))
+                    SYSTEM_ERROR ("[%s msg: %s] DEST_RHS_ID(%d) >= #rhs(%zu)", 
+                            GetName().c_str(), sampledmsg->GetClassName(),
+                            sampledmsg->DEST_RHS_ID, endpts.rhs.size());
+
+                Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
+
+                if (ept.GetCapacity() == 0)
+                {
+                    bool assnres = ept.Assign (sampledmsg);
+
+                    if (unlikely (!assnres))
+                    {
+                        SIM_WARNING ("message dropped (portname: %s)",
+                                GetName().c_str(), ept.GetConnectedPortName().c_str());
+                        ecount.msgdrop++;
+                        sampledmsg->Dispose ();
+                    }
+                }
+            }
+        }
+    }
+
     operation ("set next target LHS id")
     {
+        uint32_t next_lhsid = NextTargetLHSEndpointID ();
         UpdateStabilizeCycle ();
-        SetNewTargetLHSID (NextTargetLHSEndpointID ());
+        SetNewTargetLHSID (next_lhsid);
     }
 
     operation ("activity check")

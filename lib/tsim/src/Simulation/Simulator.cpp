@@ -375,8 +375,8 @@ void Simulator::ReportDesignSummary ()
         ROW (fieldname, ("(" + cdom.name + ") " + to_string (freq)).c_str());
     }
 
-    ROW ("Total SRAM size (KB)", "???");
-    ROW ("Total FF size (KB)", "???");
+    ROW ("Total SRAM size (KB)", "TODO");
+    ROW ("Total FF size (KB)", "TODO");
 
     STROKE;
 
@@ -396,8 +396,8 @@ void Simulator::ReportSimulationSummary ()
     STROKE;
 
     ROW ("Execution time (s)", to_string((double)runtime / 10E3).c_str());
-    ROW ("Total SRAM read access", "???");
-    ROW ("Total SRAM write access", "???");
+    ROW ("Total SRAM read access", "TODO");
+    ROW ("Total SRAM write access", "TODO");
 
     Component::CycleClass<double> cclass = 
         tb->GetTopComponent(KEY(Simulator))->GetAggregateCycleClass();

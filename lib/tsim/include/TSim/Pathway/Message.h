@@ -8,15 +8,20 @@ using namespace std;
 struct Message: public Metadata
 {
 public:
+    enum Type { PLAIN, TOGGLE };
+
     // For prototype creation. 
     // DO NOT USE FOR ORDINARY MESSAGE CREATION
     Message (const char *clsname)
-        : Metadata (clsname, ""), DEST_RHS_ID (-1) {}
+        : Metadata (clsname, ""), DEST_RHS_ID (-1), type (PLAIN) {}
 
     Message (const char *clsname, uint32_t destrhsid)
-        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid) {}
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (PLAIN) {}
 
-    const uint32_t DEST_RHS_ID;     // NOTE: -1 to broadcast
+    Message (const char *clsname, Type type, uint32_t destrhsid)
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (type) {}
+
+    uint32_t DEST_RHS_ID;     // NOTE: -1 to broadcast
 
 /*>> Below this is for OUTPUT RESERVATION <<*/
 public:
@@ -44,6 +49,10 @@ public:
             delete this;        // COMMIT SUICIDE!
     }
 
+    // Universal
+    inline Type GetType () { return type; }
+
 private:
+    Type type;
     uint32_t dispcount;
 };

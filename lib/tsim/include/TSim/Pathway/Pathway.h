@@ -89,6 +89,9 @@ public:
     uint32_t GetDissipationPower () { return dispower; }
     double GetConsumedEnergy ();
 
+    uint32_t GetLatency () { return conn.conattr.latency; }
+    uint32_t GetBitWidth () { return conn.conattr.bitwidth; }
+
     Endpoint& GetLHS (uint32_t idx) 
     { 
         if (unlikely (idx > endpts.lhs.size ()))
@@ -117,6 +120,18 @@ public:
     ConnectionAttr GetConnectionAttr () { return conn.conattr; }
     bool SetConnectionAttr (ConnectionAttr conattr);
 
+    /* Called by following 'Mux', through child 'Endpoint' */
+    void SetExtReadyState (uint32_t rhsid, bool state)
+    {
+        rhsreadymask_ext ^= (-(uint32_t)state ^ rhsreadymask_ext) & (1 << rhsid); 
+    }
+
+    /* Called by preceding 'Mux', through child 'Endpoint' */
+    bool IsBroadcastBlocked (uint32_t lhsid)
+    {
+        return GetTargetLHSID() != lhsid || !IsReady(-1);
+    }
+
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator)) final;
     virtual void PreClock (PERMIT(Simulator)) final;
@@ -127,6 +142,7 @@ public:
 protected:
     /* Called by derived 'Pathway' */
     bool AddEndpoint (string name, Endpoint::Type type, uint32_t capacity); 
+    bool IsStabilizing () { return stabilize_cycle > 0; }
 
 private:
     // ready state
@@ -159,6 +175,7 @@ private:
     } endpts;
 
     uint64_t rhsreadymask;
+    uint64_t rhsreadymask_ext;
     uint64_t next_rhsreadymask;
 
     uint32_t lhsid;
@@ -174,13 +191,14 @@ private:
 // FIXME need to be polished
 inline void Pathway::InitReadyState () 
 {
-    rhsreadymask = next_rhsreadymask = (uint32_t)-1;
+    rhsreadymask = next_rhsreadymask = rhsreadymask_ext = (uint32_t)-1;
 }
 
 inline bool Pathway::IsReady (uint32_t rhsid) 
 {
     return (rhsid == (uint32_t)-1 ? 
-            rhsreadymask == (uint32_t)-1 : rhsreadymask & (1 << rhsid));
+            (rhsreadymask & rhsreadymask_ext) == (uint32_t)-1 :
+            (rhsreadymask & rhsreadymask_ext) & (1 << rhsid));
 }
 
 inline void Pathway::SetNextReady (uint32_t rhsid, bool state)
@@ -190,7 +208,7 @@ inline void Pathway::SetNextReady (uint32_t rhsid, bool state)
 
 inline void Pathway::UpdateReadyState () 
 {
-    next_rhsreadymask = rhsreadymask;
+    rhsreadymask = next_rhsreadymask;
 }
 
 

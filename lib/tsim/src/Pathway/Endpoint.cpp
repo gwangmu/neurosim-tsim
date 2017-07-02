@@ -3,6 +3,7 @@
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Message.h>
 #include <TSim/Module/Module.h>
+#include <TSim/Device/Device.h>
 #include <TSim/Simulation/Simulator.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
@@ -18,17 +19,20 @@ using namespace std;
 Endpoint *Endpoint::_PORTCAP = nullptr;
 
 
-Endpoint::Endpoint (string name, Pathway *parent, Type type, 
+Endpoint::Endpoint (string name, uint32_t id, Pathway *parent, Type type, 
         uint32_t capacity, PERMIT(Pathway))
     : Metadata ("Endpoint", name)
 {
     this->type = type;
+    this->id = id;
 
     if (!parent)
         SYSTEM_ERROR ("endpoint '%s' with null parent", name.c_str());
     this->parent = parent;
+    msgproto = parent->GetMsgPrototype ();
 
     this->modConn = nullptr;
+    this->devConn = nullptr;
     this->portConn = "";
 
     if (capacity == 0 && type == RHS)
@@ -43,7 +47,8 @@ Endpoint::Endpoint () : Metadata ("Endpoint", "PORTCAP")
 {
     type = CAP; 
     capacity = 0;
-    resv_count = 0; 
+    resv_count = 0;
+    msgproto = nullptr; 
     selected_lhs = 0;
     parent = nullptr; 
 }
@@ -56,11 +61,21 @@ void Endpoint::SetCapacity (uint32_t capacity)
         return;
     }
 
-    if (capacity == 0 && type == RHS)
-        DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
+    //if (capacity == 0 && type == RHS)
+    //    DESIGN_FATAL ("zero-capacity RHS endpoint not allowed", GetName().c_str());
 
     if (capacity == 1 && type == LHS)
         DESIGN_WARNING ("capacity==1 LHS endpoint may merely add one-cycle delay",
+                GetName().c_str());
+
+    if (parent->GetMsgPrototype()->GetType() == Message::TOGGLE &&
+            type == LHS && capacity != 0)
+        DESIGN_ERROR ("RHS having TOGGLE message prototype does not make sense",
+                GetName().c_str());
+
+    if (parent->GetMsgPrototype()->GetType() == Message::TOGGLE &&
+            type == RHS && capacity > 1)
+        DESIGN_ERROR ("RHS having TOGGLE message prototype does not make sense",
                 GetName().c_str());
 
     this->capacity = capacity;
@@ -131,14 +146,44 @@ bool Endpoint::IsOverloaded ()
     return (resv_count + msgque.size () > capacity);
 }
 
-
-bool Endpoint::JoinTo (Module *module, string portname, PERMIT(Module))
+void Endpoint::SetExtReadyState (bool val)
 {
-    if (modConn != nullptr)
-        DESIGN_WARNING ("port '%s' (of %s) has been already assigned",
-                GetName().c_str(), portname.c_str(), module->GetName().c_str());
+    parent->SetExtReadyState (id, val);
+}
 
-    modConn = module;
-    portConn = portname;
+bool Endpoint::IsBroadcastBlocked ()
+{
+    return parent->IsBroadcastBlocked (id);
+}
+
+
+bool Endpoint::JoinTo (Component *comp, string portname)
+{
+    if (Module *module = dynamic_cast<Module *>(comp))
+    {
+        if (modConn != nullptr || devConn != nullptr)
+            DESIGN_WARNING ("port '%s' (of %s) has been already assigned",
+                    GetName().c_str(), portname.c_str(), module->GetName().c_str());
+
+        devConn = nullptr;
+        modConn = module;
+        portConn = portname;
+    }
+    else if (Device *dev = dynamic_cast<Device *>(dev))
+    {
+        if (devConn != nullptr || modConn != nullptr)
+            DESIGN_WARNING ("port '%s' (of %s) has been already assigned",
+                    GetName().c_str(), portname.c_str(), module->GetName().c_str());
+
+        modConn = nullptr;
+        devConn = dev;
+        portConn = portname;
+    }
+    else
+    {
+        SYSTEM_ERROR ("bogus component tries to join to endpoint");
+        return false;
+    }
+
     return true;
 }

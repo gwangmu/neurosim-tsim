@@ -29,6 +29,8 @@ RRFaninWire::RRFaninWire (Component *parent, ConnectionAttr conattr,
 
 uint32_t RRFaninWire::NextTargetLHSEndpointID () 
 {
+    if (IsStabilizing ()) return cur_lhsid;
+
     uint32_t next_lhsid = cur_lhsid;
     do
     {
