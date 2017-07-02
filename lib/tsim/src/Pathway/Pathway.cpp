@@ -40,7 +40,7 @@ void Pathway::Connection::Assign (Message *newmsg)
                 parent->GetName().c_str());
 
     msgprop[(curidx + conattr.latency) & PROPIDX_MASK] = newmsg;
-    DEBUG_PRINT ("Assign new message %s\n", newmsg->GetClassName()); 
+    DEBUG_PRINT ("Assign new message %s", newmsg->GetClassName()); 
     nprop++;
 }
     

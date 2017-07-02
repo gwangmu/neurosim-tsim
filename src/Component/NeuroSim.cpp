@@ -16,6 +16,7 @@
 
 #include <Component/NeuroCore.h>
 
+#include <Message/AxonMessage.h>
 #include <Message/ExampleMessage.h>
 #include <Message/NeuronBlockMessage.h>
 #include <Message/DeltaGMessage.h>
@@ -46,17 +47,17 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     Pathway::ConnectionAttr conattr (0, 32);
     
     // Modules
-    Module *datasink = new DataSinkModule <NeuronBlockOutMessage, uint32_t> ("datasink", this);
+    Module *datasink = new DataSinkModule <AxonMessage, uint32_t> ("datasink", this);
     Module *ds_dynfin = new DataSinkModule <SignalMessage, bool> ("ds_dynfin", this);
     Module *ds_parity = new DataSourceModule ("ds_parity", this);
     
     // Wires
-    Wire *nb2sink = new Wire (this, conattr, Prototype<NeuronBlockOutMessage>::Get());
+    Wire *nb2sink = new Wire (this, conattr, Prototype<AxonMessage>::Get());
     Wire *core_DynFin = new Wire (this, conattr, Prototype<SignalMessage>::Get());
     Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
    
     /** Connect **/
-    neurocore->Connect ("Core_out", nb2sink->GetEndpoint (Endpoint::LHS));
+    neurocore->Connect ("AxonData", nb2sink->GetEndpoint (Endpoint::LHS));
     datasink->Connect ("datain", nb2sink->GetEndpoint (Endpoint::RHS));
 
     neurocore->Connect ("DynFin", core_DynFin->GetEndpoint (Endpoint::LHS));

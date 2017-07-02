@@ -22,8 +22,8 @@ AxonMetaQueue::AxonMetaQueue (string iname, Component *parent)
             Prototype<NeuronBlockOutMessage>::Get());
     IPORT_Meta = CreatePort ("meta", Module::PORT_INPUT,
             Prototype<AxonMessage>::Get());
-    IPORT_Core_sel = CreatePort ("core_sel", Module::PORT_INPUT,
-            Prototype<SelectMessage>::Get());
+    // IPORT_Core_sel = CreatePort ("core_sel", Module::PORT_INPUT,
+    //         Prototype<SelectMessage>::Get());
 
     OPORT_SRAM = CreatePort ("sram", Module::PORT_OUTPUT,
             Prototype<IndexMessage>::Get());
@@ -33,11 +33,12 @@ AxonMetaQueue::AxonMetaQueue (string iname, Component *parent)
             Prototype<SignalMessage>::Get());
 }
 
-void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, 
+        const uint32_t *outque_size, Instruction *instr)
 {
     NeuronBlockOutMessage *nb_msg = static_cast<NeuronBlockOutMessage*>(inmsgs[IPORT_NB]);
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Meta]);
-    SelectMessage *sel_msg = static_cast<SelectMessage*>(inmsgs[IPORT_Core_sel]);
+    //SelectMessage *sel_msg = static_cast<SelectMessage*>(inmsgs[IPORT_Core_sel]);
 
     if(nb_msg)
     {
@@ -46,7 +47,7 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction 
     
         if(spike)
         {
-            DEBUG_PRINT ("[AMQ] Receive spike. Send read request to Axon Metadata Table");
+            DEBUG_PRINT ("[AMQ] Receive spike (idx: %d). Send read request to Axon Metadata Table", idx);
             outmsgs[OPORT_SRAM] = new IndexMessage (0, idx);
         }
     }
@@ -57,13 +58,9 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction 
         uint16_t ax_len = axon_msg->len;
 
         outmsgs[OPORT_Axon] = new AxonMessage (0, ax_addr, ax_len);
+
+        DEBUG_PRINT ("[AMQ]Recieve Axon data %lu %u", ax_addr, ax_len);
     }
 
-    if(sel_msg)
-    {
-
-    }
-
-
-
+    //if(sel_msg)
 }

@@ -3,6 +3,7 @@
 
 #include <Component/DataSinkModule.h>
 
+#include <Message/AxonMessage.h>
 #include <Message/ExampleMessage.h>
 #include <Message/NeuronBlockMessage.h>
 #include <Message/DeltaGMessage.h>
@@ -44,3 +45,4 @@ void DataSinkModule<M, T>::Operation (Message **inmsgs, Message **outmsgs,
 
 template class DataSinkModule <NeuronBlockOutMessage, uint32_t>;
 template class DataSinkModule <SignalMessage, bool>;
+template class DataSinkModule <AxonMessage, uint32_t>;

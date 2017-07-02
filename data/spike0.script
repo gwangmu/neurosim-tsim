@@ -3,5 +3,5 @@
 CLASSNAME: SpikeFileScript
 SCRIPT:
     section
-        cycle=0, data=0/3/6/8
+        cycle=0, data=0/3/6/8/10
     endsection

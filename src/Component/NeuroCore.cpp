@@ -5,6 +5,8 @@
 #include <TSim/Utility/Prototype.h>
 
 #include <Component/Accumulator.h>
+#include <Component/AxonMetaQueue.h>
+#include <Component/AxonMetaTable.h>
 #include <Component/NeuronBlock.h>
 #include <Component/NBController.h>
 #include <Component/CoreTSMgr.h>
@@ -16,6 +18,7 @@
 #include <Component/StateSRAM.h>
 #include <Component/DeltaSRAM.h>
 
+#include <Message/AxonMessage.h>
 #include <Message/ExampleMessage.h>
 #include <Message/NeuronBlockMessage.h>
 #include <Message/DeltaGMessage.h>
@@ -45,8 +48,10 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     Module *core_tsmgr = new CoreTSMgr ("core_tsmgr", this);
     Module *accumulator = new Accumulator ("accumulator", this);
 
+    Module *axon_queue = new AxonMetaQueue ("axon_meta_queue", this);
+    Module *axon_table = new AxonMetaTable ("axon_meta_table", this, 64);
+
     // Dummy modules
-    Module *de_amq_empty = new DataEndptModule <SignalMessage> ("de_amq_empty", this);
     Module *de_sdq_empty = new DataEndptModule <SignalMessage> ("de_sdq_empty", this);
     Module *synapse_data = new DataEndptModule <SynapseMessage> ("synapse_dummy", this);
    
@@ -56,16 +61,25 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     
-    // Neuron Block
-    Wire *state_waddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
-    Wire *state_wdata = new Wire (this, conattr, Prototype<StateMessage>::Get());
-    Wire *nb_idle = new Wire (this, conattr, Prototype<SignalMessage>::Get());
-    
     // Neuron Block Controller 
     Wire *ctrl2nb = new Wire (this, conattr, Prototype<NeuronBlockInMessage>::Get());
     Wire *core_ssram_raddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
     Wire *nbc_dsram_raddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
     Wire *nbc_end = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    
+    // Neuron Block
+    Wire *state_waddr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    Wire *state_wdata = new Wire (this, conattr, Prototype<StateMessage>::Get());
+    Wire *nb_idle = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    Wire *dyn_result = 
+        new Wire (this, conattr, Prototype<NeuronBlockOutMessage>::Get());
+
+    // Axon Metadata Queue
+    Wire *am_table_addr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    Wire *amq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+
+    // Axon Metadata Table
+    Wire *am_table_data = new Wire (this, conattr, Prototype<AxonMessage>::Get());
 
     // State SRAM
     Wire *state_sram_rdata = new Wire (this, conattr, Prototype<StateMessage>::Get());
@@ -73,9 +87,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     // Delta G SRAM
     Wire *deltaG_nbc_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
     Wire *deltaG_acc_rdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
-
-    // Axon Metadata Queue
-    Wire *amq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
     
     // Accumulator
     Wire *acc_idle = new Wire (this, conattr, Prototype<SignalMessage>::Get());
@@ -95,7 +106,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     /*******************************************************************************/
     /*** Connect modules ***/
     // Dummy Connection
-    de_amq_empty->Connect ("dataend", amq_empty->GetEndpoint (Endpoint::LHS));
     de_sdq_empty->Connect ("dataend", sdq_empty->GetEndpoint (Endpoint::LHS));
     synapse_data->Connect ("dataend", synapse_info->GetEndpoint (Endpoint::LHS));
 
@@ -110,11 +120,21 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     
     // Neuron block
     neuron_block->Connect ("NeuronBlock_in", ctrl2nb->GetEndpoint (Endpoint::RHS));
-    //neuron_block->Connect ("NeuronBlock_out", nb2sink->GetEndpoint (Endpoint::LHS)); // outside
+    neuron_block->Connect ("NeuronBlock_out", dyn_result->GetEndpoint (Endpoint::LHS)); 
     neuron_block->Connect ("w_addr", state_waddr->GetEndpoint (Endpoint::LHS));
     neuron_block->Connect ("w_data", state_wdata->GetEndpoint (Endpoint::LHS));
     neuron_block->Connect ("idle", nb_idle->GetEndpoint (Endpoint::LHS)); 
-        
+       
+    // Axon Metadata Queue
+    axon_queue->Connect ("nb", dyn_result->GetEndpoint (Endpoint::RHS));
+    axon_queue->Connect ("meta", am_table_data->GetEndpoint (Endpoint::RHS));
+    axon_queue->Connect ("sram", am_table_addr->GetEndpoint (Endpoint::LHS));
+    axon_queue->Connect ("empty", amq_empty->GetEndpoint (Endpoint::LHS)); 
+
+    // Axon Metadata Table
+    axon_table->Connect ("r_addr", am_table_addr->GetEndpoint (Endpoint::RHS));
+    axon_table->Connect ("r_data", am_table_data->GetEndpoint (Endpoint::LHS));
+
     // State SRAM
     state_sram->Connect ("r_addr", core_ssram_raddr->GetEndpoint (Endpoint::RHS, 0)); 
     state_sram->Connect ("r_data", state_sram_rdata->GetEndpoint (Endpoint::LHS)); 
@@ -150,7 +170,8 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     accumulator->Connect("idle", acc_idle->GetEndpoint (Endpoint::LHS)); 
 
     /*** Export port ***/    
-    ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
+    //ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
+    ExportPort ("AxonData", axon_queue, "axon");
     ExportPort ("CurTSParity", core_tsmgr, "curTS");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
 }

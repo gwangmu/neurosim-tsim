@@ -11,16 +11,18 @@ AxonMetaTable::AxonMetaTable (string iname, Component* parent,
     : Module ("AxonMetaTable", iname, parent, 1)
 {
 
-     RPORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
-             Prototype<IndexMessage>::Get());
-     RPORT_data = CreatePort ("r_data", Module::PORT_OUTPUT,
-             Prototype<AxonMessage>::Get());
+    RPORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
+            Prototype<IndexMessage>::Get());
+    RPORT_data = CreatePort ("r_data", Module::PORT_OUTPUT,
+            Prototype<AxonMessage>::Get());
 
-     this->row_size_ = row_size;
-     this->col_size_ = 8; // bits
+    this->row_size_ = row_size;
+    this->col_size_ = 8; // bits
 
-     this->read_n = 0;
-     this->write_n = 0;
+    this->read_n = 0;
+    this->write_n = 0;
+
+    this->counter = 0;    
 }
 
 
@@ -33,7 +35,8 @@ void AxonMetaTable::Operation (Message **inmsgs, Message **outmsgs,
     if(raddr_msg)
     {
         uint32_t read_addr = raddr_msg->value;
-        outmsgs[RPORT_data] = new AxonMessage (0, 0, 1);
+        outmsgs[RPORT_data] = new AxonMessage (0, counter, 1);
+        counter++;
 
         DEBUG_PRINT("[SRAM] Receive read request, and send message");
     }
