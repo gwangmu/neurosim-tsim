@@ -47,7 +47,7 @@ public:
     /* Universal */
     Component (const char* clsname, string iname, Component *parent);
 
-    string GetClock ();
+    virtual string GetClock ();
     string GetFullName ();
     string GetFullNameWOClass ();
     Component* GetParent () { return parent; }

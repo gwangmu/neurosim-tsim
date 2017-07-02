@@ -46,6 +46,7 @@ public:
     /* Universal */
     Device (const char* clsname, string iname, Component *parent, Message *msgproto);
 
+    virtual string GetClock (); 
     void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
 
     void SetDynamicPower (uint32_t pow, PERMIT(Simulator)) { dynpower = pow; }

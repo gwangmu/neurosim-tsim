@@ -9,6 +9,7 @@ using namespace std;
 class Testbench;
 class Component;
 class Module;
+class Device;
 class Pathway;
 class FileScript;
 class FileRegister;
@@ -35,7 +36,9 @@ protected:
 
         // Configuration
         vector<Module *> modules;
+        vector<Device *> devices;
         vector<Pathway *> pathways;
+        vector<Pathway *> pathways_postdev;
 
         // Simulation states
         uint64_t nexttime;

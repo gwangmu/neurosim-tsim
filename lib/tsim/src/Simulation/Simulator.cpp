@@ -2,6 +2,7 @@
 
 #include <TSim/Simulation/Testbench.h>
 #include <TSim/Module/Module.h>
+#include <TSim/Device/Device.h>
 #include <TSim/Register/FileRegister.h>
 #include <TSim/Script/FileScript.h>
 #include <TSim/Pathway/Pathway.h>
@@ -52,7 +53,9 @@ bool Simulator::LoadTestbench ()
     macrotask ("Loading '%s'..", tb->GetName().c_str());
 
     vector<Module *> modules;
+    vector<Device *> devices;
     vector<Pathway *> pathways;
+    vector<Pathway *> pathways_postdev;
     task ("find modules/pathways")
     {
         queue<Component *> queComps;
@@ -66,7 +69,12 @@ bool Simulator::LoadTestbench ()
             for (auto ipath = nextcomp->PathwayBegin ();
                     ipath != nextcomp->PathwayEnd (); ipath++)
             {
-                pathways.push_back (*ipath);
+                Pathway *pathway = *ipath;
+                
+                if (!pathway->IsPostDevicePathway ())
+                    pathways.push_back (pathway);
+                else
+                    pathways_postdev.push_back (pathway);
             }
 
             for (auto icomp = nextcomp->ChildBegin ();
@@ -75,12 +83,14 @@ bool Simulator::LoadTestbench ()
                 Component *comp = *icomp;
                 if (Module *module = dynamic_cast<Module *>(comp))
                     modules.push_back (module);
+                else if (Device *device = dynamic_cast<Device *>(comp))
+                    devices.push_back (device);
                 else
                     queComps.push (comp);
             }
         }
 
-        PRINT ("total %zu module(s) found", modules.size());
+        PRINT ("total %zu module(s), %zu device(s) found", modules.size(), devices.size());
         for (Module *module:modules)
             DEBUG_PRINT ("%s", module->GetName().c_str());
     }
@@ -103,7 +113,6 @@ bool Simulator::LoadTestbench ()
                 DESIGN_FATAL ("undefined module clock (module: %s)",
                         tb->GetName().c_str(), module->GetName().c_str());
 
-
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].modules.push_back (module);
 
@@ -117,6 +126,27 @@ bool Simulator::LoadTestbench ()
                  KEY(Simulator));
         }
 
+        for (Device *device : devices)
+        {
+            string nclock = device->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined device clock (device: %s)",
+                        tb->GetName().c_str(), device->GetName().c_str());
+
+            mapCDoms[nclock].name = nclock;
+            mapCDoms[nclock].devices.push_back (device);
+
+            // TODO
+            //device->SetDynamicPower 
+            //    (tb->GetUIntParam (Testbench::DEVICE_DYNAMIC_POWER, 
+            //                       device->GetInstanceName(), KEY(Simulator)),
+            //     KEY(Simulator));
+            //device->SetStaticPower 
+            //    (tb->GetUIntParam (Testbench::DEVICE_STATIC_POWER, 
+            //                       device->GetInstanceName(), KEY(Simulator)),
+            //     KEY(Simulator));
+        }
+
         for (Pathway *pathway : pathways)
         {
             string nclock = pathway->GetClock ();
@@ -126,6 +156,22 @@ bool Simulator::LoadTestbench ()
             
             mapCDoms[nclock].name = nclock;
             mapCDoms[nclock].pathways.push_back (pathway);
+
+            pathway->SetDissipationPower 
+                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
+                                   pathway->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
+        }
+
+        for (Pathway *pathway : pathways_postdev)
+        {
+            string nclock = pathway->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
+                        tb->GetName().c_str(), pathway->GetName().c_str());
+            
+            mapCDoms[nclock].name = nclock;
+            mapCDoms[nclock].pathways_postdev.push_back (pathway);
 
             pathway->SetDissipationPower 
                 (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
@@ -326,8 +372,20 @@ bool Simulator::Simulate ()
                 for (Module *module : curCDom->modules)
                     module->PostClock (KEY(Simulator));
 
+                operation ("devices (preparatory)");
+                for (Device *device : curCDom->devices)
+                    device->PreClock (KEY(Simulator));
+
                 operation ("post-clock pathways");
                 for (Pathway *pathway : curCDom->pathways)
+                    pathway->PostClock (KEY(Simulator));
+
+                operation ("post-clock devices");
+                for (Device *device : curCDom->devices)
+                    device->PostClock (KEY(Simulator));
+
+                operation ("post-clock pathways (post-devices)");
+                for (Pathway *pathway : curCDom->pathways_postdev)
                     pathway->PostClock (KEY(Simulator));
             }
 

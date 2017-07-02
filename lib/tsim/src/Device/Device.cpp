@@ -34,6 +34,26 @@ Device::Device (const char *clsname, string iname, Component *parent, Message *m
 }
 
 
+string Device::GetClock ()
+{
+    string clockname = "";
+
+    for (auto i = 0; i < ninports; i++)
+    {
+        if (!inports[i].endpt) return "";
+        
+        if (inports[i].endpt->GetParent()->GetClock() == "")
+            return "";
+        else if (clockname == "")
+            clockname = inports[i].endpt->GetParent()->GetClock();
+        else if (clockname != inports[i].endpt->GetParent()->GetClock())
+            return "";
+    }
+
+    return clockname;
+}
+
+
 /* functions for 'Component' */
 bool Device::Connect (string portname, Endpoint *endpt)
 {

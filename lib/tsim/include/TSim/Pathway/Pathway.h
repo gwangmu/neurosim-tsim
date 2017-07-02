@@ -111,6 +111,8 @@ public:
     uint32_t GetNumLHS () { return endpts.lhs.size (); }
     uint32_t GetNumRHS () { return endpts.rhs.size (); }
 
+    bool IsPostDevicePathway ();
+
     const CycleClass<uint64_t>& GetCycleClass () { return cclass; }
     const EventCount<uint64_t>& GetEventCount () { return ecount; }
 

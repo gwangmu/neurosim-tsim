@@ -3,6 +3,7 @@
 #include <TSim/Base/Component.h>
 #include <TSim/Pathway/Message.h>
 #include <TSim/Module/Module.h>
+#include <TSim/Device/Device.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Utility/StaticBranchPred.h>
@@ -196,13 +197,24 @@ string Pathway::GetClock ()
 
     for (Endpoint &ept : endpts.lhs)
     {
-        Module *connmod = ept.GetConnectedModule ();
-        if (!connmod)
-            return "";
-        else if (clockname != "" && connmod->GetClock() != clockname)
-            return "";
-        else if (clockname == "")
-            clockname = connmod->GetClock();
+        if (Module *connmod = ept.GetConnectedModule ())
+        {
+            if (connmod->GetClock() == "") 
+                return "";
+            else if (clockname != "" && connmod->GetClock() != clockname)
+                return "";
+            else if (clockname == "")
+                clockname = connmod->GetClock();
+        }
+        else if (Device *conndev = ept.GetConnectedDevice ())
+        {
+            if (conndev->GetClock() == "") 
+                return "";
+            if (clockname != "" && conndev->GetClock() != clockname)
+                return "";
+            else if (clockname == "")
+                clockname = connmod->GetClock();
+        }
     }
 
     return clockname;
@@ -221,6 +233,18 @@ double Pathway::GetConsumedEnergy ()
         return (clkperiod * 10E-9 * dispower * 10E-9 * cclass.propagating);
 }
 
+
+
+bool Pathway::IsPostDevicePathway ()
+{
+    for (Endpoint &endpt : endpts.lhs)
+    {
+        if (endpt.GetConnectedDevice())
+            return true;
+    }
+
+    return false;
+}
 
 IssueCount Pathway::Validate (PERMIT(Simulator))
 {
