@@ -1,7 +1,6 @@
 #pragma once
 
 #include <TSim/Module/Module.h>
-#include <Message/StateMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -30,4 +29,5 @@ private:
     uint32_t OPORT_Empty;
     
     // Internal states
+    bool is_empty;
 };

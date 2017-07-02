@@ -31,6 +31,7 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
 
     cur_tsparity_ = -1;
     next_tsparity_ = -1;
+    is_dynfin = true;
 }
 
 void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, 
@@ -72,10 +73,16 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     /*** Check state of dynamics modules  ***/
     bool dynfin = state[NBC] && state[NB] && state[AMQ];
-    if(dynfin)
+    if(!is_dynfin && dynfin)
     {
         DEBUG_PRINT ("[TSMgr] Dynamics finished");
         outmsgs[PORT_DynFin] = new SignalMessage (0, true);
+        is_dynfin = true;
+    }
+    else if (is_dynfin && !dynfin)
+    {
+        outmsgs[PORT_DynFin] = new SignalMessage (0, false);
+        is_dynfin = false;
     }
 
     /*** Update TS parity ***/

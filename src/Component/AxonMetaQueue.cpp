@@ -31,6 +31,8 @@ AxonMetaQueue::AxonMetaQueue (string iname, Component *parent)
             Prototype<AxonMessage>::Get());
     OPORT_Empty = CreatePort ("empty", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
+
+    is_empty = true;
 }
 
 void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, 
@@ -61,6 +63,23 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
 
         DEBUG_PRINT ("[AMQ]Recieve Axon data %lu %u", ax_addr, ax_len);
     }
+
+    if(!is_empty && *outque_size == 0)
+    {
+        is_empty = true;
+        DEBUG_PRINT ("[AMQ] Axon metatda queue is empty");
+
+        outmsgs[OPORT_Empty] = new SignalMessage (0, true);
+    }
+    else if (is_empty && (*outque_size != 0))
+    {
+        is_empty = false;
+        DEBUG_PRINT ("[AMQ] Axon metadata queue has data");
+
+        outmsgs[OPORT_Empty] = new SignalMessage (0, false);
+    }
+
+
 
     //if(sel_msg)
 }

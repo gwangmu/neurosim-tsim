@@ -13,6 +13,7 @@
 #include <Component/DataSourceModule.h>
 #include <Component/DataSinkModule.h>
 #include <Component/DataEndpt.h>
+#include <Component/SynDataQueue.h>
 
 #include <Component/SRAMModule.h>
 #include <Component/StateSRAM.h>
@@ -46,15 +47,12 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     Module *deltaG_storage = new DeltaStorage ("delta_storage", this, 64, 16); 
 
     Module *core_tsmgr = new CoreTSMgr ("core_tsmgr", this);
-    Module *accumulator = new Accumulator ("accumulator", this);
 
     Module *axon_queue = new AxonMetaQueue ("axon_meta_queue", this);
     Module *axon_table = new AxonMetaTable ("axon_meta_table", this, 64);
 
-    // Dummy modules
-    Module *de_sdq_empty = new DataEndptModule <SignalMessage> ("de_sdq_empty", this);
-    Module *synapse_data = new DataEndptModule <SynapseMessage> ("synapse_dummy", this);
-   
+    Module *accumulator = new Accumulator ("accumulator", this);
+    Module *syn_queue = new SynDataQueue ("syn_data_queue", this, 64);
 
     /*******************************************************************************/
     /** Wires **/
@@ -100,15 +98,11 @@ NeuroCore::NeuroCore (string iname, Component *parent)
 
     // Core Timestep Manager
     FanoutWire *core_TSParity = 
-        new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 3);
+        new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 4);
 
 
     /*******************************************************************************/
     /*** Connect modules ***/
-    // Dummy Connection
-    de_sdq_empty->Connect ("dataend", sdq_empty->GetEndpoint (Endpoint::LHS));
-    synapse_data->Connect ("dataend", synapse_info->GetEndpoint (Endpoint::LHS));
-
     // Neuron block controller
     nb_controller->Connect ("deltaG", deltaG_nbc_rdata->GetEndpoint (Endpoint::RHS));
     nb_controller->Connect ("state", state_sram_rdata->GetEndpoint (Endpoint::RHS));
@@ -169,11 +163,17 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     accumulator->Connect("w_data", deltaG_wdata->GetEndpoint (Endpoint::LHS));
     accumulator->Connect("idle", acc_idle->GetEndpoint (Endpoint::LHS)); 
 
+    syn_queue->Connect("core_ts", core_TSParity->GetEndpoint (Endpoint::RHS, 3)); 
+    syn_queue->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
+    syn_queue->Connect("empty", sdq_empty->GetEndpoint (Endpoint::LHS));
+
     /*** Export port ***/    
     //ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
     ExportPort ("AxonData", axon_queue, "axon");
     ExportPort ("CurTSParity", core_tsmgr, "curTS");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
+    ExportPort ("SynData", syn_queue, "syn");
+    ExportPort ("SynTS", syn_queue, "syn_ts"); 
 }
 
 

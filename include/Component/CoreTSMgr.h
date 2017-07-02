@@ -31,4 +31,5 @@ private:
     /* Internal State */
     bool state[5];
     uint8_t cur_tsparity_, next_tsparity_;
+    bool is_dynfin;
 };

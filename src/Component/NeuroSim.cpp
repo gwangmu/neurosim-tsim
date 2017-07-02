@@ -31,7 +31,6 @@
 
 using namespace std;
 
-
 NeuroSim::NeuroSim (string iname, Component *parent)
     : Component ("NeuroSim", iname, parent)
 {
@@ -50,20 +49,31 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     Module *datasink = new DataSinkModule <AxonMessage, uint32_t> ("datasink", this);
     Module *ds_dynfin = new DataSinkModule <SignalMessage, bool> ("ds_dynfin", this);
     Module *ds_parity = new DataSourceModule ("ds_parity", this);
-    
+    Module *de_syn = new DataEndptModule <SynapseMessage> ("de_syn", this);
+    Module *de_synTS = new DataEndptModule <SignalMessage> ("de_synTS", this);
+
     // Wires
-    Wire *nb2sink = new Wire (this, conattr, Prototype<AxonMessage>::Get());
+    Wire *core2sink = new Wire (this, conattr, Prototype<AxonMessage>::Get());
     Wire *core_DynFin = new Wire (this, conattr, Prototype<SignalMessage>::Get());
     Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
-   
+  
+    Wire *syn_data = new Wire (this, conattr, Prototype<SynapseMessage>::Get());
+    Wire *syn_parity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+
     /** Connect **/
-    neurocore->Connect ("AxonData", nb2sink->GetEndpoint (Endpoint::LHS));
-    datasink->Connect ("datain", nb2sink->GetEndpoint (Endpoint::RHS));
+    neurocore->Connect ("AxonData", core2sink->GetEndpoint (Endpoint::LHS));
+    datasink->Connect ("datain", core2sink->GetEndpoint (Endpoint::RHS));
 
     neurocore->Connect ("DynFin", core_DynFin->GetEndpoint (Endpoint::LHS));
     ds_dynfin->Connect ("datain", core_DynFin->GetEndpoint (Endpoint::RHS));
     
     ds_parity->Connect ("dataout", core_TSParity->GetEndpoint (Endpoint::LHS));
     neurocore->Connect ("CurTSParity", core_TSParity->GetEndpoint (Endpoint::RHS));
+
+    de_syn->Connect ("dataend", syn_data->GetEndpoint (Endpoint::LHS));
+    neurocore->Connect ("SynData", syn_data->GetEndpoint (Endpoint::RHS));
+
+    de_synTS->Connect ("dataend", syn_parity->GetEndpoint (Endpoint::LHS));
+    neurocore->Connect ("SynTS", syn_parity->GetEndpoint (Endpoint::RHS));
 }
 
