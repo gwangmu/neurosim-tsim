@@ -28,16 +28,17 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
 void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
 {
     ExampleMessage *inmsg = static_cast<ExampleMessage *>(inmsgs[PORT_DATAIN]);
+        
+    if (recvdata % 3 == 0)
+    {
+        DEBUG_PRINT ("switching select to %d", !cursrc);
+        cursrc = !cursrc;
+        outmsgs[PORT_SELECT] = new IntegerMessage (cursrc);
+    }
 
     if (inmsg) 
     {
         recvdata = inmsg->value;
         DEBUG_PRINT ("val = %u,", recvdata);
-        
-        if (recvdata % 3 == 0)
-        {
-            cursrc = ~cursrc;
-            outmsgs[PORT_SELECT] = new IntegerMessage (cursrc);
-        }
     }
 }

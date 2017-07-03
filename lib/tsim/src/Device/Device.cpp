@@ -5,6 +5,8 @@
 #include <TSim/Pathway/Endpoint.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Message.h>
+#include <TSim/Pathway/IntegerMessage.h>
+#include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Utility/StaticBranchPred.h>
@@ -175,6 +177,10 @@ void Device::OnCreatePort (Port &port)
             nextinmsgs = new Message *[ninports] ();
             break;
         case PORT_CONTROL:
+            if (port.msgproto != Prototype<IntegerMessage>::Get())
+                DESIGN_FATAL ("control input must have IntegerMessage message type",
+                        GetName().c_str());
+
             delete[] nextctrlmsgs;
             nextctrlmsgs = new IntegerMessage[nctrlports] ();
             break;

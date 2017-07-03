@@ -139,6 +139,16 @@ double Unit::GetAggregateConsumedEnergy ()
 }
 
 
+bool Unit::IsControlPort (string portname)
+{
+    for (auto i = 0; i < nctrlports; i++)
+        if (ctrlports[i].name == portname)
+            return true;
+
+    return false;
+}
+
+
 string Unit::GetGraphVizBody (uint32_t level)
 {
     string body = "";

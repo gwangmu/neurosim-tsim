@@ -13,13 +13,13 @@ public:
     // For prototype creation. 
     // DO NOT USE FOR ORDINARY MESSAGE CREATION
     Message (const char *clsname)
-        : Metadata (clsname, ""), DEST_RHS_ID (-1), type (PLAIN) {}
+        : Metadata (clsname, ""), DEST_RHS_ID (-1), type (PLAIN), dispcount (-1) {}
 
     Message (const char *clsname, uint32_t destrhsid)
-        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (PLAIN) {}
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (PLAIN), dispcount (-1) {}
 
     Message (const char *clsname, Type type, uint32_t destrhsid)
-        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (type) {}
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (type), dispcount (-1) {}
 
     uint32_t DEST_RHS_ID;     // NOTE: -1 to broadcast
 
@@ -39,7 +39,13 @@ public:
 /*>> Below this is for MESSAGE DISPOSAL <<*/
 public:
     // Only for Pathway
-    inline void SetNumDestination (uint32_t n_dest) { dispcount = n_dest; }
+    inline void SetNumDestination (uint32_t n_dest) 
+    { 
+        if (dispcount == -1)
+            dispcount = n_dest; 
+        else
+            dispcount += n_dest - 1;
+    }
 
     // Only for Pathway and Module
     inline void Dispose () 

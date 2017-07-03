@@ -75,6 +75,8 @@ public:
     Endpoint* GetOutEndpoint (uint32_t idx) { return outports[idx].endpt; }
     Endpoint* GetCtrlEndpoint (uint32_t idx) { return ctrlports[idx].endpt; }
 
+    bool IsControlPort (string portname);
+
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator)) = 0;
     virtual void PreClock (PERMIT(Simulator)) = 0;

@@ -65,6 +65,7 @@ bool Simulator::LoadTestbench ()
     vector<Device *> devices;
     vector<Pathway *> pathways;
     vector<Pathway *> pathways_postdev;
+    vector<Pathway *> pathways_ctrl;
     task ("find modules/pathways")
     {
         queue<Component *> queComps;
@@ -80,10 +81,12 @@ bool Simulator::LoadTestbench ()
             {
                 Pathway *pathway = *ipath;
                 
-                if (!pathway->IsPostDevicePathway ())
-                    pathways.push_back (pathway);
-                else
+                if (pathway->IsPostDevicePathway ())
                     pathways_postdev.push_back (pathway);
+                else if (pathway->IsControlPathway ())
+                    pathways_ctrl.push_back (pathway);
+                else
+                    pathways.push_back (pathway);
             }
 
             for (auto icomp = nextcomp->ChildBegin ();
@@ -99,8 +102,9 @@ bool Simulator::LoadTestbench ()
             }
         }
 
-        PRINT ("total %zu module(s), %zu device(s), %zu pathway(s) (%zu post-device) found", 
-                modules.size(), devices.size(), pathways.size() + pathways_postdev.size(), pathways_postdev.size());
+        PRINT ("total %zu module(s), %zu device(s), %zu pathway(s) (%zu post-dev / %zu control) found", 
+                modules.size(), devices.size(), pathways.size() + pathways_postdev.size() + pathways_ctrl.size(), 
+                pathways_postdev.size(), pathways_ctrl.size());
     }
 
     task ("load simulation spec")
@@ -155,36 +159,23 @@ bool Simulator::LoadTestbench ()
             //     KEY(Simulator));
         }
 
-        for (Pathway *pathway : pathways)
+        for (vector<Pathway *> _pathways : {pathways, pathways_postdev, pathways_ctrl})
         {
-            string nclock = pathway->GetClock ();
-            if (nclock == "")
-                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
-                        tb->GetName().c_str(), pathway->GetName().c_str());
-            
-            mapCDoms[nclock].name = nclock;
-            mapCDoms[nclock].pathways.push_back (pathway);
+            for (Pathway *pathway : _pathways)
+            {
+                string nclock = pathway->GetClock ();
+                if (nclock == "")
+                    DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
+                            tb->GetName().c_str(), pathway->GetName().c_str());
+                
+                mapCDoms[nclock].name = nclock;
+                mapCDoms[nclock].pathways.push_back (pathway);
 
-            pathway->SetDissipationPower 
-                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetInstanceName(), KEY(Simulator)),
-                 KEY(Simulator));
-        }
-
-        for (Pathway *pathway : pathways_postdev)
-        {
-            string nclock = pathway->GetClock ();
-            if (nclock == "")
-                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
-                        tb->GetName().c_str(), pathway->GetName().c_str());
-            
-            mapCDoms[nclock].name = nclock;
-            mapCDoms[nclock].pathways_postdev.push_back (pathway);
-
-            pathway->SetDissipationPower 
-                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetInstanceName(), KEY(Simulator)),
-                 KEY(Simulator));
+                pathway->SetDissipationPower 
+                    (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
+                                       pathway->GetInstanceName(), KEY(Simulator)),
+                     KEY(Simulator));
+            }
         }
         
         for (auto &centry : mapCDoms)
@@ -204,6 +195,9 @@ bool Simulator::LoadTestbench ()
                 pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
             
             for (Pathway *pathway : cdomain.pathways_postdev)
+                pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
+
+            for (Pathway *pathway : cdomain.pathways_ctrl)
                 pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
         }
 
@@ -386,6 +380,10 @@ bool Simulator::Simulate ()
                 operation ("post-clock modules");
                 for (Module *module : curCDom->modules)
                     module->PostClock (KEY(Simulator));
+
+                operation ("post-clock pathways (ctrls)");
+                for (Pathway *pathway : curCDom->pathways_ctrl)
+                    pathway->PostClock (KEY(Simulator));
 
                 operation ("devices (preparatory)");
                 for (Device *device : curCDom->devices)

@@ -163,8 +163,8 @@ void Module::PreClock (PERMIT(Simulator))
                 if (!outport.endpt->IsSelectedLHSOfThisCycle ()
                         || outport.endpt->IsOverloaded ())
                 {
-                    DEBUG_PRINT("%s is stalled (capacity %d)"
-                            , outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity());
+                    DEBUG_PRINT("%s is stalled (capacity %d)",
+                            outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity());
                     stalled = true;
                     break;
                 }
