@@ -8,6 +8,7 @@ using namespace std;
 struct Message: public Metadata
 {
 public:
+    // NOTE: keep DEST_RHS_ID==-1 if TOGGLE type
     enum Type { PLAIN, TOGGLE };
 
     // For prototype creation. 

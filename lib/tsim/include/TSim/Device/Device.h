@@ -36,7 +36,7 @@ public:
 
 protected:  
     /* Called by derived 'Module' */
-    void OnCreatePort (Port &newport);
+    virtual void OnCreatePort (Port &newport);
 
     Message **nextinmsgs;
     IntegerMessage *nextctrlmsgs;
