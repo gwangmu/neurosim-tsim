@@ -48,6 +48,7 @@ Module::Module (const char *clsname, string iname,
     ninports = noutports = 0;
 
     pbusy_state = 0;
+    inmsg_valid_count = 0;
 
     clkperiod = -1;
     dynpower = -1;
@@ -387,8 +388,10 @@ void Module::PostClock (PERMIT(Simulator))
             for (auto i = 0; i < noutports; i++)
             {
                 if (nextoutmsgs[omsgidx_out])
+                {
                     MarkBusyPipeline ();
-                break;
+                    break;
+                }
             }
         }
         
@@ -403,13 +406,16 @@ void Module::PostClock (PERMIT(Simulator))
                         inports[i].endpt->Pop ();
                         nextinmsgs[i]->Dispose ();
                         nextinmsgs[i] = nullptr;
+
+                        UpdateInMsgValidCount ();
+                        RefreshInMsgValidCount ();
                     }
                 }
             }
         }
 
-        omsgidx = (omsgidx + 1) & omsgidxmask;
         CommitPipeline ();
+        omsgidx = (omsgidx + 1) & omsgidxmask;
     }
 
     operation ("status check")

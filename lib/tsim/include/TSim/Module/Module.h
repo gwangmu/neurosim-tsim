@@ -118,7 +118,11 @@ private:
     // pipeline management
     inline void MarkBusyPipeline () { pbusy_state |= (1 << ((omsgidx + pdepth) & omsgidxmask)); }
     inline void CommitPipeline () { pbusy_state &= ~(1 << omsgidx); }
-    inline bool IsIdle () { return pbusy_state == 0; }
+
+    inline void RefreshInMsgValidCount () { inmsg_valid_count = pdepth; }
+    inline void UpdateInMsgValidCount () { if (inmsg_valid_count > 0) inmsg_valid_count--; }
+
+    inline bool IsIdle () { return pbusy_state == 0 && inmsg_valid_count == 0; }
 
     Message **nextinmsgs;
     Message ***nextoutmsgs;
@@ -127,6 +131,7 @@ private:
 
     uint32_t pdepth;
     uint64_t pbusy_state;
+    uint32_t inmsg_valid_count;
 
     // module state
     bool stalled;

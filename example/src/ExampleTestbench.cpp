@@ -23,5 +23,5 @@ ExampleTestbench::ExampleTestbench ()
 
 bool ExampleTestbench::IsFinished (PERMIT(Simulator))
 {
-    return (datasink->recvdata >= 10);
+    return (datasink->recvdata >= 50);
 }

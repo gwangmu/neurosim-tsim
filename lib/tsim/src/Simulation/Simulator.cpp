@@ -594,7 +594,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
                 to_string(aggecount.stalled / comp->GetNumChildModules ()) + 
                 " cycle(s) / module)";
 
-        double avgactive = aggcclass.active / comp->GetNumChildModules() /
+        double avgactive = aggcclass.active /
             (aggcclass.active + aggcclass.idle) * 100;
         double oenergy = comp->GetAggregateConsumedEnergy (); 
         double energy = oenergy * 1000;
