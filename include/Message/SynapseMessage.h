@@ -24,3 +24,4 @@ public:
     uint32_t weight;
     uint16_t idx;
 };
+
