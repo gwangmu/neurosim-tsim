@@ -9,4 +9,4 @@ EXT=png
 IMGNAME=${1%%.dot}.$EXT
 
 dot -T$EXT $1 -n -o $IMGNAME
-scp $IMGNAME gwangmu@147.46.115.228:~/Downloads
+#scp $IMGNAME gwangmu@147.46.115.228:~/Downloads
