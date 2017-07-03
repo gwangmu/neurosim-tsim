@@ -78,6 +78,8 @@ public:
     vector<Pathway *>::iterator PathwayBegin () { return pathways.begin (); }
     vector<Pathway *>::iterator PathwayEnd () { return pathways.end (); }
 
+    virtual string GetGraphVizBody (uint32_t level);
+
     virtual IssueCount Validate (PERMIT(Simulator));
 
     /* Called by parent 'Component' */

@@ -78,8 +78,12 @@ public:
     virtual IssueCount Validate (PERMIT(Simulator));
     virtual void PreClock (PERMIT(Simulator)) = 0;
     virtual void PostClock (PERMIT(Simulator)) = 0;
-
+    
+    virtual string GetGraphVizBody (uint32_t level);
+    
+    /* Called by 'Component' */
     virtual bool Connect (string portname, Endpoint *endpt) final;
+
 
 protected:  
     /* Called by derived 'Module' */

@@ -30,6 +30,11 @@ Simulator::Option LoadSimOption (int argc, char *argv[])
                 opt.timelimit = stoi (string (argv[i + 1]));
                 i++;
             }
+            else if (arg == "-gv")
+            {
+                opt.gvfilename = string (argv[i + 1]);
+                i++;
+            }
         }
     }
 
@@ -40,9 +45,11 @@ Simulator::Option LoadSimOption (int argc, char *argv[])
 int main (int argc, char *argv[])
 {
     if (argc < 2) {
-        PRINT ("usage: %s <simspec_file> [-p <timestamp interval>] [-l <timelimit>]", argv[0]);
+        PRINT ("usage: %s <simspec_file> [-p <timestamp interval>] [-l <timelimit>]\n"
+               "        [-gv <gvfilename>]", argv[0]);
         PRINT ("  -p\ttimestamp print interval (-1 = off, by default)");
         PRINT ("  -l\tsimulation time limit (-1 = infinity, by default)");
+        PRINT ("  -gv\tgraphviz source file name ("", by default)");
         return 0;
     }
 

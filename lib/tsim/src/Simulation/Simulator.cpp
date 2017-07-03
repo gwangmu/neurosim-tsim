@@ -12,6 +12,8 @@
 #include <chrono>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -51,6 +53,12 @@ bool Simulator::AttachTestbench (Testbench *tb)
 bool Simulator::LoadTestbench ()
 {
     macrotask ("Loading '%s'..", tb->GetName().c_str());
+
+    task ("print graphviz design source")
+    {
+        if (opt.gvfilename != "")
+            PrintGraphVizSource (opt.gvfilename);
+    }
 
     vector<Module *> modules;
     vector<Device *> devices;
@@ -406,6 +414,32 @@ bool Simulator::Simulate ()
 }
 
 
+bool Simulator::PrintGraphVizSource (string filename)
+{
+    string body;
+    body = tb->GetTopComponent(KEY(Simulator))->GetGraphVizBody(1);
+
+    string src = "";
+    src += string ("digraph ") + string(tb->GetClassName()) + " {\n";
+    src += "\tnode [shape = record];\n";
+    src += "\tgraph [rankdir = LR];\n";
+    src += body;
+    src += string ("}");
+
+    ofstream file (filename);
+    if (!file.is_open ())
+    {
+        DESIGN_WARNING ("cannot create graphviz file '%s'",
+                tb->GetClassName(), filename.c_str());
+        return false;
+    }
+
+    file << src;
+    file.close ();
+
+    return true;
+}
+
 void Simulator::ReportDesignSummary ()
 {
     macrotask ("< Design summary >");
@@ -486,6 +520,7 @@ void Simulator::ReportActivityEvents ()
 
 #define STROKE PRINT ("%s", string(120, '-').c_str())
 #define LABEL(f, v, en, p, e) PRINT (" %-50s  %16s %12s %12s  %s ", f, v, en, p, e);
+#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf %12s %12s  %s ", f, v, en, p, e);
 
     STROKE;
     LABEL ("Component Name", "Activity (%)", "Energy (mJ)", "Power (mW)", "Events");

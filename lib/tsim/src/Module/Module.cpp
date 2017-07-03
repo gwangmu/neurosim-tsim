@@ -448,6 +448,37 @@ void Module::PostClock (PERMIT(Simulator))
 }
 
 
+string Module::GetGraphVizBody (uint32_t level)
+{
+    string body = "";
+
+#define ADDLINE(str) body += (string(level, '\t') + str + string("\n"));
+
+    string inputs = "";
+    for (auto i = 0; i < ninports; i++)
+    {
+        inputs += string("<") + inports[i].name + ">" + inports[i].name;
+        if (i < ninports - 1) inputs += "|";
+    }
+
+    string outputs = "";
+    for (auto i = 0; i < noutports; i++)
+    {
+        outputs += string("<") + outports[i].name + ">" + outports[i].name;
+        if (i < noutports - 1) outputs += "|";
+    }
+
+    ADDLINE (GetInstanceName() + string(" [label=\"{ {") +
+            inputs + "}|" + string(GetClassName()) + "\\n" + GetInstanceName() + "\\n" + 
+            "(clock: " + GetClock() + ")|{" +
+            outputs + "} }\"];");
+
+#undef ADDLINE
+
+    return body;
+}
+
+
 /* Called by 'Module' */
 uint32_t Module::CreatePort (string portname, Module::PortType iotype,
         Message* msgproto)

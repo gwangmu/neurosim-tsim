@@ -54,6 +54,38 @@ string Device::GetClock ()
 }
 
 
+string Device::GetGraphVizBody (uint32_t level)
+{
+    string body = "";
+
+#define ADDLINE(str) body += (string(level, '\t') + str + string("\n"));
+
+    string inputs = "";
+    for (auto i = 0; i < ninports; i++)
+    {
+        inputs += string("<") + inports[i].name + ">" + inports[i].name;
+        if (i < ninports - 1) inputs += "|";
+    }
+
+    string ctrls = "";
+    for (auto i = 0; i < nctrlports; i++)
+    {
+        ctrls += string("<") + ctrlports[i].name + ">" + ctrlports[i].name;
+        if (i < nctrlports - 1) ctrls += "|";
+    }
+
+    string out = "";
+    out += string("<") + outport.name + ">" + outport.name;
+
+    ADDLINE (GetInstanceName() + string(" [label=\"{ {") +
+            inputs + "|" + ctrls + "}|" + string(GetClassName()) + "\\n" + GetInstanceName() + "\\n" + 
+            "(clock: " + GetClock() + ")|" + out + "\"];");
+
+#undef ADDLINE
+
+    return body;
+}
+
 /* functions for 'Component' */
 bool Device::Connect (string portname, Endpoint *endpt)
 {

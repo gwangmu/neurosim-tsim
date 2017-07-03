@@ -2,12 +2,14 @@
 
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Message.h>
+#include <TSim/Pathway/NullMessage.h>
 #include <TSim/Module/Module.h>
 #include <TSim/Device/Device.h>
 #include <TSim/Simulation/Simulator.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Utility/StaticBranchPred.h>
+#include <TSim/Utility/Prototype.h>
 
 #include <string>
 #include <cinttypes>
@@ -48,7 +50,7 @@ Endpoint::Endpoint () : Metadata ("Endpoint", "PORTCAP")
     type = CAP; 
     capacity = 0;
     resv_count = 0;
-    msgproto = nullptr; 
+    msgproto = Prototype<NullMessage>::Get ();
     selected_lhs = 0;
     parent = nullptr; 
 }

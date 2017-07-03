@@ -9,3 +9,5 @@ core
 tags
 bin/
 *out
+*.dot
+*.png

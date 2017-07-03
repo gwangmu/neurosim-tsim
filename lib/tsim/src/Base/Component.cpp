@@ -1,6 +1,8 @@
 #include <TSim/Base/Component.h>
 
 #include <TSim/Simulation/Simulator.h>
+#include <TSim/Module/Module.h>
+#include <TSim/Device/Device.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Endpoint.h>
 #include <TSim/Utility/AccessKey.h>
@@ -127,6 +129,106 @@ double Component::GetAggregateConsumedEnergy ()
     }
 
     return energy;
+}
+
+
+string Component::GetGraphVizBody (uint32_t level)
+{
+    string body = "";
+
+#define ADDBULK(str) body += (str);
+#define ADDLINE(str) body += (string(level, '\t') + str + string("\n"));
+
+    operation ("node declaration")
+    {
+        ADDLINE (string("// ") + GetFullName());
+        ADDLINE ("subgraph " + string("cluster_") + GetInstanceName() + " {");
+        ADDLINE ("\tlabel = \"" + GetName() + "\"");
+
+        for (Component *child : children)
+            ADDBULK (child->GetGraphVizBody (level + 1));
+
+        for (Pathway *pathway : pathways)
+            if (pathway->GetNumLHS() > 1 || pathway->GetNumRHS() > 1)
+            {
+                string label = "";
+                label = pathway->GetMsgPrototype()->GetClassName() + string ("(") + 
+                        to_string(pathway->GetBitWidth()) + string (")");
+
+                ADDLINE ("p" + to_string((uint64_t)pathway) + " [xlabel=\"" + label + "\", shape=point]");
+            }
+
+        ADDLINE ("}");
+    }
+
+    operation ("connection")
+    {
+        for (Pathway *pathway : pathways)
+        {
+            vector<string> lhss;
+            vector<string> rhss;
+            
+            for (auto i = 0; i < pathway->GetNumLHS(); i++)
+            {
+                Endpoint &endpt = pathway->GetLHS(i);
+                string lhsname = "";
+
+                if (endpt.GetConnectedModule ())
+                    lhsname += endpt.GetConnectedModule()->GetInstanceName() + ":";
+                else if (endpt.GetConnectedDevice ())
+                    lhsname += endpt.GetConnectedDevice()->GetInstanceName() + ":";
+                else
+                    SYSTEM_ERROR ("bogus component type");
+
+                lhsname += endpt.GetConnectedPortName();
+
+                lhss.push_back (lhsname);
+            }
+
+            for (auto i = 0; i < pathway->GetNumRHS(); i++)
+            {
+                Endpoint &endpt = pathway->GetRHS(i);
+                string rhsname = "";
+
+                if (endpt.GetConnectedModule ())
+                    rhsname += endpt.GetConnectedModule()->GetInstanceName() + ":";
+                else if (endpt.GetConnectedDevice ())
+                    rhsname += endpt.GetConnectedDevice()->GetInstanceName() + ":";
+                else
+                    SYSTEM_ERROR ("bogus component type");
+
+                rhsname += endpt.GetConnectedPortName();
+
+                rhss.push_back (rhsname);
+            }
+
+            if (lhss.size() > 0 && rhss.size() > 0)
+            {
+                string label = "";
+                label = pathway->GetMsgPrototype()->GetClassName() + string ("(") + 
+                        to_string(pathway->GetBitWidth()) + string (")");
+
+                if (lhss.size() == 1 && rhss.size() == 1)
+                {
+                    ADDLINE (lhss[0] + " -> " + rhss[0] + " [label=\"" + label + "\"];");
+                }
+                else
+                {
+                    string point = "p" + to_string((uint64_t)pathway);
+
+                    for (auto i = 0; i < lhss.size(); i++)
+                        ADDLINE (lhss[i] + " -> " + point);
+                    for (auto i = 0; i < rhss.size(); i++)
+                        ADDLINE (point + " -> " + rhss[i] + " [arrowtail=inv, dir=both];");
+                }
+            }
+        }
+    }    
+
+#undef ADDLINE
+#undef ADDBULK
+    
+    return body;
 }
 
 

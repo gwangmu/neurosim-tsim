@@ -79,6 +79,8 @@ public:
     virtual void PreClock (PERMIT(Simulator)) final;
     virtual void PostClock (PERMIT(Simulator)) final;
 
+    virtual string GetGraphVizBody (uint32_t level);
+
     /* Called by parent 'Component' */
     bool SetScript (Script *script); 
     bool SetRegister (Register *reg);

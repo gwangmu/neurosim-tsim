@@ -23,6 +23,7 @@ public:
         Option () {}
         uint64_t timelimit = -1;
         uint64_t tsinterval = -1;
+        string gvfilename = "";
     };
 
 protected:
@@ -49,7 +50,8 @@ public:
 
     bool AttachTestbench (Testbench *tb);
     bool Simulate ();
-
+    
+    bool PrintGraphVizSource (string filename);
     void ReportDesignSummary ();
     void ReportSimulationSummary ();
     void ReportActivityEvents ();
