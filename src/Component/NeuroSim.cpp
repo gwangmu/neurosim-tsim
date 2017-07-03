@@ -34,10 +34,11 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     SetClock ("main");
 
     /** Parameters **/
+    int num_cores = 2;
     int num_propagators = 1;
 
     /** Components **/
-    Component *neurochip = new NeuroChip ("chip0", this, num_propagators);
+    Component *neurochip = new NeuroChip ("chip0", this, num_cores, num_propagators);
    
     /** Modules **/
 
@@ -47,7 +48,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     
     // Modules
     Module *datasink = new DataSinkModule <AxonMessage, uint32_t> ("datasink", this);
-    Module *ds_parity = new DataSourceModule ("ds_parity", this);
+    std::vector <Module*> ds_parity;
+    for (int i=0; i<num_cores; i++)
+        ds_parity.push_back(new DataSourceModule ("ds_parity", this));
     
     Module *de_syn = new DataEndptModule <SynapseMessage> ("de_syn", this);
     Module *de_synTS = new DataEndptModule <SignalMessage> ("de_synTS", this);
@@ -55,7 +58,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
 
     // Wires
     Wire *core2sink = new Wire (this, conattr, Prototype<AxonMessage>::Get()); // DUMMY
-    Wire *core_TSParity = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    std::vector<Wire*> core_TSParity;
+    for (int i=0; i<num_cores; i++)
+        core_TSParity.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
     
     std::vector<Wire*> syn_data;
     std::vector<Wire*> syn_parity;
@@ -71,9 +76,11 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     neurochip->Connect ("Axon", core2sink->GetEndpoint (Endpoint::LHS));
     datasink->Connect ("datain", core2sink->GetEndpoint (Endpoint::RHS));
 
-    ds_parity->Connect ("dataout", core_TSParity->GetEndpoint (Endpoint::LHS));
-    neurochip->Connect ("CurTSParity", core_TSParity->GetEndpoint (Endpoint::RHS));
-
+    for (int i=0; i<num_cores; i++)
+    {
+        ds_parity[i]->Connect ("dataout", core_TSParity[i]->GetEndpoint (Endpoint::LHS));
+        neurochip->Connect ("CurTSParity" + to_string(i), core_TSParity[i]->GetEndpoint (Endpoint::RHS));
+    }
     for (int i=0; i<num_propagators; i++)
     {
         de_syn->Connect ("dataend", syn_data[i]->GetEndpoint (Endpoint::LHS));

@@ -36,7 +36,7 @@
 using namespace std;
 
 
-NeuroCore::NeuroCore (string iname, Component *parent)
+NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     : Component ("NeuroCore", iname, parent)
 {
     // add child modules/components
@@ -153,8 +153,6 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     core_tsmgr->Connect ("Tsparity", core_TSParity->GetEndpoint (Endpoint::LHS));
    
     // Accumulator
-    // synapse
-    // r_addr, r_data, w_addr, w_data, idle
     accumulator->Connect("synapse", synapse_info->GetEndpoint (Endpoint::RHS));
     accumulator->Connect("tsparity", core_TSParity->GetEndpoint (Endpoint::RHS, 2));
     accumulator->Connect("r_addr", acc_dsram_raddr->GetEndpoint (Endpoint::LHS)); 
@@ -163,6 +161,7 @@ NeuroCore::NeuroCore (string iname, Component *parent)
     accumulator->Connect("w_data", deltaG_wdata->GetEndpoint (Endpoint::LHS));
     accumulator->Connect("idle", acc_idle->GetEndpoint (Endpoint::LHS)); 
 
+    // Synapse data queue
     syn_queue->Connect("core_ts", core_TSParity->GetEndpoint (Endpoint::RHS, 3)); 
     syn_queue->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
     syn_queue->Connect("empty", sdq_empty->GetEndpoint (Endpoint::LHS));
