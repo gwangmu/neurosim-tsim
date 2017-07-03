@@ -43,6 +43,7 @@ protected:
 
         // Simulation states
         uint64_t nexttime;
+        uint64_t ncycles;
     };
 
 public:

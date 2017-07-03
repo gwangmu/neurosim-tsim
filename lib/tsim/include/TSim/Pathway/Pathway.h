@@ -159,6 +159,8 @@ private:
     inline void UpdateStabilizeCycle ();
 
 private:
+    const uint32_t INITIAL_LHSID = 0;
+
     Component *parent;
 
     // property

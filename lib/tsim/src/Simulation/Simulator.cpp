@@ -24,6 +24,7 @@ Simulator::ClockDomain::ClockDomain ()
     name = "";
     period = 0;
     nexttime = 0;
+    ncycles = 0;
 }
 
 
@@ -358,6 +359,7 @@ bool Simulator::Simulate ()
                 curtime = mintime;
                 curCDom = &cdomains[minidx];
                 cdomains[minidx].nexttime += cdomains[minidx].period;
+                cdomains[minidx].ncycles++;
             }
 
             if (nexttstime <= curtime)
@@ -498,6 +500,16 @@ void Simulator::ReportSimulationSummary ()
             to_string(cclass.active / (cclass.active + cclass.idle) /
                 nmodules * 100).c_str());
 
+    for (auto i = 0; i < cdomains.size(); i++)
+    {
+        ClockDomain &cdom = cdomains[i];
+
+        const char *fieldname = "";
+        if (i == 0) fieldname = "Number of cycles";
+
+        ROW (fieldname, ("(" + cdom.name + ") " + to_string (cdom.ncycles)).c_str());
+    }
+
     STROKE;
 
     ROW ("Simulation time (s)", to_string((double)curtime / 10E9).c_str());
@@ -519,8 +531,7 @@ void Simulator::ReportActivityEvents ()
     macrotask ("< Activity and Events >");
 
 #define STROKE PRINT ("%s", string(120, '-').c_str())
-#define LABEL(f, v, en, p, e) PRINT (" %-50s  %16s %12s %12s  %s ", f, v, en, p, e);
-#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf %12s %12s  %s ", f, v, en, p, e);
+#define LABEL(f, v, en, p, e) PRINT (" %-50s  %18s %12s %12s  %s ", f, v, en, p, e);
 
     STROKE;
     LABEL ("Component Name", "Activity (%)", "Energy (mJ)", "Power (mW)", "Events");
@@ -535,7 +546,7 @@ void Simulator::ReportActivityEvents ()
 
 void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 {
-#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf %12s %12s  %s ", f, v, en, p, e);
+#define ROW(f, v, en, p, e) PRINT (" %-60s % 9.2lf %12s %12s  %s ", f, v, en, p, e);
 
     if (Module *module = dynamic_cast<Module *>(comp))
     {

@@ -65,7 +65,7 @@ Pathway::Pathway (const char *clsname, Component *parent,
 
     SetConnectionAttr (conattr);
 
-    lhsid = -1;
+    lhsid = INITIAL_LHSID;
     stabilize_cycle = 0;
 
     clkperiod = -1;
@@ -137,8 +137,12 @@ bool Pathway::AddEndpoint (string name, Endpoint::Type type, uint32_t capacity)
             return false;
         }
         
-        endpts.lhs.push_back (Endpoint (name, endpts.lhs.size(), this, 
+        uint32_t id = endpts.lhs.size();
+        endpts.lhs.push_back (Endpoint (name, id, this, 
                     Endpoint::LHS, capacity, KEY(Pathway)));
+
+        if (id == INITIAL_LHSID)
+            endpts.lhs.back().SetSelectedLHS (true);
     }
     else if (type == Endpoint::RHS)
     {
