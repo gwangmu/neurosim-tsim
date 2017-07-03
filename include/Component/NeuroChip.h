@@ -10,8 +10,8 @@
 using namespace std;
 
 
-class NeuroCore: public Component
+class NeuroChip: public Component
 {
 public:
-    NeuroCore (string iname, Component *parent, int num_propagators);
+    NeuroChip (string iname, Component *parent, int num_cores, int num_propagators);
 };
