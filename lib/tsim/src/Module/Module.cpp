@@ -104,13 +104,13 @@ IssueCount Module::Validate (PERMIT(Simulator))
 
     if (GetDynamicPower() == -1)
     {
-        DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
+        //DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
         icount.warning++;
     }
 
     if (GetStaticPower() == -1)
     {
-        DESIGN_WARNING ("no static power info", GetFullName().c_str());
+        //DESIGN_WARNING ("no static power info", GetFullName().c_str());
         icount.warning++;
     }
 

@@ -41,7 +41,7 @@ void Pathway::Connection::Assign (Message *newmsg)
                 parent->GetName().c_str());
 
     msgprop[(curidx + conattr.latency) & PROPIDX_MASK] = newmsg;
-    DEBUG_PRINT ("Assign new message %s\n", newmsg->GetClassName()); 
+    DEBUG_PRINT ("Assign new message %s", newmsg->GetClassName()); 
     nprop++;
 }
     
@@ -249,7 +249,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
     if (dispower == -1)
     {
-        DESIGN_WARNING ("no dissipation power info", GetName().c_str());
+        //DESIGN_WARNING ("no dissipation power info", GetName().c_str());
         icount.warning++;
     }
 

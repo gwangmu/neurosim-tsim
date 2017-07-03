@@ -51,7 +51,7 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
     
         if(spike)
         {
-            DEBUG_PRINT ("[AMQ] Receive spike (idx: %d). Send read request to Axon Metadata Table", idx);
+            DEBUG_PRINT ("[AMQ] Receive spike (idx: %d, queue size: %u)", idx, *outque_size);
             outmsgs[OPORT_SRAM] = new IndexMessage (0, idx);
         }
     }

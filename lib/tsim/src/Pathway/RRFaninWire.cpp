@@ -34,7 +34,7 @@ uint32_t RRFaninWire::NextTargetLHSEndpointID ()
     uint32_t next_lhsid = cur_lhsid;
     do
     {
-        next_lhsid = cur_lhsid + 1;
+        next_lhsid = next_lhsid + 1;
         if (next_lhsid >= GetNumLHS ())
             next_lhsid = 0;
 
@@ -46,7 +46,6 @@ uint32_t RRFaninWire::NextTargetLHSEndpointID ()
             cur_lhsid = next_lhsid;
             break;
         }
-
     } while (next_lhsid != cur_lhsid);
 
     return cur_lhsid;
