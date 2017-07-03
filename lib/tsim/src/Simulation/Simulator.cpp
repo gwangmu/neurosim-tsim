@@ -99,9 +99,8 @@ bool Simulator::LoadTestbench ()
             }
         }
 
-        PRINT ("total %zu module(s), %zu device(s) found", modules.size(), devices.size());
-        for (Module *module:modules)
-            DEBUG_PRINT ("%s", module->GetName().c_str());
+        PRINT ("total %zu module(s), %zu device(s), %zu pathway(s) (%zu post-device) found", 
+                modules.size(), devices.size(), pathways.size() + pathways_postdev.size(), pathways_postdev.size());
     }
 
     task ("load simulation spec")
@@ -197,8 +196,14 @@ bool Simulator::LoadTestbench ()
 
             for (Module *module : cdomain.modules)
                 module->SetClockPeriod(cdomain.period, KEY(Simulator));
+            
+            for (Device *device : cdomain.devices)
+                device->SetClockPeriod(cdomain.period, KEY(Simulator));
 
             for (Pathway *pathway : cdomain.pathways)
+                pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
+            
+            for (Pathway *pathway : cdomain.pathways_postdev)
                 pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
         }
 

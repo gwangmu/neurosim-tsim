@@ -80,9 +80,9 @@ string Pathway::GetInstanceName ()
 
     for (auto i = 0; i < endpts.lhs.size (); i++)
     {
-        if (endpts.lhs[i].GetConnectedModule ())
+        if (endpts.lhs[i].GetConnectedUnit ())
         {
-            lhs = endpts.lhs[i].GetConnectedModule()->GetInstanceName()
+            lhs = endpts.lhs[i].GetConnectedUnit()->GetInstanceName()
                 + "." + endpts.lhs[i].GetConnectedPortName();
             break;
         }
@@ -90,9 +90,9 @@ string Pathway::GetInstanceName ()
 
     for (auto i = 0; i < endpts.rhs.size (); i++)
     {
-        if (endpts.rhs[i].GetConnectedModule ())
+        if (endpts.rhs[i].GetConnectedUnit ())
         {
-            rhs = endpts.rhs[i].GetConnectedModule()->GetInstanceName()
+            rhs = endpts.rhs[i].GetConnectedUnit()->GetInstanceName()
                 + "." + endpts.rhs[i].GetConnectedPortName();
             break;
         }
@@ -201,24 +201,17 @@ string Pathway::GetClock ()
 
     for (Endpoint &ept : endpts.lhs)
     {
-        if (Module *connmod = ept.GetConnectedModule ())
+        if (Unit *connunit = ept.GetConnectedUnit ())
         {
-            if (connmod->GetClock() == "") 
+            if (connunit->GetClock() == "") 
                 return "";
-            else if (clockname != "" && connmod->GetClock() != clockname)
+            else if (clockname != "" && connunit->GetClock() != clockname)
                 return "";
             else if (clockname == "")
-                clockname = connmod->GetClock();
+                clockname = connunit->GetClock();
         }
-        else if (Device *conndev = ept.GetConnectedDevice ())
-        {
-            if (conndev->GetClock() == "") 
-                return "";
-            if (clockname != "" && conndev->GetClock() != clockname)
-                return "";
-            else if (clockname == "")
-                clockname = connmod->GetClock();
-        }
+        else
+            return "";
     }
 
     return clockname;
@@ -243,7 +236,7 @@ bool Pathway::IsPostDevicePathway ()
 {
     for (Endpoint &endpt : endpts.lhs)
     {
-        if (endpt.GetConnectedDevice())
+        if (dynamic_cast<Device *>(endpt.GetConnectedUnit()))
             return true;
     }
 
@@ -303,7 +296,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
     for (Endpoint &ept : endpts.lhs)
     {
-        if (!ept.GetConnectedModule ())
+        if (!ept.GetConnectedUnit ())
         {
             DESIGN_ERROR ("disconnected endpoint '%s'",
                     GetName().c_str(), ept.GetName().c_str());
@@ -313,7 +306,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
     for (Endpoint &ept : endpts.rhs)
     {
-        if (!ept.GetConnectedModule ())
+        if (!ept.GetConnectedUnit ())
         {
             DESIGN_ERROR ("disconnected endpoint '%s'",
                     GetName().c_str(), ept.GetName().c_str());

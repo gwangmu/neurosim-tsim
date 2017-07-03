@@ -1,7 +1,7 @@
 #include <TSim/Base/Component.h>
 
 #include <TSim/Simulation/Simulator.h>
-#include <TSim/Module/Module.h>
+#include <TSim/Base/Unit.h>
 #include <TSim/Device/Device.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Endpoint.h>
@@ -63,12 +63,12 @@ uint32_t Component::GetNumChildModules ()
 }
 
 
-Module* Component::GetModule (string name)
+Unit* Component::GetUnit (string name)
 {
-    Module *tar = nullptr;
+    Unit *tar = nullptr;
     for (Component *child : children)
     {
-        if ((tar = child->GetModule (name)))
+        if ((tar = child->GetUnit (name)))
             break;
     }
 
@@ -173,16 +173,12 @@ string Component::GetGraphVizBody (uint32_t level)
                 Endpoint &endpt = pathway->GetLHS(i);
                 string lhsname = "";
 
-                if (endpt.GetConnectedModule ())
-                    lhsname += endpt.GetConnectedModule()->GetInstanceName() + ":";
-                else if (endpt.GetConnectedDevice ())
-                    lhsname += endpt.GetConnectedDevice()->GetInstanceName() + ":";
-                else
-                    SYSTEM_ERROR ("bogus component type");
-
-                lhsname += endpt.GetConnectedPortName();
-
-                lhss.push_back (lhsname);
+                if (endpt.GetConnectedUnit ())
+                {
+                    lhsname += endpt.GetConnectedUnit()->GetInstanceName() + ":";
+                    lhsname += endpt.GetConnectedPortName();
+                    lhss.push_back (lhsname);
+                }
             }
 
             for (auto i = 0; i < pathway->GetNumRHS(); i++)
@@ -190,16 +186,12 @@ string Component::GetGraphVizBody (uint32_t level)
                 Endpoint &endpt = pathway->GetRHS(i);
                 string rhsname = "";
 
-                if (endpt.GetConnectedModule ())
-                    rhsname += endpt.GetConnectedModule()->GetInstanceName() + ":";
-                else if (endpt.GetConnectedDevice ())
-                    rhsname += endpt.GetConnectedDevice()->GetInstanceName() + ":";
-                else
-                    SYSTEM_ERROR ("bogus component type");
-
-                rhsname += endpt.GetConnectedPortName();
-
-                rhss.push_back (rhsname);
+                if (endpt.GetConnectedUnit ())
+                {
+                    rhsname += endpt.GetConnectedUnit()->GetInstanceName() + ":";
+                    rhsname += endpt.GetConnectedPortName();
+                    rhss.push_back (rhsname);
+                }
             }
 
             if (lhss.size() > 0 && rhss.size() > 0)

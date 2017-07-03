@@ -37,8 +37,8 @@ HDRDIR=include
 LIBDIR=lib
 
 ifdef EXAMPLE
-SRCDIR=example/src
-HDRDIR=example/include
+SRCDIR=example/$(EXAMPLE)/src
+HDRDIR=example/$(EXAMPLE)/include
 endif
 
 # library paths

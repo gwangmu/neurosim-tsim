@@ -17,10 +17,10 @@ Mux::Mux (string iname, Component *parent, Message *msgproto, uint32_t ninput)
 {
     // NOTE: IDs should be 0, 1, 2, ...
     for (int i = 0; i < ninput; i++)
-        CreatePort (string("input") + to_string(i), Device::PORT_INPUT);
+        CreatePort (string("input") + to_string(i), Device::PORT_INPUT, msgproto);
 
     // NOTE: ID should be 0
-    CreatePort (string("select"), Device::PORT_CONTROL);
+    CreatePort (string("select"), Device::PORT_CONTROL, msgproto);
 }
 
 
@@ -45,7 +45,7 @@ void Mux::PreClock (PERMIT(Simulator))
                 inports[i].endpt->SetExtReadyState (false);
             else
                 inports[i].endpt->SetExtReadyState 
-                    (!outport.endpt->IsBroadcastBlocked ());
+                    (!outports[0].endpt->IsBroadcastBlocked ());
         }
     }
 }
@@ -103,7 +103,7 @@ void Mux::PostClock (PERMIT(Simulator))
             SYSTEM_ERROR ("RESERVE message cannot reach this point (%s)",
                     GetFullName().c_str());
 
-        bool assnres = outport.endpt->Assign (outmsg);
+        bool assnres = outports[0].endpt->Assign (outmsg);
         if (unlikely (!assnres))
             SYSTEM_ERROR ("attempted to push to full LHS queue");
     }

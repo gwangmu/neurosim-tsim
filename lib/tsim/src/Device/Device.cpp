@@ -1,6 +1,7 @@
 #include <TSim/Device/Device.h>
 
 #include <TSim/Base/Component.h>
+#include <TSim/Base/Unit.h>
 #include <TSim/Pathway/Endpoint.h>
 #include <TSim/Pathway/Pathway.h>
 #include <TSim/Pathway/Message.h>
@@ -16,21 +17,27 @@
 using namespace std;
 
 
+const char *const Device::OUTPORT_NAME = "output";
+
+
 /* Constructors */
 Device::Device (const char *clsname, string iname, Component *parent, Message *msgproto):
-    Component (clsname, iname, parent)
+    Unit (clsname, iname, parent)
 {
-    ninports = nctrlports = 0;
-    pname2port.insert (make_pair (GetOutPortName(), &outport));
-
     this->msgproto = msgproto;
+
+    pname2port.insert (make_pair (OUTPORT_NAME, &outports[0]));
+    noutports++;
+
+    Port &outport = outports[0];
+    outport.name = OUTPORT_NAME;
+    outport.id = 0;
+    outport.iotype = PORT_OUTPUT;
+    outport.endpt = nullptr;
+    outport.msgproto = msgproto;
 
     nextinmsgs = new Message *[0];
     nextctrlmsgs = new IntegerMessage[0];
-
-    clkperiod = -1;
-    dynpower = -1;
-    stapower = -1;
 }
 
 
@@ -54,65 +61,9 @@ string Device::GetClock ()
 }
 
 
-string Device::GetGraphVizBody (uint32_t level)
-{
-    string body = "";
-
-#define ADDLINE(str) body += (string(level, '\t') + str + string("\n"));
-
-    string inputs = "";
-    for (auto i = 0; i < ninports; i++)
-    {
-        inputs += string("<") + inports[i].name + ">" + inports[i].name;
-        if (i < ninports - 1) inputs += "|";
-    }
-
-    string ctrls = "";
-    for (auto i = 0; i < nctrlports; i++)
-    {
-        ctrls += string("<") + ctrlports[i].name + ">" + ctrlports[i].name;
-        if (i < nctrlports - 1) ctrls += "|";
-    }
-
-    string out = "";
-    out += string("<") + outport.name + ">" + outport.name;
-
-    ADDLINE (GetInstanceName() + string(" [label=\"{ {") +
-            inputs + "|" + ctrls + "}|" + string(GetClassName()) + "\\n" + GetInstanceName() + "\\n" + 
-            "(clock: " + GetClock() + ")|" + out + "\"];");
-
-#undef ADDLINE
-
-    return body;
-}
-
 /* functions for 'Component' */
-bool Device::Connect (string portname, Endpoint *endpt)
+bool Device::IsValidConnection (Port *port, Endpoint *endpt)
 {
-    if (!pname2port.count (portname))
-    {
-        DESIGN_ERROR ("non-existing port '%s'", GetFullName().c_str(), 
-                portname.c_str());
-        return false;
-    }
-
-    Port *port = pname2port[portname];
-
-    if (port->iotype == Device::PORT_UNKNOWN)
-    {
-        SYSTEM_ERROR ("port type cannot be UNKNOWN"
-                "(portname: %s)", portname.c_str());
-        return false;
-    }
-
-    if (!endpt)
-    {
-        DESIGN_WARNING ("attemping to assign a null endpoint to the port '%s'",
-                GetFullName().c_str(), portname.c_str());
-        port->endpt = nullptr;
-        return true;
-    }
-
     // XXX Device-only
     if (port->iotype == Device::PORT_INPUT || port->iotype == Device::PORT_CONTROL)
     {
@@ -147,78 +98,8 @@ bool Device::Connect (string portname, Endpoint *endpt)
             return false;
         }
     }
-            
-
-    if ((port->iotype == Device::PORT_INPUT || port->iotype == Device::PORT_OUTPUT) &&
-            !endpt->IsPortCap() && 
-            endpt->GetParent()->GetMsgPrototype() != msgproto)
-    {
-        DESIGN_ERROR ("mismatching message proto %s (of '%s') and %s",
-                GetFullName().c_str(), 
-                endpt->GetParent()->GetMsgPrototype()->GetClassName (),
-                endpt->GetParent()->GetName().c_str(), 
-                msgproto->GetClassName ());
-        return false;
-    }
-
-    if (!(endpt->GetEndpointType() == Endpoint::CAP) &&
-            !(port->iotype == Device::PORT_INPUT &&
-                endpt->GetEndpointType() == Endpoint::RHS) &&
-            !(port->iotype == Device::PORT_CONTROL &&
-                endpt->GetEndpointType() == Endpoint::RHS) &&
-            !(port->iotype == Device::PORT_OUTPUT &&
-                endpt->GetEndpointType() == Endpoint::LHS))
-    {
-        DESIGN_ERROR ("incompatible endpoint '%s' to %s port '%s'",
-                GetName().c_str(), endpt->GetClassName(),
-                Device::Port::GetTypeString(port->iotype), portname.c_str());
-        return false;
-    }
-
-    port->endpt = endpt;
-
-    if (!endpt->IsPortCap())
-        endpt->JoinTo (this, portname);
 
     return true;
-}
-
-
-double Device::GetConsumedEnergy ()
-{
-    if (clkperiod == -1)
-        SYSTEM_ERROR ("zero module clock period (module: %s)",
-                GetFullName().c_str());
-
-    if (dynpower == -1 || stapower == -1)
-        return -1;
-    else
-        return (clkperiod * 10E-9 * 
-                (stapower * 10E-9 * (cclass.active + cclass.idle) +
-                 dynpower * 10E-9 * cclass.active));
-}
-
-
-Component::CycleClass<double> Device::GetAggregateCycleClass ()
-{
-    CycleClass<double> cclass_conv;
-    cclass_conv.active = cclass.active;
-    cclass_conv.idle = cclass.idle;
-
-    return cclass_conv;
-}
-
-Component::EventCount<double> Device::GetAggregateEventCount ()
-{
-    EventCount<double> ecount_conv;
-    ecount_conv.stalled = ecount.stalled;
-
-    return ecount_conv;
-}
-
-double Device::GetAggregateConsumedEnergy ()
-{
-    return GetConsumedEnergy ();
 }
 
 
@@ -233,19 +114,19 @@ IssueCount Device::Validate (PERMIT(Simulator))
         icount.error++;
     }
 
-    if (dynpower == -1)
+    if (GetDynamicPower() == -1)
     {
         DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
         icount.warning++;
     }
 
-    if (stapower == -1)
+    if (GetStaticPower() == -1)
     {
         DESIGN_WARNING ("no static power info", GetFullName().c_str());
         icount.warning++;
     }
 
-    if (clkperiod == -1)
+    if (GetClockPeriod() == -1)
     {
         SYSTEM_ERROR ("no clock period (module: %s)", GetFullName().c_str());
         icount.error++;
@@ -273,10 +154,10 @@ IssueCount Device::Validate (PERMIT(Simulator))
         }
     }
 
-    if (!outport.endpt)
+    if (!outports[0].endpt)
     {
         DESIGN_ERROR ("disconnected port '%s'", 
-                GetFullName().c_str(), outport.name.c_str());
+                GetFullName().c_str(), outports[0].name.c_str());
         icount.error++;
     }
 
@@ -285,47 +166,22 @@ IssueCount Device::Validate (PERMIT(Simulator))
 
 
 /* Called by 'Device' */
-uint32_t Device::CreatePort (string portname, Device::PortType iotype)
+void Device::OnCreatePort (Port &port)
 {
-    uint32_t id = -1;
-    Port port = Port();
-    
-    port.name = portname;
-    port.iotype = iotype;
-    port.endpt = nullptr;
-
-    if (iotype == Device::PORT_INPUT)
+    switch (port.iotype)
     {
-        if (ninports > MAX_MODULE_PORTS)
-            DESIGN_FATAL ("#lhs > %u not allowed", GetName().c_str(), MAX_MODULE_PORTS);
-
-        id = ninports++;
-        port.id = id;
-        inports[id] = port;
-        pname2port.insert (make_pair (portname, &inports[id]));
-
-        delete[] nextinmsgs;
-        nextinmsgs = new Message *[ninports] ();
+        case PORT_INPUT:
+            delete[] nextinmsgs;
+            nextinmsgs = new Message *[ninports] ();
+            break;
+        case PORT_CONTROL:
+            delete[] nextctrlmsgs;
+            nextctrlmsgs = new IntegerMessage[nctrlports] ();
+            break;
+        default:
+            SYSTEM_ERROR ("cannot create %s port (device: %s)",
+                    Port::GetTypeString (port.iotype),
+                    GetFullName().c_str());
+            break;
     }
-    else if (iotype == Device::PORT_CONTROL)
-    {
-        if (nctrlports > MAX_MODULE_PORTS)
-            DESIGN_FATAL ("#rhs > %u not allowed", GetName().c_str(), MAX_MODULE_PORTS);
-
-        id = nctrlports++;
-        port.id = id;
-        ctrlports[id] = port;
-        pname2port.insert (make_pair (portname, &ctrlports[id]));
-
-        delete[] nextctrlmsgs;
-        nextctrlmsgs = new IntegerMessage[nctrlports] ();
-    }
-    else
-    {
-        DESIGN_ERROR ("cannot create %s port", GetFullName().c_str(),
-                Device::Port::GetTypeString (iotype));
-        return -1;
-    }
-
-    return id;
 }
