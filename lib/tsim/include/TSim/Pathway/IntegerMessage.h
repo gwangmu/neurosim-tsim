@@ -10,7 +10,7 @@ struct IntegerMessage : public Message
 public:
     // NOTE: fixed to broadcast
     IntegerMessage () 
-        : Message ("IntegerMessage", TOGGLE, -1), value (0) {}
+        : Message ("IntegerMessage", TOGGLE, -1), value (-1) {}
     IntegerMessage (uint64_t value)
         : Message ("IntegerMessage", TOGGLE, -1), value (value) {}
 

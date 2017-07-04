@@ -44,7 +44,12 @@ void Pathway::Connection::Assign (Message *newmsg)
     DEBUG_PRINT ("Assign new message %s", newmsg->GetClassName()); 
     nprop++;
 }
-    
+
+void Pathway::Connection::NullifyNow ()
+{
+    msgprop[curidx] = nullptr;
+}
+
 
 
 Pathway::Pathway (const char *clsname, Component *parent, 
@@ -65,7 +70,7 @@ Pathway::Pathway (const char *clsname, Component *parent,
 
     SetConnectionAttr (conattr);
 
-    lhsid = -1;
+    lhsid = INITIAL_LHSID;
     stabilize_cycle = 0;
 
     clkperiod = -1;
@@ -80,9 +85,9 @@ string Pathway::GetInstanceName ()
 
     for (auto i = 0; i < endpts.lhs.size (); i++)
     {
-        if (endpts.lhs[i].GetConnectedModule ())
+        if (endpts.lhs[i].GetConnectedUnit ())
         {
-            lhs = endpts.lhs[i].GetConnectedModule()->GetInstanceName()
+            lhs = endpts.lhs[i].GetConnectedUnit()->GetInstanceName()
                 + "." + endpts.lhs[i].GetConnectedPortName();
             break;
         }
@@ -90,9 +95,9 @@ string Pathway::GetInstanceName ()
 
     for (auto i = 0; i < endpts.rhs.size (); i++)
     {
-        if (endpts.rhs[i].GetConnectedModule ())
+        if (endpts.rhs[i].GetConnectedUnit ())
         {
-            rhs = endpts.rhs[i].GetConnectedModule()->GetInstanceName()
+            rhs = endpts.rhs[i].GetConnectedUnit()->GetInstanceName()
                 + "." + endpts.rhs[i].GetConnectedPortName();
             break;
         }
@@ -137,8 +142,12 @@ bool Pathway::AddEndpoint (string name, Endpoint::Type type, uint32_t capacity)
             return false;
         }
         
-        endpts.lhs.push_back (Endpoint (name, endpts.lhs.size(), this, 
+        uint32_t id = endpts.lhs.size();
+        endpts.lhs.push_back (Endpoint (name, id, this, 
                     Endpoint::LHS, capacity, KEY(Pathway)));
+
+        if (id == INITIAL_LHSID)
+            endpts.lhs.back().SetSelectedLHS (true);
     }
     else if (type == Endpoint::RHS)
     {
@@ -197,24 +206,17 @@ string Pathway::GetClock ()
 
     for (Endpoint &ept : endpts.lhs)
     {
-        if (Module *connmod = ept.GetConnectedModule ())
+        if (Unit *connunit = ept.GetConnectedUnit ())
         {
-            if (connmod->GetClock() == "") 
+            if (connunit->GetClock() == "") 
                 return "";
-            else if (clockname != "" && connmod->GetClock() != clockname)
+            else if (clockname != "" && connunit->GetClock() != clockname)
                 return "";
             else if (clockname == "")
-                clockname = connmod->GetClock();
+                clockname = connunit->GetClock();
         }
-        else if (Device *conndev = ept.GetConnectedDevice ())
-        {
-            if (conndev->GetClock() == "") 
-                return "";
-            if (clockname != "" && conndev->GetClock() != clockname)
-                return "";
-            else if (clockname == "")
-                clockname = connmod->GetClock();
-        }
+        else
+            return "";
     }
 
     return clockname;
@@ -239,7 +241,18 @@ bool Pathway::IsPostDevicePathway ()
 {
     for (Endpoint &endpt : endpts.lhs)
     {
-        if (endpt.GetConnectedDevice())
+        if (dynamic_cast<Device *>(endpt.GetConnectedUnit()))
+            return true;
+    }
+
+    return false;
+}
+
+bool Pathway::IsControlPathway ()
+{
+    for (Endpoint &endpt : endpts.rhs)
+    {
+        if (endpt.GetConnectedUnit()->IsControlPort (endpt.GetConnectedPortName ()))
             return true;
     }
 
@@ -299,7 +312,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
     for (Endpoint &ept : endpts.lhs)
     {
-        if (!ept.GetConnectedModule ())
+        if (!ept.GetConnectedUnit ())
         {
             DESIGN_ERROR ("disconnected endpoint '%s'",
                     GetName().c_str(), ept.GetName().c_str());
@@ -309,7 +322,7 @@ IssueCount Pathway::Validate (PERMIT(Simulator))
 
     for (Endpoint &ept : endpts.rhs)
     {
-        if (!ept.GetConnectedModule ())
+        if (!ept.GetConnectedUnit ())
         {
             DESIGN_ERROR ("disconnected endpoint '%s'",
                     GetName().c_str(), ept.GetName().c_str());
@@ -338,13 +351,15 @@ void Pathway::PreClock (PERMIT(Simulator))
                     {
                         Endpoint &ept = endpts.rhs[i];
 
-                        // TODO: assign only if ept.capacity != 0
-                        if (!ept.Assign (sampledmsg))
+                        if (ept.GetCapacity() != 0)
                         {
-                            SIM_WARNING ("message dropped (portname: %s)",
-                                    GetName().c_str(), ept.GetConnectedPortName().c_str());
-                            ecount.msgdrop++;
-                            sampledmsg->Dispose ();
+                            if (!ept.Assign (sampledmsg))
+                            {
+                                SIM_WARNING ("message dropped (portname: %s)",
+                                        GetName().c_str(), ept.GetConnectedPortName().c_str());
+                                ecount.msgdrop++;
+                                sampledmsg->Dispose ();
+                            }
                         }
                     }
                 }
@@ -360,15 +375,17 @@ void Pathway::PreClock (PERMIT(Simulator))
 
                     Endpoint &ept = endpts.rhs[sampledmsg->DEST_RHS_ID];
 
-                    // TODO: assign only if ept.capacity != 0
-                    bool assnres = ept.Assign (sampledmsg);
-
-                    if (unlikely (!assnres))
+                    if (ept.GetCapacity() != 0)
                     {
-                        SIM_WARNING ("message dropped (portname: %s)",
-                                GetName().c_str(), ept.GetConnectedPortName().c_str());
-                        ecount.msgdrop++;
-                        sampledmsg->Dispose ();
+                        bool assnres = ept.Assign (sampledmsg);
+
+                        if (unlikely (!assnres))
+                        {
+                            SIM_WARNING ("message dropped (portname: %s)",
+                                    GetName().c_str(), ept.GetConnectedPortName().c_str());
+                            ecount.msgdrop++;
+                            sampledmsg->Dispose ();
+                        }
                     }
                 }
             }
@@ -378,13 +395,17 @@ void Pathway::PreClock (PERMIT(Simulator))
 
 void Pathway::PostClock (PERMIT(Simulator))
 {
+    DEBUG_PRINT ("calc '%s'", GetName().c_str());
+
     operation ("update next ready state")
     {
         for (auto i = 0; i < endpts.rhs.size(); i++)
         {
             Endpoint &ept = endpts.rhs[i];
-            SetNextReady (i, ept.GetCapacity () - ept.GetNumMessages () >
-                    conn.conattr.latency);
+
+            if (ept.GetCapacity() != 0)
+                SetNextReady (i, ept.GetCapacity () - ept.GetNumMessages () >
+                        conn.conattr.latency);
         }
 
         UpdateReadyState ();
@@ -438,22 +459,26 @@ void Pathway::PostClock (PERMIT(Simulator))
         {
             operation ("ahead-of-time broadcast message")
             {
+                bool processed = true;
                 for (auto i = 0; i < endpts.rhs.size(); i++)
                 {
                     Endpoint &ept = endpts.rhs[i];
 
-                    // TODO: assign only if ept.capacity != 0
                     if (ept.GetCapacity() == 0)
                     {
-                        if (!ept.Assign (sampledmsg))
+                        if (unlikely (!ept.Assign (sampledmsg)))
                         {
-                            SIM_WARNING ("message dropped (portname: %s)",
+                            SYSTEM_ERROR ("message dropped (pathway: %s, portname: %s)",
                                     GetName().c_str(), ept.GetConnectedPortName().c_str());
                             ecount.msgdrop++;
                             sampledmsg->Dispose ();
                         }
                     }
+                    else
+                        processed = false;
                 }
+
+                if (processed) conn.NullifyNow ();
             }
         }
         else
@@ -473,11 +498,13 @@ void Pathway::PostClock (PERMIT(Simulator))
 
                     if (unlikely (!assnres))
                     {
-                        SIM_WARNING ("message dropped (portname: %s)",
+                        SYSTEM_ERROR ("message dropped (pathway: %s, portname: %s)",
                                 GetName().c_str(), ept.GetConnectedPortName().c_str());
                         ecount.msgdrop++;
                         sampledmsg->Dispose ();
                     }
+
+                    conn.NullifyNow ();
                 }
             }
         }

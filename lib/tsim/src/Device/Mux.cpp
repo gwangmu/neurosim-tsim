@@ -1,7 +1,8 @@
 #include <TSim/Device/Mux.h>
-#include <TSim/Base/Component.h>
-#include <TSim/Pathway/Message.h>
+
+#include <TSim/Pathway/IntegerMessage.h>
 #include <TSim/Simulation/Simulator.h>
+#include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Utility/StaticBranchPred.h>
 
@@ -17,22 +18,24 @@ Mux::Mux (string iname, Component *parent, Message *msgproto, uint32_t ninput)
 {
     // NOTE: IDs should be 0, 1, 2, ...
     for (int i = 0; i < ninput; i++)
-        CreatePort (string("input") + to_string(i), Device::PORT_INPUT);
+        CreatePort (string("input") + to_string(i), Device::PORT_INPUT, msgproto);
 
     // NOTE: ID should be 0
-    CreatePort (string("select"), Device::PORT_CONTROL);
+    CreatePort (string("select"), Device::PORT_CONTROL, Prototype<IntegerMessage>::Get());
 }
 
 
 void Mux::PreClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("open/close pre-mux pathways");
-
     operation ("update control messages")
     {
         if (IntegerMessage *intmsg = 
                 static_cast<IntegerMessage *>(ctrlports[0].endpt->Peek ()))
+        {
+            DEBUG_PRINT ("peak/pop ctrl port");
             nextctrlmsgs[0] = *intmsg;
+            ctrlports[0].endpt->Pop ();
+        }
     }
 
     operation ("open/close pre-mux pathways")
@@ -45,7 +48,7 @@ void Mux::PreClock (PERMIT(Simulator))
                 inports[i].endpt->SetExtReadyState (false);
             else
                 inports[i].endpt->SetExtReadyState 
-                    (!outport.endpt->IsBroadcastBlocked ());
+                    (!outports[0].endpt->IsBroadcastBlocked ());
         }
     }
 }
@@ -53,19 +56,6 @@ void Mux::PreClock (PERMIT(Simulator))
 void Mux::PostClock (PERMIT(Simulator))
 {
     MICRODEBUG_PRINT ("calc '%s'", GetFullName().c_str());
-
-    operation ("peak messages from RHS")
-    {
-        for (auto i = 0; i < ninports; i++)
-        {
-            if (!nextinmsgs[i])
-            {
-                nextinmsgs[i] = inports[i].endpt->Peek ();
-                DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
-                inports[i].endpt->Pop ();
-            }
-        }
-    }
 
     Message *outmsg = nullptr;
     operation ("select message")
@@ -76,13 +66,17 @@ void Mux::PostClock (PERMIT(Simulator))
         {
             Message *inmsg = inports[i].endpt->Peek ();
 
-            if (i == inputid)
-                outmsg = inmsg;
-            else if (unlikely (inmsg != nullptr))
+            if (inmsg)
             {
-                SIM_WARNING ("message dropped (portname: %s)",
-                        GetFullName().c_str(), inports[i].name.c_str());
-                inmsg->Dispose ();
+                inports[i].endpt->Pop ();
+                if (i == inputid)
+                    outmsg = inmsg;
+                else if (unlikely (inmsg != nullptr))
+                {
+                    SIM_WARNING ("message dropped (portname: %s)",
+                            GetFullName().c_str(), inports[i].name.c_str());
+                    inmsg->Dispose ();
+                }
             }
         }
 
@@ -97,14 +91,17 @@ void Mux::PostClock (PERMIT(Simulator))
         else            cclass.active++;
     }
 
-    operation ("assign to post-mux pathway LHS")
+    if (outmsg)
     {
-        if (unlikely (Message::IsReserveMsg (outmsg)))
-            SYSTEM_ERROR ("RESERVE message cannot reach this point (%s)",
-                    GetFullName().c_str());
+        operation ("assign to post-mux pathway LHS")
+        {
+            if (unlikely (Message::IsReserveMsg (outmsg)))
+                SYSTEM_ERROR ("RESERVE message cannot reach this point (%s)",
+                        GetFullName().c_str());
 
-        bool assnres = outport.endpt->Assign (outmsg);
-        if (unlikely (!assnres))
-            SYSTEM_ERROR ("attempted to push to full LHS queue");
+            bool assnres = outports[0].endpt->Assign (outmsg);
+            if (unlikely (!assnres))
+                SYSTEM_ERROR ("attempted to push to full LHS queue");
+        }
     }
 }

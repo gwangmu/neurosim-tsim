@@ -18,10 +18,12 @@ EXPORT_TESTBENCH (ExampleTestbench);
 ExampleTestbench::ExampleTestbench ()
     : Testbench ("ExampleTestbench", new ExampleComponent ("top", nullptr)) 
 {
-    datasink = static_cast<DataSinkModule *>(TOP_COMPONENT->GetModule ("datasink"));
+    datasink = dynamic_cast<DataSinkModule *>(TOP_COMPONENT->GetUnit ("datasink"));
+    if (!datasink)
+        SYSTEM_ERROR ("something is wrong!");
 }
 
 bool ExampleTestbench::IsFinished (PERMIT(Simulator))
 {
-    return (datasink->recvdata >= 10);
+    return (datasink->recvdata >= 50);
 }

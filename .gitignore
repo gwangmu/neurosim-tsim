@@ -11,3 +11,4 @@ bin/
 *out
 *.dot
 *.png
+makegv

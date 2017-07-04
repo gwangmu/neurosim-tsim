@@ -24,6 +24,7 @@ Simulator::ClockDomain::ClockDomain ()
     name = "";
     period = 0;
     nexttime = 0;
+    ncycles = 0;
 }
 
 
@@ -64,6 +65,7 @@ bool Simulator::LoadTestbench ()
     vector<Device *> devices;
     vector<Pathway *> pathways;
     vector<Pathway *> pathways_postdev;
+    vector<Pathway *> pathways_ctrl;
     task ("find modules/pathways")
     {
         queue<Component *> queComps;
@@ -79,10 +81,12 @@ bool Simulator::LoadTestbench ()
             {
                 Pathway *pathway = *ipath;
                 
-                if (!pathway->IsPostDevicePathway ())
-                    pathways.push_back (pathway);
-                else
+                if (pathway->IsPostDevicePathway ())
                     pathways_postdev.push_back (pathway);
+                else if (pathway->IsControlPathway ())
+                    pathways_ctrl.push_back (pathway);
+                else
+                    pathways.push_back (pathway);
             }
 
             for (auto icomp = nextcomp->ChildBegin ();
@@ -98,9 +102,9 @@ bool Simulator::LoadTestbench ()
             }
         }
 
-        PRINT ("total %zu module(s), %zu device(s) found", modules.size(), devices.size());
-        for (Module *module:modules)
-            DEBUG_PRINT ("%s", module->GetName().c_str());
+        PRINT ("total %zu module(s), %zu device(s), %zu pathway(s) (%zu post-dev / %zu control) found", 
+                modules.size(), devices.size(), pathways.size() + pathways_postdev.size() + pathways_ctrl.size(), 
+                pathways_postdev.size(), pathways_ctrl.size());
     }
 
     task ("load simulation spec")
@@ -155,36 +159,23 @@ bool Simulator::LoadTestbench ()
             //     KEY(Simulator));
         }
 
-        for (Pathway *pathway : pathways)
+        for (vector<Pathway *> _pathways : {pathways, pathways_postdev, pathways_ctrl})
         {
-            string nclock = pathway->GetClock ();
-            if (nclock == "")
-                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
-                        tb->GetName().c_str(), pathway->GetName().c_str());
-            
-            mapCDoms[nclock].name = nclock;
-            mapCDoms[nclock].pathways.push_back (pathway);
+            for (Pathway *pathway : _pathways)
+            {
+                string nclock = pathway->GetClock ();
+                if (nclock == "")
+                    DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
+                            tb->GetName().c_str(), pathway->GetName().c_str());
+                
+                mapCDoms[nclock].name = nclock;
+                mapCDoms[nclock].pathways.push_back (pathway);
 
-            pathway->SetDissipationPower 
-                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetInstanceName(), KEY(Simulator)),
-                 KEY(Simulator));
-        }
-
-        for (Pathway *pathway : pathways_postdev)
-        {
-            string nclock = pathway->GetClock ();
-            if (nclock == "")
-                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
-                        tb->GetName().c_str(), pathway->GetName().c_str());
-            
-            mapCDoms[nclock].name = nclock;
-            mapCDoms[nclock].pathways_postdev.push_back (pathway);
-
-            pathway->SetDissipationPower 
-                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetInstanceName(), KEY(Simulator)),
-                 KEY(Simulator));
+                pathway->SetDissipationPower 
+                    (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
+                                       pathway->GetInstanceName(), KEY(Simulator)),
+                     KEY(Simulator));
+            }
         }
         
         for (auto &centry : mapCDoms)
@@ -196,8 +187,17 @@ bool Simulator::LoadTestbench ()
 
             for (Module *module : cdomain.modules)
                 module->SetClockPeriod(cdomain.period, KEY(Simulator));
+            
+            for (Device *device : cdomain.devices)
+                device->SetClockPeriod(cdomain.period, KEY(Simulator));
 
             for (Pathway *pathway : cdomain.pathways)
+                pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
+            
+            for (Pathway *pathway : cdomain.pathways_postdev)
+                pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
+
+            for (Pathway *pathway : cdomain.pathways_ctrl)
                 pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
         }
 
@@ -358,6 +358,7 @@ bool Simulator::Simulate ()
                 curtime = mintime;
                 curCDom = &cdomains[minidx];
                 cdomains[minidx].nexttime += cdomains[minidx].period;
+                cdomains[minidx].ncycles++;
             }
 
             if (nexttstime <= curtime)
@@ -379,6 +380,10 @@ bool Simulator::Simulate ()
                 operation ("post-clock modules");
                 for (Module *module : curCDom->modules)
                     module->PostClock (KEY(Simulator));
+
+                operation ("post-clock pathways (ctrls)");
+                for (Pathway *pathway : curCDom->pathways_ctrl)
+                    pathway->PostClock (KEY(Simulator));
 
                 operation ("devices (preparatory)");
                 for (Device *device : curCDom->devices)
@@ -498,6 +503,16 @@ void Simulator::ReportSimulationSummary ()
             to_string(cclass.active / (cclass.active + cclass.idle) /
                 nmodules * 100).c_str());
 
+    for (auto i = 0; i < cdomains.size(); i++)
+    {
+        ClockDomain &cdom = cdomains[i];
+
+        const char *fieldname = "";
+        if (i == 0) fieldname = "Number of cycles";
+
+        ROW (fieldname, ("(" + cdom.name + ") " + to_string (cdom.ncycles)).c_str());
+    }
+
     STROKE;
 
     ROW ("Simulation time (s)", to_string((double)curtime / 10E9).c_str());
@@ -519,8 +534,7 @@ void Simulator::ReportActivityEvents ()
     macrotask ("< Activity and Events >");
 
 #define STROKE PRINT ("%s", string(120, '-').c_str())
-#define LABEL(f, v, en, p, e) PRINT (" %-50s  %16s %12s %12s  %s ", f, v, en, p, e);
-#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf %12s %12s  %s ", f, v, en, p, e);
+#define LABEL(f, v, en, p, e) PRINT (" %-50s  %18s %12s %12s  %s ", f, v, en, p, e);
 
     STROKE;
     LABEL ("Component Name", "Activity (%)", "Energy (mJ)", "Power (mW)", "Events");
@@ -535,7 +549,7 @@ void Simulator::ReportActivityEvents ()
 
 void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 {
-#define ROW(f, v, en, p, e) PRINT (" %-60s  % 6.2lf %12s %12s  %s ", f, v, en, p, e);
+#define ROW(f, v, en, p, e) PRINT (" %-60s % 9.2lf %12s %12s  %s ", f, v, en, p, e);
 
     if (Module *module = dynamic_cast<Module *>(comp))
     {
@@ -594,7 +608,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
                 to_string(aggecount.stalled / comp->GetNumChildModules ()) + 
                 " cycle(s) / module)";
 
-        double avgactive = aggcclass.active / comp->GetNumChildModules() /
+        double avgactive = aggcclass.active /
             (aggcclass.active + aggcclass.idle) * 100;
         double oenergy = comp->GetAggregateConsumedEnergy (); 
         double energy = oenergy * 1000;

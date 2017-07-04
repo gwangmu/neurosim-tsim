@@ -1,5 +1,6 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
+#include <TSim/Pathway/IntegerMessage.h>
 
 #include <Script/ExampleFileScript.h>
 #include <Component/DataSinkModule.h>
@@ -17,14 +18,23 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
 {
     // create ports
     PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<ExampleMessage>::Get());
+    PORT_SELECT = CreatePort ("select_mux", Module::PORT_OUTPUT, Prototype<IntegerMessage>::Get());
 
     recvdata = 0;
+    cursrc = 0;
 }
 
 // NOTE: called only if not stalled
-void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, uint32_t *outque_size Instruction *instr)
+void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
 {
     ExampleMessage *inmsg = static_cast<ExampleMessage *>(inmsgs[PORT_DATAIN]);
+        
+    if (recvdata % 3 == 0)
+    {
+        DEBUG_PRINT ("switching select to %d", !cursrc);
+        cursrc = !cursrc;
+        outmsgs[PORT_SELECT] = new IntegerMessage (cursrc);
+    }
 
     if (inmsg) 
     {

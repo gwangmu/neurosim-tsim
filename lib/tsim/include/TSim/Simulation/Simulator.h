@@ -40,9 +40,11 @@ protected:
         vector<Device *> devices;
         vector<Pathway *> pathways;
         vector<Pathway *> pathways_postdev;
+        vector<Pathway *> pathways_ctrl;
 
         // Simulation states
         uint64_t nexttime;
+        uint64_t ncycles;
     };
 
 public:

@@ -69,6 +69,7 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         
 
         outmsgs[PORT_out] = new NeuronBlockOutMessage (0, neuron_idx, is_spike);
+        DEBUG_PRINT ("%p", outmsgs[PORT_out]);
         outmsgs[OPORT_waddr] = new IndexMessage (0, neuron_idx);
         
         State s = 0;

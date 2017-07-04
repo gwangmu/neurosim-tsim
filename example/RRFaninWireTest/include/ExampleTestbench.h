@@ -1,7 +1,6 @@
 #pragma once
 
 #include <TSim/Simulation/Testbench.h>
-#include <Message/AxonMessage.h>
 #include <Component/DataSinkModule.h>
 
 #include <cinttypes>
@@ -10,14 +9,13 @@
 
 using namespace std;
 
-struct NeuronBlockOutMessage;
 
-class NeuroSimTestbench: public Testbench
+class ExampleTestbench: public Testbench
 {
 public:
-    NeuroSimTestbench ();
+    ExampleTestbench ();
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:
-    DataSinkModule<AxonMessage, uint32_t> *datasink;
+    DataSinkModule *datasink;
 };
