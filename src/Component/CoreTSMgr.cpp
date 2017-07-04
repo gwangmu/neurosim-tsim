@@ -4,6 +4,7 @@
 
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
+#include <TSim/Pathway/IntegerMessage.h>
 
 CoreTSMgr::CoreTSMgr (string iname, Component* parent)
     : Module ("CoreTSMgr", iname, parent, 1)
@@ -17,7 +18,7 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
     PORT_Acc = CreatePort ("Acc_idle", Module::PORT_INPUT,
             Prototype<SignalMessage>::Get());
     PORT_SDQ = CreatePort ("SDQ_empty", Module::PORT_INPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
     PORT_curTS = CreatePort ("curTS", Module::PORT_INPUT,
             Prototype<SignalMessage>::Get());
 
@@ -42,7 +43,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     SignalMessage *nb_msg = static_cast<SignalMessage*>(inmsgs[PORT_NB]);
     SignalMessage *amq_msg = static_cast<SignalMessage*>(inmsgs[PORT_AMQ]);
     SignalMessage *acc_msg = static_cast<SignalMessage*>(inmsgs[PORT_Acc]);
-    SignalMessage *sdq_msg = static_cast<SignalMessage*>(inmsgs[PORT_SDQ]);
+    IntegerMessage *sdq_msg = static_cast<IntegerMessage*>(inmsgs[PORT_SDQ]);
 
     if(nbc_msg)
     {
@@ -66,7 +67,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
     if(sdq_msg)
     {
-        DEBUG_PRINT ("[TSMgr] NB Controller is end? %d", sdq_msg->value);
+        DEBUG_PRINT ("[TSMgr] NB Controller is end? %lu", sdq_msg->value);
         state[SDQ] = sdq_msg->value;
     }
 

@@ -2,6 +2,7 @@
 
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
+#include <TSim/Pathway/IntegerMessage.h>
 
 #include <Message/SignalMessage.h>
 #include <Message/SelectMessage.h>
@@ -28,7 +29,7 @@ SynDataQueue::SynDataQueue (string iname, Component *parent,
     OPORT_Acc = CreatePort ("acc", Module::PORT_OUTPUT,
             Prototype<SynapseMessage>::Get());
     OPORT_Empty = CreatePort ("empty", Module::PORT_OUTPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
 
     is_empty = true;
     this->max_queue_size_ = max_queue_size;
@@ -112,14 +113,14 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         is_empty = true;
         DEBUG_PRINT ("[SDQ] Axon metatda queue is empty");
 
-        outmsgs[OPORT_Empty] = new SignalMessage (0, true);
+        outmsgs[OPORT_Empty] = new IntegerMessage (1);
     }
     else if (is_empty && (*outque_size != 0))
     {
         is_empty = false;
         DEBUG_PRINT ("[SDQ] Axon metadata queue has data");
 
-        outmsgs[OPORT_Empty] = new SignalMessage (0, false);
+        outmsgs[OPORT_Empty] = new IntegerMessage (0);
     }
 
 

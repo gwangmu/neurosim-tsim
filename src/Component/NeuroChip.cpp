@@ -82,8 +82,8 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
             
         for (int j=0; j<num_propagators; j++)
         {
-            cores[i]->Connect ("SynData", syn_data[j]->GetEndpoint (Endpoint::RHS, i));
-            cores[i]->Connect ("SynTS", syn_parity[j]->GetEndpoint (Endpoint::RHS, i));
+            cores[i]->Connect ("SynData" + to_string(j), syn_data[j]->GetEndpoint (Endpoint::RHS, i));
+            cores[i]->Connect ("SynTS" + to_string(j), syn_parity[j]->GetEndpoint (Endpoint::RHS, i));
         }
     }
     

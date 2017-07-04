@@ -2,7 +2,9 @@
 
 #include <TSim/Pathway/Wire.h>
 #include <TSim/Pathway/FanoutWire.h>
+#include <TSim/Pathway/IntegerMessage.h>
 #include <TSim/Utility/Prototype.h>
+#include <TSim/Device/AndGate.h>
 
 #include <Component/Accumulator.h>
 #include <Component/AxonMetaQueue.h>
@@ -40,6 +42,7 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     : Component ("NeuroCore", iname, parent)
 {
     // Parameters
+    int syn_queue_size = 64;
     int pipeline_depth = 2;
     
     Module *neuron_block = new NeuronBlock ("neuron_block", this, pipeline_depth);
@@ -54,7 +57,12 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     Module *axon_table = new AxonMetaTable ("axon_meta_table", this, 64);
 
     Module *accumulator = new Accumulator ("accumulator", this);
-    Module *syn_queue = new SynDataQueue ("syn_data_queue", this, 64);
+
+    std::vector<Module*> syn_queue;
+    for(int i=0; i<num_propagators; i++)
+        syn_queue.push_back (new SynDataQueue ("syn_data_queue" + to_string(i), this, syn_queue_size));
+
+    AndGate *empty_and = new AndGate ("empty_and", this, num_propagators);
 
     /*******************************************************************************/
     /** Wires **/
@@ -95,12 +103,16 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     Wire *deltaG_wdata = new Wire (this, conattr, Prototype<DeltaGMessage>::Get());
 
     // Synapse Data Queue
-    Wire *sdq_empty = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+    std::vector<Wire*> sdq_empty;
+    for (int i=0; i<num_propagators; i++)
+        sdq_empty.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
     Wire *synapse_info = new Wire (this, conattr, Prototype<SynapseMessage>::Get());
+
+    Wire *sdq_empty_and = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
 
     // Core Timestep Manager
     FanoutWire *core_TSParity = 
-        new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 4);
+        new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 3 + num_propagators);
 
 
     /*******************************************************************************/
@@ -151,7 +163,7 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     core_tsmgr->Connect ("NB_idle", nb_idle->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("AMQ_empty", amq_empty->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("Acc_idle", acc_idle->GetEndpoint (Endpoint::RHS));
-    core_tsmgr->Connect ("SDQ_empty", sdq_empty->GetEndpoint (Endpoint::RHS));
+    core_tsmgr->Connect ("SDQ_empty", sdq_empty_and->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("Tsparity", core_TSParity->GetEndpoint (Endpoint::LHS));
    
     // Accumulator
@@ -164,17 +176,27 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     accumulator->Connect("idle", acc_idle->GetEndpoint (Endpoint::LHS)); 
 
     // Synapse data queue
-    syn_queue->Connect("core_ts", core_TSParity->GetEndpoint (Endpoint::RHS, 3)); 
-    syn_queue->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
-    syn_queue->Connect("empty", sdq_empty->GetEndpoint (Endpoint::LHS));
+    for (int i=0; i<num_propagators; i++)
+    {
+        syn_queue[i]->Connect("core_ts", core_TSParity->GetEndpoint (Endpoint::RHS, 3 + i)); 
+        syn_queue[i]->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
+        syn_queue[i]->Connect("empty", sdq_empty[i]->GetEndpoint (Endpoint::LHS));
+
+        empty_and->Connect("input" + to_string(i), sdq_empty[i]->GetEndpoint (Endpoint::RHS));
+    }
+    empty_and->Connect("output", sdq_empty_and->GetEndpoint (Endpoint::LHS));
 
     /*** Export port ***/    
     //ExportPort ("Core_out", neuron_block, "NeuronBlock_out");
     ExportPort ("AxonData", axon_queue, "axon");
     ExportPort ("CurTSParity", core_tsmgr, "curTS");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
-    ExportPort ("SynData", syn_queue, "syn");
-    ExportPort ("SynTS", syn_queue, "syn_ts"); 
+
+    for(int i=0; i<num_propagators; i++)
+    {
+        ExportPort ("SynData" + to_string(i), syn_queue[i], "syn");
+        ExportPort ("SynTS" + to_string(i), syn_queue[i], "syn_ts");
+    }
 }
 
 
