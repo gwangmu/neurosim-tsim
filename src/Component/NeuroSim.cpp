@@ -34,7 +34,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     SetClock ("main");
 
     /** Parameters **/
-    int num_cores = 2;
+    int num_cores = 1;
     int num_propagators = 1;
 
     /** Components **/

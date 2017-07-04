@@ -32,10 +32,6 @@ using namespace std;
 NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_propagators)
     : Component ("NeuroChip", iname, parent)
 {
-    // NOTE: children automatically inherit parent's clock
-    //  but they can override it by redefining their own.
-    SetClock ("main");
-
     /** Parameters **/
     int axon_meta_queue_size = 32; 
         
@@ -50,11 +46,10 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     Module *axon_transmitter = new AxonTransmitter ("axon_transmitter", this);
     Module *syn_distributor = new SynDataDistrib ("syn_distributor", this, num_propagators);
 
-    /** Module & Wires **/
+    /** Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     
-    // Modules
     std::vector<Module*> ds_dynfin;
     for (int i=0; i<num_cores; i++)
         ds_dynfin.push_back (new DataSinkModule <SignalMessage, bool> ("ds_dynfin" + to_string(i), this));
