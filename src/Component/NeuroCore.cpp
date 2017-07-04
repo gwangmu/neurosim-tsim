@@ -39,8 +39,10 @@ using namespace std;
 NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     : Component ("NeuroCore", iname, parent)
 {
-    // add child modules/components
-    Module *neuron_block = new NeuronBlock ("neuron_block", this, 2);
+    // Parameters
+    int pipeline_depth = 2;
+    
+    Module *neuron_block = new NeuronBlock ("neuron_block", this, pipeline_depth);
     Module *nb_controller = new NBController ("nb_controller", this, 16);
    
     Module *state_sram = new StateSRAM ("state_sram", this, 64, 16);

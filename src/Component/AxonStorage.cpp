@@ -28,7 +28,7 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
     if(raddr_msg)
     {
         uint32_t read_addr = raddr_msg->value;
-        outmsgs[PORT_data] = new DramMessage (0, 0, 0, true, 1);
+        outmsgs[PORT_data] = new DramMessage (0, 0, 0, false, 0);
         counter++;
 
         DEBUG_PRINT("[DRAM] Receive read request, and send message");

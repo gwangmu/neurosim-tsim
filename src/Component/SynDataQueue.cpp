@@ -59,6 +59,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         {
             if(internal_queue_.empty())
             {
+                DEBUG_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
                 outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
             }
             else

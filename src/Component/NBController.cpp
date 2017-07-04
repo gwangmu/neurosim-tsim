@@ -36,8 +36,10 @@ NBController::NBController (string iname, Component *parent, uint32_t max_index)
 
     /* variable initialization */
     max_idx_ = max_index;
-    idx_counter_ = 0;
+    read_idx_counter_ = 0;
+    nb_idx_counter_ = 0;
     ts_parity_ = false;
+    is_finish_ = true;
 }
 
 void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
@@ -51,7 +53,15 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
     {
         DEBUG_PRINT ("[NBC] Receive TSParity. Reset NB controller");
         ts_parity_ = parity_msg->value;
-        idx_counter_ = 0;
+        read_idx_counter_ = 0;
+        nb_idx_counter_ = 0;
+        
+        if(is_finish_)
+        {
+            DEBUG_PRINT("[NBC] Start NB controller");
+            outmsgs[OPORT_End] = new SignalMessage(0, false);
+            is_finish_ = false;
+        }
     }
 
     if(state_msg && deltaG_msg)
@@ -60,8 +70,18 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
         state_reg = state_msg->value;
         deltaG_reg = deltaG_msg->value;
         
-        DEBUG_PRINT ("[NBC] Initiate neuron block (Nidx: %d)", idx_counter_);
-        outmsgs[OPORT_NB] = new NeuronBlockInMessage (0, idx_counter_, state_reg, deltaG_reg);
+        DEBUG_PRINT ("[NBC] Initiate neuron block (Nidx: %d)", nb_idx_counter_);
+        outmsgs[OPORT_NB] = new NeuronBlockInMessage (0, nb_idx_counter_, state_reg, deltaG_reg);
+
+        nb_idx_counter_++;
+
+
+        if (nb_idx_counter_ == max_idx_)
+        {
+            DEBUG_PRINT ("[NBC] Finish controller jobs");
+            outmsgs[OPORT_End] = new SignalMessage(0, true);
+            is_finish_ = true;
+        }
     }
     else if (unlikely((state_msg || deltaG_msg)))
     {
@@ -69,16 +89,11 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
         return;
     }
 
-    if(idx_counter_ != max_idx_)
+    if(read_idx_counter_ != max_idx_ && !is_finish_)
     {
         DEBUG_PRINT ("[NBC] Read Reqest");
-        outmsgs[OPORT_sSRAM] = new IndexMessage (0, idx_counter_);
-        outmsgs[OPORT_dSRAM] = new IndexMessage (ts_parity_, idx_counter_);
-        idx_counter_++;
-    }
-    else
-    {
-        DEBUG_PRINT ("[NBC] Finish controller jobs");
-        outmsgs[OPORT_End] = new SignalMessage(0, true);
+        outmsgs[OPORT_sSRAM] = new IndexMessage (0, read_idx_counter_);
+        outmsgs[OPORT_dSRAM] = new IndexMessage (ts_parity_, read_idx_counter_);
+        read_idx_counter_++;
     }
 }

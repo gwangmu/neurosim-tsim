@@ -45,6 +45,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
 
     if(!is_idle_)
     {
+        DEBUG_PRINT ("[AS] Send read request");
         outmsgs[OPORT_Addr] = new IndexMessage (0, read_addr_);
         
         read_addr_ += read_bytes;

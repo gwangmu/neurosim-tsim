@@ -35,9 +35,12 @@ void AxonMetaTable::Operation (Message **inmsgs, Message **outmsgs,
     if(raddr_msg)
     {
         uint32_t read_addr = raddr_msg->value;
-        outmsgs[RPORT_data] = new AxonMessage (0, counter, 1);
-        counter++;
+        uint16_t len = 1;
+        outmsgs[RPORT_data] = new AxonMessage (0, counter, len);
 
-        DEBUG_PRINT("[SRAM] Receive read request, and send message");
+        DEBUG_PRINT("[AT] Receive read request, and send message (addr: %d, len %d)",
+                counter, len);
+        
+        counter++;
     }
 }

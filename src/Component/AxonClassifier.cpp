@@ -51,14 +51,14 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         outmsgs[OPORT_Sel] = new SelectMessage (target_module, dram_msg->target_idx); 
         if(is_board)
         {
-            outmsgs[OPORT_Synapse] = new SynapseMessage (0, dram_msg->val32, dram_msg->val16);
-            outmsgs[OPORT_TSparity] = new SignalMessage (0, ts_parity);
-            DEBUG_PRINT ("[AEC] Send synapse data to chip");
+            outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16);
+            DEBUG_PRINT ("[AEC] Send routing information to controller");
         }
         else
         {
-            outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16);
-            DEBUG_PRINT ("[AEC] Send routing information to controller");
+            outmsgs[OPORT_Synapse] = new SynapseMessage (0, dram_msg->val32, dram_msg->val16);
+            outmsgs[OPORT_TSparity] = new SignalMessage (0, ts_parity);
+            DEBUG_PRINT ("[AEC] Send synapse data to chip");
         }
     }
 

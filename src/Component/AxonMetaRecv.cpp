@@ -27,6 +27,7 @@ void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs,
 
     if(axon_msg)
     {
+        DEBUG_PRINT ("[AMR] Receive message (addr %lu)", axon_msg->value);
         outmsgs[OPORT_Axon] = new AxonMessage (0, axon_msg->value, axon_msg->len); 
     }
 }

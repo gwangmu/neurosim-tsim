@@ -50,6 +50,8 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         outmsgs[PORT_raddr] = new IndexMessage (rhs, syn_msg->idx);
         idx_queue.push_back(syn_msg->idx);
 
+        DEBUG_PRINT ("[Acc] Request deltaG (idx: %d)", syn_msg->idx);
+
         if(is_idle_)
         {
             is_idle_ = false;

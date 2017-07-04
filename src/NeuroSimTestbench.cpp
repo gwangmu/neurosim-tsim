@@ -18,10 +18,10 @@ EXPORT_TESTBENCH (NeuroSimTestbench);
 NeuroSimTestbench::NeuroSimTestbench ()
     : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
 {
-    datasink = static_cast<DataSinkModule<NeuronBlockOutMessage, uint32_t> *>(TOP_COMPONENT->GetModule ("datasink"));
+    //datasink = static_cast<DataSinkModule<NeuronBlockOutMessage, uint32_t> *>(TOP_COMPONENT->GetModule ("datasink"));
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
-    return (datasink->recvdata >= 4);
+    return 0; //(datasink->recvdata >= 4);
 }

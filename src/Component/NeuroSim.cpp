@@ -2,6 +2,7 @@
 
 #include <TSim/Pathway/Wire.h>
 #include <TSim/Pathway/FanoutWire.h>
+#include <TSim/Pathway/RRFaninWire.h>
 #include <TSim/Utility/Prototype.h>
 
 #include <Component/DataSourceModule.h>
@@ -9,6 +10,7 @@
 #include <Component/DataEndpt.h>
 
 #include <Component/NeuroChip.h>
+#include <Component/Propagator.h>
 
 #include <Message/AxonMessage.h>
 #include <Message/ExampleMessage.h>
@@ -34,12 +36,20 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     SetClock ("main");
 
     /** Parameters **/
-    int num_cores = 1;
+    int num_chips = 1;
     int num_propagators = 1;
+    
+    int num_cores = 1;
 
     /** Components **/
-    Component *neurochip = new NeuroChip ("chip0", this, num_cores, num_propagators);
-   
+    std::vector<Component*> neurochips;
+    for (int i=0; i<num_chips; i++)
+        neurochips.push_back (new NeuroChip ("chip" + to_string(i), this, num_cores, num_propagators));
+    
+    std::vector<Component*> propagators;
+    for (int i=0; i<num_propagators; i++)
+        propagators.push_back(new Propagator ("propagator" + to_string(i), this));
+
     /** Modules **/
 
     /** Module & Wires **/
@@ -47,50 +57,71 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     Pathway::ConnectionAttr conattr (0, 32);
     
     // Modules
-    Module *datasink = new DataSinkModule <AxonMessage, uint32_t> ("datasink", this);
-    std::vector <Module*> ds_parity;
-    for (int i=0; i<num_cores; i++)
-        ds_parity.push_back(new DataSourceModule ("ds_parity", this));
+    //Module *datasink = new DataSinkModule <AxonMessage, uint32_t> ("datasink", this);
+    Module *ds_parity = new DataSourceModule ("ds_parity", this);
     
-    Module *de_syn = new DataEndptModule <SynapseMessage> ("de_syn", this);
-    Module *de_synTS = new DataEndptModule <SignalMessage> ("de_synTS", this);
-    Module *de_synCidx = new DataEndptModule <SelectMessage> ("de_synCidx", this);
+    //Module *de_syn = new DataEndptModule <SynapseMessage> ("de_syn", this);
+    //Module *de_synTS = new DataEndptModule <SignalMessage> ("de_synTS", this);
+    //Module *de_synCidx = new DataEndptModule <SelectMessage> ("de_synCidx", this);
+    Module *ds_board = new DataSinkModule <AxonMessage, uint32_t> ("ds_board", this);
+    Module *ds_idle = new DataSinkModule <SignalMessage, bool> ("ds_idle", this);
 
     // Wires
-    Wire *core2sink = new Wire (this, conattr, Prototype<AxonMessage>::Get()); // DUMMY
-    std::vector<Wire*> core_TSParity;
-    for (int i=0; i<num_cores; i++)
-        core_TSParity.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
+    std::vector<RRFaninWire*> axon_data;
+    for (int i=0; i<num_propagators; i++)
+        axon_data.push_back (new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_chips));
+    FanoutWire *cur_TSParity = new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 
+            num_cores + num_propagators);
     
     std::vector<Wire*> syn_data;
     std::vector<Wire*> syn_parity;
     std::vector<Wire*> syn_cidx;
+    std::vector<Wire*> board_axon;
+    std::vector<Wire*> prop_idle;
     for (int i=0; i<num_propagators; i++)
     {
         syn_data.push_back (new Wire (this, conattr, Prototype<SynapseMessage>::Get()));
         syn_parity.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
         syn_cidx.push_back (new Wire (this, conattr, Prototype<SelectMessage>::Get()));
+        board_axon.push_back (new Wire (this, conattr, Prototype<AxonMessage>::Get()));
+        prop_idle.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
     }
-    
-    /** Connect **/
-    neurochip->Connect ("Axon", core2sink->GetEndpoint (Endpoint::LHS));
-    datasink->Connect ("datain", core2sink->GetEndpoint (Endpoint::RHS));
+   
 
+    /** Connect **/
+    for (int i=0; i<num_chips; i++)
+    {
+        for (int p=0; p<num_propagators; p++)
+            neurochips[i]->Connect ("Axon", axon_data[p]->GetEndpoint (Endpoint::LHS, i));
+    }
+
+    ds_parity->Connect ("dataout", cur_TSParity->GetEndpoint (Endpoint::LHS));
     for (int i=0; i<num_cores; i++)
     {
-        ds_parity[i]->Connect ("dataout", core_TSParity[i]->GetEndpoint (Endpoint::LHS));
-        neurochip->Connect ("CurTSParity" + to_string(i), core_TSParity[i]->GetEndpoint (Endpoint::RHS));
+        neurochips[i]->Connect ("CurTSParity" + to_string(i), cur_TSParity->GetEndpoint (Endpoint::RHS, i));
     }
+    
     for (int i=0; i<num_propagators; i++)
     {
-        de_syn->Connect ("dataend", syn_data[i]->GetEndpoint (Endpoint::LHS));
-        neurochip->Connect ("SynapseData" + to_string(i), syn_data[i]->GetEndpoint (Endpoint::RHS));
+        propagators[i]->Connect ("Axon", axon_data[i]->GetEndpoint (Endpoint::RHS));
+        propagators[i]->Connect ("PropTS", cur_TSParity->GetEndpoint (Endpoint::RHS, num_cores + i));
+        
+        propagators[i]->Connect ("Synapse", syn_data[i]->GetEndpoint (Endpoint::LHS));
+        propagators[i]->Connect ("SynTS", syn_parity[i]->GetEndpoint (Endpoint::LHS));
+        propagators[i]->Connect ("Index", syn_cidx[i]->GetEndpoint (Endpoint::LHS));
+        
+        propagators[i]->Connect ("BoardAxon", board_axon[i]->GetEndpoint (Endpoint::LHS));
+        propagators[i]->Connect ("Idle", prop_idle[i]->GetEndpoint (Endpoint::LHS));
+        ds_board->Connect ("datain", board_axon[i]->GetEndpoint (Endpoint::RHS));
+        ds_idle->Connect ("datain", prop_idle[i]->GetEndpoint (Endpoint::RHS));
 
-        de_synTS->Connect ("dataend", syn_parity[i]->GetEndpoint (Endpoint::LHS));
-        neurochip->Connect ("SynTS" + to_string(i), syn_parity[i]->GetEndpoint (Endpoint::RHS));
+        for (int c=0; c<num_chips; c++)
+        {
+            neurochips[c]->Connect ("SynapseData" + to_string(i), syn_data[i]->GetEndpoint (Endpoint::RHS));
+            neurochips[c]->Connect ("SynTS" + to_string(i), syn_parity[i]->GetEndpoint (Endpoint::RHS));
+            neurochips[c]->Connect ("SynCidx" + to_string(i), syn_cidx[i]->GetEndpoint (Endpoint::RHS));
 
-        de_synCidx->Connect ("dataend", syn_cidx[i]->GetEndpoint (Endpoint::LHS));
-        neurochip->Connect ("SynCidx" + to_string(i), syn_cidx[i]->GetEndpoint (Endpoint::RHS));
+        }
     }
 }
 

@@ -27,6 +27,7 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs,
 
     if(axon_msg)
     {
+        DEBUG_PRINT ("[AMT] Receive axon message (addr %lu)", axon_msg->value) 
         outmsgs[OPORT_Axon] = new AxonMessage (0, axon_msg->value, axon_msg->len); 
     }
 }

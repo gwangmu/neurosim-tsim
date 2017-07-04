@@ -52,6 +52,8 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
             DEBUG_PRINT ("[AMQ] Receive spike (idx: %d, queue size: %u)", idx, *outque_size);
             outmsgs[OPORT_SRAM] = new IndexMessage (0, idx);
         }
+        else
+            DEBUG_PRINT ("[AMQ] Receive NB output (idx: %d)", idx);
     }
 
     if(axon_msg)
@@ -61,7 +63,7 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
 
         outmsgs[OPORT_Axon] = new AxonMessage (0, ax_addr, ax_len);
 
-        DEBUG_PRINT ("[AMQ]Recieve Axon data %lu %u", ax_addr, ax_len);
+        DEBUG_PRINT ("[AMQ] Recieve Axon data %lu %u", ax_addr, ax_len);
     }
 
     if(!is_empty && *outque_size == 0)

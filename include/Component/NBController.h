@@ -32,8 +32,9 @@ private:
     
     // Internal states
     uint32_t max_idx_;
-    uint32_t idx_counter_;
+    uint32_t read_idx_counter_, nb_idx_counter_;
     bool ts_parity_;
+    bool is_finish_;
 
     /* Internal Registers */
     uint64_t deltaG_reg;

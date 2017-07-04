@@ -46,7 +46,6 @@ void SynDataDistrib::Operation (Message **inmsgs, Message **outmsgs,
 
         if(syn_msg && sel_msg )
         {
-            DEBUG_PRINT ("[SDD] Distribute Synapse Data");
             uint32_t weight = syn_msg->weight;
             uint16_t idx = syn_msg->idx;
 
@@ -54,6 +53,13 @@ void SynDataDistrib::Operation (Message **inmsgs, Message **outmsgs,
 
             outmsgs[OPORT_Syn[i]] = new SynapseMessage (rhs, weight, idx);
             outmsgs[OPORT_TS[i]] = new SignalMessage (rhs, ts_msg->value);
+            
+            DEBUG_PRINT ("[SDD] Distribute Synapse Data to %d", rhs);
+        }
+        else if (unlikely (syn_msg || sel_msg))
+        {
+            SIM_ERROR ("SDD receive only either synapse or select",
+                    GetFullName().c_str());
         }
     }
 }
