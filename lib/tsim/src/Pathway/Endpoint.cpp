@@ -33,8 +33,7 @@ Endpoint::Endpoint (string name, uint32_t id, Pathway *parent, Type type,
     this->parent = parent;
     msgproto = parent->GetMsgPrototype ();
 
-    this->modConn = nullptr;
-    this->devConn = nullptr;
+    this->unitConn = nullptr;
     this->portConn = "";
 
     if (capacity == 0 && type == RHS)
@@ -125,6 +124,9 @@ bool Endpoint::Assign (Message *msg)
     if (resv_count > 0) resv_count--;
     msgque.push (msg);
 
+    DEBUG_PRINT ("assining message %p (%s - %s)",
+            msg, GetConnectedUnit()->GetName().c_str(), GetConnectedPortName().c_str());
+
     return true;
 }
 
@@ -161,29 +163,17 @@ bool Endpoint::IsBroadcastBlocked ()
 
 bool Endpoint::JoinTo (Component *comp, string portname)
 {
-    if (Module *module = dynamic_cast<Module *>(comp))
+    if (Unit *unit = dynamic_cast<Unit *>(comp))
     {
-        if (modConn != nullptr || devConn != nullptr)
-            DESIGN_WARNING ("port '%s' (of %s) has been already assigned",
-                    GetName().c_str(), portname.c_str(), module->GetName().c_str());
+        if (unitConn != nullptr)
+            DESIGN_WARNING ("already assigned endpoint", GetName().c_str());
 
-        devConn = nullptr;
-        modConn = module;
-        portConn = portname;
-    }
-    else if (Device *dev = dynamic_cast<Device *>(dev))
-    {
-        if (devConn != nullptr || modConn != nullptr)
-            DESIGN_WARNING ("port '%s' (of %s) has been already assigned",
-                    GetName().c_str(), portname.c_str(), module->GetName().c_str());
-
-        modConn = nullptr;
-        devConn = dev;
+        unitConn = unit;
         portConn = portname;
     }
     else
     {
-        SYSTEM_ERROR ("bogus component tries to join to endpoint");
+        SYSTEM_ERROR ("non-unit component tries to join to endpoint");
         return false;
     }
 

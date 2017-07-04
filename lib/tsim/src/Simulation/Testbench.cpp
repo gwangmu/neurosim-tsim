@@ -46,10 +46,10 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_REGISTER_DATAPATH (toked[1], toked[2]);
             else if (toked[0] == "CLOCK_PERIOD")
                 SET_CLOCK_PERIOD (toked[1], stoi (toked[2]));
-            else if (toked[0] == "MODULE_DYNAMIC_POWER")    
-                SET_MODULE_DYNAMIC_POWER (toked[1], stoi (toked[2]));
-            else if (toked[0] == "MODULE_STATIC_POWER")    
-                SET_MODULE_STATIC_POWER (toked[1], stoi (toked[2]));
+            else if (toked[0] == "UNIT_DYNAMIC_POWER")    
+                SET_UNIT_DYNAMIC_POWER (toked[1], stoi (toked[2]));
+            else if (toked[0] == "UNIT_STATIC_POWER")    
+                SET_UNIT_STATIC_POWER (toked[1], stoi (toked[2]));
             else if (toked[0] == "PATHWAY_DIS_POWER")    
                 SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
             else
@@ -101,14 +101,14 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype,
         else
             return -1;
     }
-    else if (ptype == Testbench::MODULE_DYNAMIC_POWER)
+    else if (ptype == Testbench::UNIT_DYNAMIC_POWER)
     {
         if (moddynpow.count (pname))
             return moddynpow[pname];
         else
             return -1;
     }
-    else if (ptype == Testbench::MODULE_STATIC_POWER)
+    else if (ptype == Testbench::UNIT_STATIC_POWER)
     {
         if (modstapow.count (pname))
             return modstapow[pname];

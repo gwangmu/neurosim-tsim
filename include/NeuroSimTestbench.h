@@ -1,6 +1,7 @@
 #pragma once
 
 #include <TSim/Simulation/Testbench.h>
+#include <Message/AxonMessage.h>
 #include <Component/DataSinkModule.h>
 
 #include <cinttypes>
@@ -18,5 +19,5 @@ public:
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:
-    DataSinkModule<NeuronBlockOutMessage, uint32_t> *datasink;
+    DataSinkModule<AxonMessage, uint32_t> *datasink;
 };

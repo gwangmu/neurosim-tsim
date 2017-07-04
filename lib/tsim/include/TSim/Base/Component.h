@@ -14,14 +14,14 @@ using namespace std;
 class Simulator;
 class Testbench;
 class Pathway;
+class Unit;
 
 
 class Component: public Metadata, public IValidatable
 {
-protected:
-    static const uint32_t MAX_MODULE_PORTS = 64;
-    
 public:
+    static const uint32_t MAX_MODULE_PORTS = 64;
+
     template <typename T>
     struct CycleClass
     {
@@ -42,7 +42,7 @@ private:
         Component *child;
         string portname;
     };
-
+    
 public:
     /* Universal */
     Component (const char* clsname, string iname, Component *parent);
@@ -53,7 +53,7 @@ public:
     Component* GetParent () { return parent; }
     virtual uint32_t GetNumChildModules ();
 
-    virtual Module* GetModule (string name);
+    virtual Unit* GetUnit (string name);
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();
     virtual double GetAggregateConsumedEnergy ();

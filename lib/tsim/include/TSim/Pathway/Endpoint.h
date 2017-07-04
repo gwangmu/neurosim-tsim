@@ -13,7 +13,7 @@
 using namespace std;
 
 class Device;
-class Module;
+class Unit;
 class Message;
 class Simulator;
 
@@ -36,8 +36,7 @@ public:
     /* Universal */
     Type GetEndpointType () { return type; }
     Pathway* GetParent () { return parent; }
-    Module* GetConnectedModule () { return modConn; }
-    Device* GetConnectedDevice () { return devConn; }
+    Unit* GetConnectedUnit () { return unitConn; }
     string GetConnectedPortName () { return portConn; }
     Message* GetMsgPrototype () { return msgproto; }
     bool IsPortCap () { return (type == CAP); }
@@ -83,7 +82,7 @@ private:
     Type type;
     Pathway* parent;
 
-    Module *modConn;
+    Unit *unitConn;
     Device *devConn;
     string portConn;
 

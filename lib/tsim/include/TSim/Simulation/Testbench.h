@@ -10,8 +10,8 @@
 #define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
 #define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
 #define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
-#define SET_MODULE_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
-#define SET_MODULE_STATIC_POWER(mod,pow) modstapow[mod] = pow
+#define SET_UNIT_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
+#define SET_UNIT_STATIC_POWER(mod,pow) modstapow[mod] = pow
 #define SET_PATHWAY_DIS_POWER(path,pow) pathdispow[path] = pow
 
 
@@ -36,8 +36,8 @@ public:
         FILESCRIPT_PATH, 
         REGISTER_DATAPATH, 
         CLOCK_PERIOD,
-        MODULE_DYNAMIC_POWER,
-        MODULE_STATIC_POWER,
+        UNIT_DYNAMIC_POWER,
+        UNIT_STATIC_POWER,
         PATHWAY_DIS_POWER
     };
 

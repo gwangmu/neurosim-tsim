@@ -42,6 +42,8 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Meta]);
     //SelectMessage *sel_msg = static_cast<SelectMessage*>(inmsgs[IPORT_Core_sel]);
 
+    DEBUG_PRINT ("%p, %p", nb_msg, axon_msg);
+
     if(nb_msg)
     {
         uint32_t idx = nb_msg->value;

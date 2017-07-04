@@ -61,6 +61,7 @@ protected:
         Message* Sample ();
         void Flow ();
         void Assign (Message *newmsg);
+        void NullifyNow ();
 
     //private:      // FIXME for the sake of convenience XD
         Pathway *const parent;
@@ -112,6 +113,7 @@ public:
     uint32_t GetNumRHS () { return endpts.rhs.size (); }
 
     bool IsPostDevicePathway ();
+    bool IsControlPathway ();
 
     const CycleClass<uint64_t>& GetCycleClass () { return cclass; }
     const EventCount<uint64_t>& GetEventCount () { return ecount; }
@@ -159,6 +161,8 @@ private:
     inline void UpdateStabilizeCycle ();
 
 private:
+    const uint32_t INITIAL_LHSID = 0;
+
     Component *parent;
 
     // property

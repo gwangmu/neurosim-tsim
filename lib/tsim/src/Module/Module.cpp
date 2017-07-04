@@ -1,6 +1,7 @@
 #include <TSim/Module/Module.h>
 
 #include <TSim/Base/Component.h>
+#include <TSim/Base/Unit.h>
 #include <TSim/Script/Script.h>
 #include <TSim/Register/Register.h>
 #include <TSim/Pathway/Endpoint.h>
@@ -21,7 +22,7 @@ using namespace std;
 /* Constructors */
 Module::Module (const char *clsname, string iname, 
         Component *parent, uint32_t pdepth):
-    Component (clsname, iname, parent)
+    Unit (clsname, iname, parent)
 {
     script = nullptr;
     reg = nullptr;
@@ -45,13 +46,8 @@ Module::Module (const char *clsname, string iname,
 
     outque_size = new uint32_t[0];
 
-    ninports = noutports = 0;
-
     pbusy_state = 0;
-
-    clkperiod = -1;
-    dynpower = -1;
-    stapower = -1;
+    inmsg_valid_count = 0;
 }
 
 
@@ -95,112 +91,6 @@ bool Module::SetRegister (Register *reg)
 }
 
 
-bool Module::Connect (string portname, Endpoint *endpt)
-{
-    if (!pname2port.count (portname))
-    {
-        DESIGN_ERROR ("non-existing port '%s'", GetFullName().c_str(), 
-                portname.c_str());
-        return false;
-    }
-
-    Port *port = pname2port[portname];
-
-    if (port->iotype == Module::PORT_UNKNOWN)
-    {
-        SYSTEM_ERROR ("port type cannot be UNKNOWN"
-                "(portname: %s)", portname.c_str());
-        return false;
-    }
-
-    if (!endpt)
-    {
-        DESIGN_WARNING ("attemping to assign a null endpoint to the port '%s'",
-                GetFullName().c_str(), portname.c_str());
-        port->endpt = nullptr;
-        return true;
-    }
-
-    if (!endpt->IsPortCap() && 
-            endpt->GetParent()->GetMsgPrototype() != port->msgproto)
-    {
-        DESIGN_ERROR ("mismatching message proto %s (of '%s') "
-                "and %s (of port '%s')",
-                GetFullName().c_str(), 
-                endpt->GetParent()->GetMsgPrototype()->GetClassName (),
-                endpt->GetParent()->GetName().c_str(), 
-                port->msgproto->GetClassName (), portname.c_str());
-        return false;
-    }
-
-    if (!(endpt->GetEndpointType() == Endpoint::CAP) &&
-            !(port->iotype == Module::PORT_INPUT &&
-                endpt->GetEndpointType() == Endpoint::RHS) &&
-            !(port->iotype == Module::PORT_OUTPUT &&
-                endpt->GetEndpointType() == Endpoint::LHS))
-    {
-        DESIGN_ERROR ("incompatible endpoint '%s' to %s port '%s'",
-                GetName().c_str(), endpt->GetClassName(),
-                Module::Port::GetTypeString(port->iotype), portname.c_str());
-        return false;
-    }
-
-    port->endpt = endpt;
-    if (!endpt->IsPortCap())
-        endpt->JoinTo (this, portname);
-
-    return true;
-}
-
-
-Module* Module::GetModule (string name)
-{
-    if (GetInstanceName() == name)
-        return this;
-    else
-        return nullptr;
-}
-
-
-double Module::GetConsumedEnergy ()
-{
-    if (clkperiod == -1)
-        SYSTEM_ERROR ("zero module clock period (module: %s)",
-                GetFullName().c_str());
-
-    if (dynpower == -1 || stapower == -1)
-        return -1;
-    else
-        return (clkperiod * 10E-9 * 
-                (stapower * 10E-9 * (cclass.active + cclass.idle) +
-                 dynpower * 10E-9 * cclass.active));
-}
-
-
-Component::CycleClass<double> Module::GetAggregateCycleClass ()
-{
-    CycleClass<double> cclass_conv;
-    cclass_conv.active = cclass.active;
-    cclass_conv.idle = cclass.idle;
-
-    return cclass_conv;
-}
-
-Component::EventCount<double> Module::GetAggregateEventCount ()
-{
-    EventCount<double> ecount_conv;
-    ecount_conv.stalled = ecount.stalled;
-    // NOTE: ecount.oport_full is non-aggregatable
-
-    return ecount_conv;
-}
-
-double Module::GetAggregateConsumedEnergy ()
-{
-    return GetConsumedEnergy ();
-}
-
-
 /* functions for 'Simulator' */
 IssueCount Module::Validate (PERMIT(Simulator))
 {
@@ -212,19 +102,19 @@ IssueCount Module::Validate (PERMIT(Simulator))
         icount.error++;
     }
 
-    if (dynpower == -1)
+    if (GetDynamicPower() == -1)
     {
         //DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
         icount.warning++;
     }
 
-    if (stapower == -1)
+    if (GetStaticPower() == -1)
     {
         //DESIGN_WARNING ("no static power info", GetFullName().c_str());
         icount.warning++;
     }
 
-    if (clkperiod == -1)
+    if (GetClockPeriod() == -1)
     {
         SYSTEM_ERROR ("no clock period (module: %s)", GetFullName().c_str());
         icount.error++;
@@ -273,8 +163,8 @@ void Module::PreClock (PERMIT(Simulator))
                 if (!outport.endpt->IsSelectedLHSOfThisCycle ()
                         || outport.endpt->IsOverloaded ())
                 {
-                    DEBUG_PRINT("%s is stalled (capacity %d)"
-                            , outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity());
+                    DEBUG_PRINT("%s is stalled (capacity %d)",
+                            outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity());
                     stalled = true;
                     break;
                 }
@@ -327,8 +217,7 @@ void Module::PreClock (PERMIT(Simulator))
 /*>>> ! PERFORMANCE-CRITICAL ! <<<*/
 void Module::PostClock (PERMIT(Simulator))
 {
-    MICRODEBUG_PRINT ("calc '%s' (stall: %d)"
-            , GetFullName().c_str(), stalled);
+    MICRODEBUG_PRINT ("calc '%s' (stall: %d)", GetFullName().c_str(), stalled);
 
     Instruction *nextinstr = nullptr;
     if (likely (!stalled))
@@ -344,9 +233,9 @@ void Module::PostClock (PERMIT(Simulator))
     {
         for (auto i = 0; i < ninports; i++)
         {
-            if (!nextinmsgs[i])
+            if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
             {
-                if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
+                if (!nextinmsgs[i])
                 {
                     if (likely (!stalled))
                     {
@@ -354,15 +243,15 @@ void Module::PostClock (PERMIT(Simulator))
                         DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
                     }
                 }
-                else /* TOGGLE */
+            }
+            else /* TOGGLE */
+            {
+                Message *inmsg = inports[i].endpt->Peek ();
+                if (inmsg)
                 {
-                    Message *inmsg = inports[i].endpt->Peek ();
-                    if (inmsg)
-                    {
-                        inports[i].endpt->Pop ();
-                        nextinmsgs[i]->Dispose ();
-                        nextinmsgs[i] = inmsg;
-                    }
+                    inports[i].endpt->Pop ();
+                    if (nextinmsgs[i]) nextinmsgs[i]->Dispose ();
+                    nextinmsgs[i] = inmsg;
                 }
             }
         }
@@ -387,8 +276,10 @@ void Module::PostClock (PERMIT(Simulator))
             for (auto i = 0; i < noutports; i++)
             {
                 if (nextoutmsgs[omsgidx_out])
+                {
                     MarkBusyPipeline ();
-                break;
+                    break;
+                }
             }
         }
         
@@ -403,13 +294,16 @@ void Module::PostClock (PERMIT(Simulator))
                         inports[i].endpt->Pop ();
                         nextinmsgs[i]->Dispose ();
                         nextinmsgs[i] = nullptr;
+
+                        UpdateInMsgValidCount ();
+                        RefreshInMsgValidCount ();
                     }
                 }
             }
         }
 
-        omsgidx = (omsgidx + 1) & omsgidxmask;
         CommitPipeline ();
+        omsgidx = (omsgidx + 1) & omsgidxmask;
     }
 
     operation ("status check")
@@ -448,87 +342,43 @@ void Module::PostClock (PERMIT(Simulator))
 }
 
 
-string Module::GetGraphVizBody (uint32_t level)
+void Module::OnCreatePort (Port &newport)
 {
-    string body = "";
-
-#define ADDLINE(str) body += (string(level, '\t') + str + string("\n"));
-
-    string inputs = "";
-    for (auto i = 0; i < ninports; i++)
+    switch (newport.iotype)
     {
-        inputs += string("<") + inports[i].name + ">" + inports[i].name;
-        if (i < ninports - 1) inputs += "|";
+        case PORT_INPUT:
+            delete[] nextinmsgs;
+            nextinmsgs = new Message *[ninports] ();
+            break;
+        case PORT_OUTPUT:
+            for (uint32_t i = 0; i < omsgidxmask + 1; i++)
+            {
+                delete[] nextoutmsgs[i];
+                nextoutmsgs[i] = new Message *[noutports] ();
+            }
+            
+            delete[] outque_size;
+            outque_size = new uint32_t[noutports] ();
+            break;
+        default:
+            SYSTEM_ERROR ("Module cannot have %s type port (module: %s)", 
+                    Port::GetTypeString (newport.iotype),
+                    GetFullName().c_str());
+            break;
     }
-
-    string outputs = "";
-    for (auto i = 0; i < noutports; i++)
-    {
-        outputs += string("<") + outports[i].name + ">" + outports[i].name;
-        if (i < noutports - 1) outputs += "|";
-    }
-
-    ADDLINE (GetInstanceName() + string(" [label=\"{ {") +
-            inputs + "}|" + string(GetClassName()) + "\\n" + GetInstanceName() + "\\n" + 
-            "(clock: " + GetClock() + ")|{" +
-            outputs + "} }\"];");
-
-#undef ADDLINE
-
-    return body;
 }
 
-
-/* Called by 'Module' */
-uint32_t Module::CreatePort (string portname, Module::PortType iotype,
-        Message* msgproto)
+bool Module::IsValidConnection (Port *port, Endpoint *endpt)
 {
-    uint32_t id = -1;
-    Port port = Port();
-    
-    port.name = portname;
-    port.iotype = iotype;
-    port.msgproto = msgproto;
-    port.endpt = nullptr;
-
-    if (iotype == Module::PORT_INPUT)
+    if (port->iotype == Unit::PORT_INPUT)
     {
-        if (ninports > MAX_MODULE_PORTS)
-            DESIGN_FATAL ("#lhs > %u not allowed", GetName().c_str(), MAX_MODULE_PORTS);
-
-        id = ninports++;
-        port.id = id;
-        inports[id] = port;
-        pname2port.insert (make_pair (portname, &inports[id]));
-
-        delete[] nextinmsgs;
-        nextinmsgs = new Message *[ninports] ();
-    }
-    else if (iotype == Module::PORT_OUTPUT)
-    {
-        if (noutports > MAX_MODULE_PORTS)
-            DESIGN_FATAL ("#rhs > %u not allowed", GetName().c_str(), MAX_MODULE_PORTS);
-
-        id = noutports++;
-        port.id = id;
-        outports[id] = port;
-        pname2port.insert (make_pair (portname, &outports[id]));
-
-        for (uint32_t i = 0; i < omsgidxmask + 1; i++)
+        if (endpt->GetCapacity () == 0)
         {
-            delete[] nextoutmsgs[i];
-            nextoutmsgs[i] = new Message *[noutports] ();
+            DESIGN_FATAL ("module INUPT endpoint cannot have zero capacity",
+                    GetFullName().c_str());
+            return false;
         }
-        
-        delete[] outque_size;
-        outque_size = new uint32_t[noutports] ();
-    }
-    else
-    {
-        DESIGN_ERROR ("cannot create %s port", GetFullName().c_str(),
-                Module::Port::GetTypeString (iotype));
-        return -1;
     }
 
-    return id;
+    return true;
 }

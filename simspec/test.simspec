@@ -7,6 +7,6 @@ FILESCRIPT_PATH(neuron_block): data/spike0.script
 # Clock
 CLOCK_PERIOD(main): 500
 
-# Module power
-MODULE_DYNAMIC_POWER(neuron_block): 300
-MODULE_STATIC_POWER(neuron_block): 500
+# Unit power
+UNIT_DYNAMIC_POWER(neuron_block): 300
+UNIT_STATIC_POWER(neuron_block): 500
