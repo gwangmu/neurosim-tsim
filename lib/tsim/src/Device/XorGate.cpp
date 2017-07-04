@@ -16,7 +16,7 @@ Message* XorGate::Logic (Message const * const *inmsgs)
     IntegerMessage newoutmsg (0);
     
     for (auto i = 0; i < ninports; i++)
-        newoutmsg.value ^= (static_cast<IntegerMessage *>inmsgs[i])->value;
+        newoutmsg.value ^= static_cast<IntegerMessage const *>(inmsgs[i])->value;
 
     if (newoutmsg.value != cached_output.value)
     {

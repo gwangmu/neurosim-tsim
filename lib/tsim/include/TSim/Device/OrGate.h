@@ -20,10 +20,12 @@ class OrGate: public Gate
 {
 public:
     OrGate (string iname, Component *parent, uint32_t ninput)
-        : Gate ("Gate", iname, parent, Prototype<IntegerMessage>::Get()) {}
+        : Gate ("OrGate", iname, parent, Prototype<IntegerMessage>::Get(), ninput),
+        cached (false) {}
 
     virtual Message* Logic (Message const * const *inmsgs);
 
 private:
     IntegerMessage cached_output;
+    bool cached;
 };

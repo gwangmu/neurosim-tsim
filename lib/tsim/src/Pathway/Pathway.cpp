@@ -457,16 +457,22 @@ void Pathway::PostClock (PERMIT(Simulator))
     {
         if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
         {
-            operation ("ahead-of-time broadcast message")
-            {
-                bool processed = true;
-                for (auto i = 0; i < endpts.rhs.size(); i++)
-                {
-                    Endpoint &ept = endpts.rhs[i];
+            uint64_t processed = (-1 << endpts.rhs.size());
 
-                    if (ept.GetCapacity() == 0)
+            DEBUG_PRINT ("%lx", processed);
+            for (auto i = 0; i < endpts.rhs.size(); i++)
+            {
+                Endpoint &ept = endpts.rhs[i];
+
+                if (ept.GetCapacity() == 0)
+                {
+                    operation ("ahead-of-time broadcast message")
                     {
-                        if (unlikely (!ept.Assign (sampledmsg)))
+                        if (likely (ept.Assign (sampledmsg)))
+                        {
+                            processed |= (1 << i);
+                        }
+                        else
                         {
                             SYSTEM_ERROR ("message dropped (pathway: %s, portname: %s)",
                                     GetName().c_str(), ept.GetConnectedPortName().c_str());
@@ -474,12 +480,11 @@ void Pathway::PostClock (PERMIT(Simulator))
                             sampledmsg->Dispose ();
                         }
                     }
-                    else
-                        processed = false;
                 }
-
-                if (processed) conn.NullifyNow ();
             }
+
+            DEBUG_PRINT ("%lx", processed);
+            if (processed == -1) conn.NullifyNow ();
         }
         else
         {

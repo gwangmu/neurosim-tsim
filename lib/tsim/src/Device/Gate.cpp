@@ -11,8 +11,9 @@
 using namespace std;
 
 
-Gate::Gate (string iname, Component *parent, Message *msgproto, uint32_t ninput)
-    : Device ("Gate", iname, parent, msgproto)
+Gate::Gate (const char *clsname, string iname, Component *parent, 
+        Message *msgproto, uint32_t ninput)
+    : Device (clsname, iname, parent, msgproto)
 {
     if (msgproto->GetType() != Message::TOGGLE)
         DESIGN_FATAL ("Gate only accepts TOGGLE type messages", GetName().c_str());
@@ -38,6 +39,7 @@ void Gate::PostClock (PERMIT(Simulator))
             {
                 inports[i].endpt->Pop ();
                 if (nextinmsgs[i]) nextinmsgs[i]->Dispose ();
+                nextinmsgs[i] = inmsg;
                 SetInputReadyState (i);
                 in_updated = true;
             }

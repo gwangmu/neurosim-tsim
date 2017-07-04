@@ -17,7 +17,8 @@ class Simulator;
 class Gate: public Device
 {
 public:
-    Gate (string iname, Component *parent, Message *msgproto, uint32_t ninput);
+    Gate (const char *clsname, string iname, Component *parent, 
+            Message *msgproto, uint32_t ninput);
 
     virtual void PreClock (PERMIT(Simulator)) final {};
     virtual void PostClock (PERMIT(Simulator)) final;

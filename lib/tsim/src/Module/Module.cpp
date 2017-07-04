@@ -233,9 +233,9 @@ void Module::PostClock (PERMIT(Simulator))
     {
         for (auto i = 0; i < ninports; i++)
         {
-            if (!nextinmsgs[i])
+            if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
             {
-                if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
+                if (!nextinmsgs[i])
                 {
                     if (likely (!stalled))
                     {
@@ -243,15 +243,15 @@ void Module::PostClock (PERMIT(Simulator))
                         DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
                     }
                 }
-                else /* TOGGLE */
+            }
+            else /* TOGGLE */
+            {
+                Message *inmsg = inports[i].endpt->Peek ();
+                if (inmsg)
                 {
-                    Message *inmsg = inports[i].endpt->Peek ();
-                    if (inmsg)
-                    {
-                        inports[i].endpt->Pop ();
-                        nextinmsgs[i]->Dispose ();
-                        nextinmsgs[i] = inmsg;
-                    }
+                    inports[i].endpt->Pop ();
+                    if (nextinmsgs[i]) nextinmsgs[i]->Dispose ();
+                    nextinmsgs[i] = inmsg;
                 }
             }
         }
@@ -366,4 +366,19 @@ void Module::OnCreatePort (Port &newport)
                     GetFullName().c_str());
             break;
     }
+}
+
+bool Module::IsValidConnection (Port *port, Endpoint *endpt)
+{
+    if (port->iotype == Unit::PORT_INPUT)
+    {
+        if (endpt->GetCapacity () == 0)
+        {
+            DESIGN_FATAL ("module INUPT endpoint cannot have zero capacity",
+                    GetFullName().c_str());
+            return false;
+        }
+    }
+
+    return true;
 }

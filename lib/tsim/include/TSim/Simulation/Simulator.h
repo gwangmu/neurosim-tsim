@@ -8,8 +8,7 @@ using namespace std;
 
 class Testbench;
 class Component;
-class Module;
-class Device;
+class Unit;
 class Pathway;
 class FileScript;
 class FileRegister;
@@ -27,6 +26,9 @@ public:
     };
 
 protected:
+    enum PathwayClass { PATHWAY_NORMAL, PATHWAY_POSTDEV, PATHWAY_CTRL, N_PATHWAY_CLASSES };
+    enum UnitType { UNIT_MODULE, UNIT_DEVICE, N_UNIT_TYPES };
+
     struct ClockDomain
     {
         ClockDomain ();
@@ -36,11 +38,8 @@ protected:
         uint32_t period;    // unit: nanoseconds
 
         // Configuration
-        vector<Module *> modules;
-        vector<Device *> devices;
-        vector<Pathway *> pathways;
-        vector<Pathway *> pathways_postdev;
-        vector<Pathway *> pathways_ctrl;
+        vector<Unit *> units[N_UNIT_TYPES];
+        vector<Pathway *> pathways[N_PATHWAY_CLASSES];
 
         // Simulation states
         uint64_t nexttime;
