@@ -37,9 +37,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
 
     /** Parameters **/
     int num_chips = 1;
-    int num_propagators = 1;
+    int num_propagators = 4;
     
-    int num_cores = 1;
+    int num_cores = 8;
 
     /** Components **/
     std::vector<Component*> neurochips;
@@ -93,13 +93,15 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     {
         for (int p=0; p<num_propagators; p++)
             neurochips[i]->Connect ("Axon", axon_data[p]->GetEndpoint (Endpoint::LHS, i));
+
+        for (int c=0; c<num_cores; c++)
+        {
+            neurochips[i]->Connect ("CurTSParity" + to_string(c), 
+                    cur_TSParity->GetEndpoint (Endpoint::RHS, c));
+        }
     }
 
     ds_parity->Connect ("dataout", cur_TSParity->GetEndpoint (Endpoint::LHS));
-    for (int i=0; i<num_cores; i++)
-    {
-        neurochips[i]->Connect ("CurTSParity" + to_string(i), cur_TSParity->GetEndpoint (Endpoint::RHS, i));
-    }
     
     for (int i=0; i<num_propagators; i++)
     {

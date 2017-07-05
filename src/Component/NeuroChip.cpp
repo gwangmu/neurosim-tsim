@@ -99,7 +99,6 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     
     for (int i=0; i<num_cores; i++)
         ExportPort ("CurTSParity" + to_string(i), cores[i], "CurTSParity");
-    
 
     for (int i=0; i<num_propagators; i++)
     {
