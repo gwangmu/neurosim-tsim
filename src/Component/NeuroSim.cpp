@@ -11,6 +11,7 @@
 
 #include <Component/NeuroChip.h>
 #include <Component/Propagator.h>
+#include <Component/Controller.h>
 
 #include <Message/AxonMessage.h>
 #include <Message/ExampleMessage.h>
@@ -36,10 +37,11 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     SetClock ("main");
 
     /** Parameters **/
-    int num_chips = 1;
-    int num_propagators = 4;
+    const int num_boards = 1;
+    const int num_chips = 1;
+    const int num_propagators = 4;
     
-    int num_cores = 8;
+    const int num_cores = 8;
 
     /** Components **/
     std::vector<Component*> neurochips;
@@ -50,6 +52,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     for (int i=0; i<num_propagators; i++)
         propagators.push_back(new Propagator ("propagator" + to_string(i), this));
 
+    //Controller *controller = new Controller ("controller", this, num_board);
+
     /** Modules **/
 
     /** Module & Wires **/
@@ -57,12 +61,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     Pathway::ConnectionAttr conattr (0, 32);
     
     // Modules
-    //Module *datasink = new DataSinkModule <AxonMessage, uint32_t> ("datasink", this);
     Module *ds_parity = new DataSourceModule ("ds_parity", this);
     
-    //Module *de_syn = new DataEndptModule <SynapseMessage> ("de_syn", this);
-    //Module *de_synTS = new DataEndptModule <SignalMessage> ("de_synTS", this);
-    //Module *de_synCidx = new DataEndptModule <SelectMessage> ("de_synCidx", this);
     Module *ds_board = new DataSinkModule <AxonMessage, uint32_t> ("ds_board", this);
     Module *ds_idle = new DataSinkModule <SignalMessage, bool> ("ds_idle", this);
 
