@@ -22,7 +22,7 @@ private:
     uint32_t IPORT_Axon;
 
     // Output port
-    uint32_t OPORT_Addr; 
+    uint32_t OPORT_Addr, OPORT_idle; 
 
     // DRAM parameters
     uint32_t read_bytes;

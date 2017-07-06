@@ -33,7 +33,7 @@ private:
     // internal state
     bool dyn_fin, prop_idle;
     bool ts_parity;
-    bool is_finish;
+    bool is_finish, is_start;
 
     uint32_t num_boards;
     uint32_t end_counter;

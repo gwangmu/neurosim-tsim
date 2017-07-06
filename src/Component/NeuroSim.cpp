@@ -45,6 +45,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     
     const int num_cores = 1;
 
+    const int axon_entry_queue_size = 64;
+
     /** Components **/
     std::vector<Component*> neurochips;
     for (int i=0; i<num_chips; i++)
@@ -139,7 +141,11 @@ NeuroSim::NeuroSim (string iname, Component *parent)
         propagators[i]->Connect ("BoardAxon", board_axon->GetEndpoint (Endpoint::LHS, i));
         propagators[i]->Connect ("BoardID", board_id->GetEndpoint (Endpoint::LHS, i));
         propagators[i]->Connect ("Idle", prop_idle[i]->GetEndpoint (Endpoint::LHS));
-        
+    
+        syn_data[i]->GetEndpoint (Endpoint::LHS)->SetCapacity (axon_entry_queue_size);
+        syn_parity[i]->GetEndpoint (Endpoint::LHS)->SetCapacity (axon_entry_queue_size);
+        syn_cidx[i]->GetEndpoint (Endpoint::LHS)->SetCapacity (axon_entry_queue_size);
+
         idle_and->Connect ("input" + to_string(i), prop_idle[i]->GetEndpoint (Endpoint::RHS)); 
         controller->Connect ("AxonOut", axon_data[i]->GetEndpoint (Endpoint::LHS, num_chips));
 

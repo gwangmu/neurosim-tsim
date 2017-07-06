@@ -31,7 +31,8 @@ TSManager::TSManager (string iname, Component *parent, uint32_t num_boards)
     prop_idle = true;
     ts_parity = false;
     is_finish = true;
-    
+    is_start = true;
+
     this->num_boards = num_boards;
     this->end_counter = 0;
 
@@ -61,8 +62,13 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         prop_idle = (val != 0)? 1:0;
 
         if(prop_idle)
-            DEBUG_PRINT("[TSM] Propagator is idle");
-        
+        {
+            DEBUG_PRINT("[TSM] Propagator is idle, %p", idle_msg);
+        }
+        else
+        {
+            DEBUG_PRINT("[TSM] Propagator is busy");
+        }
         is_finish = dyn_fin && prop_idle;
     }
 
@@ -79,14 +85,16 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         DEBUG_PRINT ("[TSM] Get remote TS end signal");
     }
 
-    if (is_finish)
+    if (is_finish && is_start)
     {
         DEBUG_PRINT ("[TSM] The chip is finished");
         outmsgs[OPORT_TSend] = new SignalMessage (-1, true);
         end_counter++;
     }
+    else if (!is_finish && !is_start && !dyn_fin)
+        is_start = true;
 
-    if (end_counter == num_boards)
+    if ((end_counter == num_boards) && is_start)
     {
         ts_parity = !ts_parity;
 
@@ -95,6 +103,8 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         end_counter = 0;
         is_finish = false;
         cur_timestep++;
+        is_start = false;
+
         DEBUG_PRINT ("[TSM] Current Timestep %d", cur_timestep);
         DEBUG_PRINT ("[TSM] Update Timestep parity %d to %d", !ts_parity, ts_parity);
 

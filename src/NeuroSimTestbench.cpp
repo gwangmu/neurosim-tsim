@@ -30,7 +30,7 @@ NeuroSimTestbench::NeuroSimTestbench ()
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
-    return (ts_mgr->cur_timestep > 1); //(datasink->recvdata >= 4);
+    return (ts_mgr->cur_timestep > 2); //(datasink->recvdata >= 4);
     
     // DEBUG_PRINT ("%u", datasink->recvdata);
     // return (datasink->recvdata >= 4);

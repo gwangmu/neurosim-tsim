@@ -18,7 +18,16 @@ public:
 
 private:
     uint32_t PORT_addr, PORT_data;
+    uint32_t PORT_idle;
 
     // Internal State
-    int counter; // temp
+    uint32_t entry_cnt;
+    bool is_idle_;
+
+    // Temp states
+    bool is_request;
+    uint32_t delay_counter;
+    uint32_t delay;
+    uint32_t counter; 
+
 };

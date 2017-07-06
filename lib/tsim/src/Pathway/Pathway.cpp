@@ -459,7 +459,7 @@ void Pathway::PostClock (PERMIT(Simulator))
         {
             uint64_t processed = (-1 << endpts.rhs.size());
 
-            DEBUG_PRINT ("%lx", processed);
+            //DEBUG_PRINT ("%lx", processed);
             for (auto i = 0; i < endpts.rhs.size(); i++)
             {
                 Endpoint &ept = endpts.rhs[i];
@@ -483,7 +483,7 @@ void Pathway::PostClock (PERMIT(Simulator))
                 }
             }
 
-            DEBUG_PRINT ("%lx", processed);
+            //DEBUG_PRINT ("%lx", processed);
             if (processed == -1) conn.NullifyNow ();
         }
         else
