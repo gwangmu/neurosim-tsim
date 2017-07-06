@@ -139,13 +139,28 @@ double Unit::GetAggregateConsumedEnergy ()
 }
 
 
+bool Unit::IsInputPort (string portname)
+{
+    if (!pname2port.count (portname))
+        return false;
+
+    return (pname2port[portname]->iotype == PORT_INPUT);
+}
+
+bool Unit::IsOutputPort (string portname)
+{
+    if (!pname2port.count (portname))
+        return false;
+
+    return (pname2port[portname]->iotype == PORT_OUTPUT);
+}
+
 bool Unit::IsControlPort (string portname)
 {
-    for (auto i = 0; i < nctrlports; i++)
-        if (ctrlports[i].name == portname)
-            return true;
+    if (!pname2port.count (portname))
+        return false;
 
-    return false;
+    return (pname2port[portname]->iotype == PORT_CONTROL);
 }
 
 

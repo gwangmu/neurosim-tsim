@@ -1,5 +1,8 @@
 #pragma once        //< Why is this NOT a standard?
 
+#include <TSim/Interface/IClockable.h>
+#include <TSim/Utility/AccessKey.h>
+
 #include <cinttypes>
 #include <string>
 #include <vector>
@@ -8,7 +11,8 @@ using namespace std;
 
 class Testbench;
 class Component;
-class Unit;
+class Module;
+class Device;
 class Pathway;
 class FileScript;
 class FileRegister;
@@ -26,9 +30,6 @@ public:
     };
 
 protected:
-    enum PathwayClass { PATHWAY_NORMAL, PATHWAY_POSTDEV, PATHWAY_CTRL, N_PATHWAY_CLASSES };
-    enum UnitType { UNIT_MODULE, UNIT_DEVICE, N_UNIT_TYPES };
-
     struct ClockDomain
     {
         ClockDomain ();
@@ -38,8 +39,26 @@ protected:
         uint32_t period;    // unit: nanoseconds
 
         // Configuration
-        vector<Unit *> units[N_UNIT_TYPES];
-        vector<Pathway *> pathways[N_PATHWAY_CLASSES];
+        vector<Module *> modules;
+        vector<Device *> devices;
+        vector<Pathway *> pathways;
+
+        // Clock functions (in execution order)
+        // HAVE FUN WITH FUNCTION POINTERS! XD
+        class Clocker
+        {
+        public:
+            Clocker (IClockable *iclk, IClockable::ClockFunction clkfn)
+                : iclk (iclk), clkfn (clkfn) {}
+
+            inline void Invoke (PERMIT(Simulator)) 
+            { (iclk->*clkfn) (TRANSFER_KEY(Simulator)); }
+
+        private:
+            IClockable *iclk;
+            IClockable::ClockFunction clkfn;
+        };            
+        vector<Clocker> clockers;
 
         // Simulation states
         uint64_t nexttime;

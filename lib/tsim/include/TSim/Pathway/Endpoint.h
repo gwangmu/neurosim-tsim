@@ -36,6 +36,7 @@ public:
     /* Universal */
     Type GetEndpointType () { return type; }
     Pathway* GetParent () { return parent; }
+    uint32_t GetID () { return id; }
     Unit* GetConnectedUnit () { return unitConn; }
     string GetConnectedPortName () { return portConn; }
     Message* GetMsgPrototype () { return msgproto; }

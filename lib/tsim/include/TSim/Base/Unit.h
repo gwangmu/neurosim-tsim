@@ -68,6 +68,9 @@ public:
     uint32_t GetNumInPorts () { return ninports; }
     uint32_t GetNumOutPorts () { return noutports; }
     uint32_t GetNumCtrlPorts () { return nctrlports; }
+    uint32_t GetInPortID (string pname) { return (pname2port.count(pname) ? pname2port[pname]->id : -1); }  // TODO port type check
+    uint32_t GetOutPortID (string pname) { return (pname2port.count(pname) ? pname2port[pname]->id : -1); }
+    uint32_t GetCtrlPortID (string pname) { return (pname2port.count(pname) ? pname2port[pname]->id : -1); }
     string GetInPortName (uint32_t idx) { return inports[idx].name; }
     string GetOutPortName (uint32_t idx) { return outports[idx].name; }
     string GetCtrlPortName (uint32_t idx) { return ctrlports[idx].name; }
@@ -75,6 +78,8 @@ public:
     Endpoint* GetOutEndpoint (uint32_t idx) { return outports[idx].endpt; }
     Endpoint* GetCtrlEndpoint (uint32_t idx) { return ctrlports[idx].endpt; }
 
+    bool IsInputPort (string portname);
+    bool IsOutputPort (string portname);
     bool IsControlPort (string portname);
 
     /* Called by 'Simulator' */

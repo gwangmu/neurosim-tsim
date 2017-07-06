@@ -112,7 +112,7 @@ public:
     uint32_t GetNumLHS () { return endpts.lhs.size (); }
     uint32_t GetNumRHS () { return endpts.rhs.size (); }
 
-    bool IsPostDevicePathway ();
+    bool IsPostModulePathway ();
     bool IsControlPathway ();
 
     const CycleClass<uint64_t>& GetCycleClass () { return cclass; }

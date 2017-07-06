@@ -21,7 +21,7 @@ OBJEXT=o
 CXX=clang++
 LD=clang++
 AR=ar
-MAKE=make -j12
+MAKE=make 
 
 # compiler flags
 CXXFLAGS=--std=c++11 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG) -g

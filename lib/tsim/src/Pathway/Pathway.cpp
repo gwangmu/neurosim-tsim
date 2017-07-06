@@ -237,11 +237,11 @@ double Pathway::GetConsumedEnergy ()
 
 
 
-bool Pathway::IsPostDevicePathway ()
+bool Pathway::IsPostModulePathway ()
 {
     for (Endpoint &endpt : endpts.lhs)
     {
-        if (dynamic_cast<Device *>(endpt.GetConnectedUnit()))
+        if (dynamic_cast<Module *>(endpt.GetConnectedUnit()))
             return true;
     }
 

@@ -4,6 +4,7 @@
 #include <TSim/Base/Unit.h>
 #include <TSim/Module/Module.h>
 #include <TSim/Device/Device.h>
+#include <TSim/Device/Gate.h>
 #include <TSim/Register/FileRegister.h>
 #include <TSim/Script/FileScript.h>
 #include <TSim/Pathway/Pathway.h>
@@ -61,8 +62,13 @@ bool Simulator::LoadTestbench ()
             PrintGraphVizSource (opt.gvfilename);
     }
 
-    vector<Unit *> units[N_UNIT_TYPES];
-    vector<Pathway *> pathways[N_PATHWAY_CLASSES];
+    vector<Module *> modules;
+    vector<Device *> devices;
+    vector<Pathway *> pathways;
+    uint32_t nmodules = 0;
+    uint32_t ndevices = 0;
+    uint32_t ngates = 0;
+    uint32_t npathways = 0;
     task ("find modules/pathways")
     {
         queue<Component *> queComps;
@@ -77,32 +83,39 @@ bool Simulator::LoadTestbench ()
                     ipath != nextcomp->PathwayEnd (); ipath++)
             {
                 Pathway *pathway = *ipath;
-                
-                if (pathway->IsPostDevicePathway ())
-                    pathways[PATHWAY_POSTDEV].push_back (pathway);
-                else if (pathway->IsControlPathway ())
-                    pathways[PATHWAY_CTRL].push_back (pathway);
-                else
-                    pathways[PATHWAY_NORMAL].push_back (pathway);
+                pathways.push_back (pathway);
+                npathways++;
             }
 
             for (auto icomp = nextcomp->ChildBegin ();
                     icomp != nextcomp->ChildEnd (); icomp++)
             {
                 Component *comp = *icomp;
-                if (Module *module = dynamic_cast<Module *>(comp))
-                    units[UNIT_MODULE].push_back (module);
-                else if (Device *device = dynamic_cast<Device *>(comp))
-                    units[UNIT_DEVICE].push_back (device);
+
+                if (Unit *unit = dynamic_cast<Unit *>(comp))
+                {
+                    if (Module *module = dynamic_cast<Module *>(unit))
+                    {
+                        modules.push_back (module);
+                        nmodules++;
+                    }
+                    else if (Device *device = dynamic_cast<Device *>(unit))
+                    {
+                        devices.push_back (device);
+                        ndevices++;
+                        if (dynamic_cast<Gate *>(unit))
+                            ngates++;
+                    }
+                    else
+                        SYSTEM_ERROR ("bogus unit class");
+                }
                 else
                     queComps.push (comp);
             }
         }
 
-        PRINT ("total %zu module(s), %zu device(s), %zu pathway(s) (%zu post-dev / %zu control) found", 
-                units[UNIT_MODULE].size(), units[UNIT_DEVICE].size(), 
-                pathways[PATHWAY_NORMAL].size() + pathways[PATHWAY_POSTDEV].size() + pathways[PATHWAY_CTRL].size(), 
-                pathways[PATHWAY_POSTDEV].size(), pathways[PATHWAY_CTRL].size());
+        PRINT ("total %u module(s), %u device(s) (with %u gate(s)), %u pathway(s) found",
+                nmodules, ndevices, ngates, npathways);
     }
 
     task ("load simulation spec")
@@ -116,48 +129,62 @@ bool Simulator::LoadTestbench ()
     {
         map<string, ClockDomain> mapCDoms;
 
-        for (auto unit_type : { UNIT_MODULE, UNIT_DEVICE })
+        for (Module *module : modules)
         {
-            for (Unit *unit : units[unit_type])
-            {
-                string nclock = unit->GetClock ();
-                if (nclock == "")
-                    DESIGN_FATAL ("undefined unit clock (unit: %s)",
-                            tb->GetName().c_str(), unit->GetName().c_str());
+            string nclock = module->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined module clock (module: %s)",
+                        tb->GetName().c_str(), module->GetName().c_str());
 
-                mapCDoms[nclock].name = nclock;
-                mapCDoms[nclock].units[unit_type].push_back (unit);
+            mapCDoms[nclock].name = nclock;
+            mapCDoms[nclock].modules.push_back (module);
 
-                unit->SetDynamicPower 
-                    (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
-                                       unit->GetInstanceName(), KEY(Simulator)),
-                     KEY(Simulator));
-                unit->SetStaticPower 
-                    (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
-                                       unit->GetInstanceName(), KEY(Simulator)),
-                     KEY(Simulator));
-            }
+            module->SetDynamicPower 
+                (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
+                                   module->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
+            module->SetStaticPower 
+                (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
+                                   module->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
         }
 
-        for (auto pathway_class : { PATHWAY_NORMAL, PATHWAY_POSTDEV, PATHWAY_CTRL })
+        for (Device *device : devices)
         {
-            for (Pathway *pathway : pathways[pathway_class])
-            {
-                string nclock = pathway->GetClock ();
-                if (nclock == "")
-                    DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
-                            tb->GetName().c_str(), pathway->GetName().c_str());
-                
-                if (mapCDoms[nclock].name == "")
-                    mapCDoms[nclock].name = nclock;
+            string nclock = device->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined device clock (device: %s)",
+                        tb->GetName().c_str(), device->GetName().c_str());
 
-                mapCDoms[nclock].pathways[pathway_class].push_back (pathway);
+            mapCDoms[nclock].name = nclock;
+            mapCDoms[nclock].devices.push_back (device);
 
-                pathway->SetDissipationPower 
-                    (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                       pathway->GetInstanceName(), KEY(Simulator)),
-                     KEY(Simulator));
-            }
+            device->SetDynamicPower 
+                (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
+                                   device->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
+            device->SetStaticPower 
+                (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
+                                   device->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
+        }
+
+        for (Pathway *pathway : pathways)
+        {
+            string nclock = pathway->GetClock ();
+            if (nclock == "")
+                DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
+                        tb->GetName().c_str(), pathway->GetName().c_str());
+            
+            if (mapCDoms[nclock].name == "")
+                mapCDoms[nclock].name = nclock;
+
+            mapCDoms[nclock].pathways.push_back (pathway);
+
+            pathway->SetDissipationPower 
+                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
+                                   pathway->GetInstanceName(), KEY(Simulator)),
+                 KEY(Simulator));
         }
         
         for (auto &centry : mapCDoms)
@@ -167,26 +194,204 @@ bool Simulator::LoadTestbench ()
         {
             cdomain.period = tb->GetUIntParam (Testbench::CLOCK_PERIOD, cdomain.name, KEY(Simulator));
 
-            for (auto unit_type : { UNIT_MODULE, UNIT_DEVICE })
-                for (Unit *unit : cdomain.units[unit_type])
-                    unit->SetClockPeriod (cdomain.period, KEY(Simulator));
+            for (Module *module : cdomain.modules)
+                module->SetClockPeriod (cdomain.period, KEY(Simulator));
 
-            for (auto pathway_class : { PATHWAY_NORMAL, PATHWAY_POSTDEV, PATHWAY_CTRL })
-                for (Pathway *pathway : cdomain.pathways[pathway_class])
-                    pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
+            for (Device *device : cdomain.devices)
+                device->SetClockPeriod (cdomain.period, KEY(Simulator));
+
+            for (Pathway *pathway : cdomain.pathways)
+                pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
         }
 
         PRINT ("total %zu clock domain(s) formed", cdomains.size());
     }
 
+    task ("schedule intra-domain clock functions")
+    {
+        struct PathwayResolveState
+        {
+            PathwayResolveState (uint32_t nlhs, uint32_t nrhs)
+            {
+                lhs_msg = (uint64_t)-1 << nlhs;
+                rhs_block = (uint64_t)-1 << nrhs;
+            }
+
+            uint64_t rhs_block = 0;
+            uint64_t lhs_msg = 0;
+
+            void ResolveRHSBlock (uint32_t id) { rhs_block |= (1 << id); }
+            void ResolveLHSMsg (uint32_t id) { lhs_msg |= (1 << id); }
+            bool IsResolved () { return (rhs_block == (uint64_t)-1) && (lhs_msg == (uint64_t)-1); }
+        };
+
+        struct DeviceResolveState
+        {
+            DeviceResolveState (uint32_t nin, uint32_t nctrl)
+            {
+                in_msg = (uint64_t)-1 << nin;
+                ctrl_msg = (uint64_t)-1 << nctrl;
+            }
+
+            uint64_t ctrl_msg = 0;
+            uint64_t in_msg = 0;
+
+            void SetNumCtrl (uint32_t n) { ctrl_msg = (uint64_t)-1 << n; }
+            void SetNumInput (uint32_t n) { in_msg = (uint64_t)-1 << n; }
+            void ResolveCtrlMsg (uint32_t id) { ctrl_msg |= (1 << id); }
+            void ResolveInputMsg (uint32_t id) { in_msg |= (1 << id); }
+            bool IsCtrlResolved () { return (ctrl_msg == (uint64_t)-1); }
+            bool IsInputResolved () { return (in_msg == (uint64_t)-1); }
+        };
+
+        for (ClockDomain &cdom : cdomains)
+        {
+            task ("push base clock functions")
+            {
+                for (Module *module : cdom.modules)
+                    cdom.clockers.push_back (ClockDomain::Clocker (module, &IClockable::PreClock));
+
+                for (Pathway *pathway : cdom.pathways)
+                    if (pathway->IsPostModulePathway ())
+                        cdom.clockers.push_back (ClockDomain::Clocker (pathway, &IClockable::PreClock));
+
+                for (Module *module : cdom.modules)
+                    cdom.clockers.push_back (ClockDomain::Clocker (module, &IClockable::PostClock));
+            }
+
+            map<Pathway *, PathwayResolveState> prstates;
+            map<Device *, DeviceResolveState> drstates;
+
+            task ("init pathway resolve states")
+            {
+                for (Pathway *pathway : cdom.pathways)
+                {
+                    prstates.insert (make_pair (pathway, 
+                                PathwayResolveState (pathway->GetNumLHS(),
+                                    pathway->GetNumRHS())));
+                    
+                    for (auto i = 0; i < pathway->GetNumLHS(); i++)
+                    {
+                        // NOTE: resolved by base clock functions
+                        if (dynamic_cast<Module *>(pathway->GetLHS(i).GetConnectedUnit()))
+                            prstates.find(pathway)->second.ResolveLHSMsg (i);
+                    }
+
+                    for (auto i = 0; i < pathway->GetNumRHS(); i++)
+                    {
+                        // NOTE: resolved by base clock functions
+                        // NOTE: LHS blocking was determined at the previous clock
+                        if (dynamic_cast<Module *>(pathway->GetRHS(i).GetConnectedUnit()))
+                            prstates.find(pathway)->second.ResolveRHSBlock (i);
+                    }
+
+                    if (pathway->IsControlPathway ())
+                    {
+                        // NOTE: CONTROL pathways are never be blocked,
+                        //  as message prototype must be TOGGLE-type
+                        for (auto i = 0; i < pathway->GetNumRHS(); i++)
+                            prstates.find(pathway)->second.ResolveRHSBlock (i);
+                    }
+                }
+
+                for (Device *device : cdom.devices)
+                    drstates.insert (make_pair (device, 
+                                DeviceResolveState (device->GetNumInPorts(),
+                                    device->GetNumCtrlPorts())));
+            }
+
+            task ("schedule rest of clock functions")
+            {
+                while (!prstates.empty ())
+                {
+                    for (auto &entry : prstates)
+                    {
+                        Pathway *pathway = entry.first;
+                        PathwayResolveState &prstate = entry.second;
+
+                        if (prstate.IsResolved ())
+                        {
+                            operation ("schedule resolved pathways");
+                            cdom.clockers.push_back (ClockDomain::Clocker (pathway, &IClockable::PostClock));
+
+                            operation ("resolve devices")
+                            {
+                                for (auto i = 0; i < pathway->GetNumRHS(); i++)
+                                {
+                                    Endpoint &endpt = pathway->GetRHS(i);
+                                    if (Device *postdev = dynamic_cast<Device *>(endpt.GetConnectedUnit ()))
+                                    {
+                                        string pname = endpt.GetConnectedPortName ();
+                                        if (postdev->IsControlPort (pname))
+                                            drstates.find(postdev)->second.ResolveCtrlMsg (postdev->GetCtrlPortID (pname));
+                                        else if (postdev->IsInputPort (pname))
+                                            drstates.find(postdev)->second.ResolveInputMsg (postdev->GetInPortID (pname));
+                                        else
+                                            SYSTEM_ERROR ("RHS cannot be connected to ports other than INPUT/CONTROL type");
+                                    }
+                                }
+                            }
+
+                            prstates.erase (pathway);
+                        }
+                    }
+
+                    for (auto &entry : drstates)
+                    {
+                        Device *device = entry.first;
+                        DeviceResolveState &drstate = entry.second;
+                        
+                        if (drstate.IsCtrlResolved ())
+                        {
+                            operation ("schedule ctrl-resolved devices");
+                            cdom.clockers.push_back (ClockDomain::Clocker (device, &IClockable::PreClock));
+
+                            operation ("resolve pathways' rhs_block")
+                            {
+                                for (auto i = 0; i < device->GetNumInPorts(); i++)
+                                {
+                                    Endpoint *inept = device->GetInEndpoint (i);
+                                    Pathway *prepath = inept->GetParent ();
+                                    prstates.find(prepath)->second.ResolveRHSBlock (inept->GetID ());
+                                }
+                            }
+                        }
+
+                        if (drstate.IsInputResolved ())
+                        {
+                            operation ("schedule in-resolved devices")
+                            {
+                                if (!drstate.IsCtrlResolved ())
+                                    SYSTEM_ERROR ("INPUT cannot be resolved before CONTROL resolved");
+
+                                cdom.clockers.push_back (ClockDomain::Clocker (device, &IClockable::PostClock));
+                            }
+
+                            operation ("resolve pathways' lhs_msg")
+                            {
+                                for (auto i = 0; i < device->GetNumOutPorts(); i++)
+                                {
+                                    Endpoint *outept = device->GetOutEndpoint (i);
+                                    Pathway *postpath = outept->GetParent ();
+                                    prstates.find(postpath)->second.ResolveLHSMsg (outept->GetID ());
+                                }
+                            }
+
+                            drstates.erase (device);
+                        }                    
+                    }
+                }
+
+                if (!drstates.empty ())
+                    SYSTEM_ERROR ("empty 'prstates' must imply empty 'drstate'");
+            }
+        }
+    }
+
     task ("init this->fscrs, this->regs")
     {
-        for (Unit *unit : units[UNIT_MODULE])
+        for (Module *module : modules)
         {
-            Module *module = dynamic_cast<Module *>(unit);
-            if (!module)
-                SYSTEM_ERROR ("units[UNIT_MODULE] must contain only Modules");
-
             if (FileScript *fscr = dynamic_cast<FileScript *>(module->GetScript ()))
                 fscrs.push_back (fscr);
 
@@ -194,9 +399,11 @@ bool Simulator::LoadTestbench ()
                 regs.push_back (reg);
         }
 
-        PRINT ("total %zu file script(s), %zu register(s) found", fscrs.size(), regs.size());
+        PRINT ("total %zu file script(s), %zu file register(s) found", 
+                fscrs.size(), regs.size());
 
-        task ("load file scripts") {
+        task ("load file scripts") 
+        {
             for (FileScript *fscr : fscrs)
             {
                 string pname = fscr->GetParent()->GetInstanceName();
@@ -216,7 +423,8 @@ bool Simulator::LoadTestbench ()
             }
         }
 
-        task ("load register data") {
+        task ("load register data") 
+        {
             for (FileRegister *reg : regs)
             {
                 string pname = reg->GetParent()->GetInstanceName();
@@ -288,7 +496,7 @@ bool Simulator::ValidateTestbench ()
                 nerr++;
             }
 
-            if (cdom.units[UNIT_MODULE].empty())
+            if (cdom.modules.empty())
                 DESIGN_FATAL ("clock domain '%s' does not contain any module", 
                         tb->GetName().c_str(), cdom.name.c_str());
         }
@@ -349,12 +557,16 @@ bool Simulator::Simulate ()
 
             task ("simulate %lu ns", curtime)
             {
+                for (ClockDomain::Clocker &clocker : curCDom->clockers)
+                    clocker.Invoke (KEY(Simulator));
+
+                #if 0
                 operation ("pre-clock modules");
                 for (Unit *unit : curCDom->units[UNIT_MODULE])
                     unit->PreClock (KEY(Simulator));
 
-                operation ("pre-clock pathways (all)");
-                for (auto pathway_class : { PATHWAY_NORMAL, PATHWAY_POSTDEV, PATHWAY_CTRL })
+                operation ("pre-clock pathways (normal)");
+                for (auto pathway_class : { PATHWAY_NORMAL, PATHWAY_POSTDEV })
                     for (Pathway *pathway : curCDom->pathways[pathway_class])
                         pathway->PreClock (KEY(Simulator));
 
@@ -381,6 +593,7 @@ bool Simulator::Simulate ()
                 operation ("post-clock pathways (post-devices)");
                 for (Pathway *pathway : curCDom->pathways[PATHWAY_POSTDEV])
                     pathway->PostClock (KEY(Simulator));
+                #endif
             }
 
             if (curtime > opt.timelimit) 
@@ -439,12 +652,12 @@ void Simulator::ReportDesignSummary ()
 
     uint32_t nmodules = 0;
     for (ClockDomain &cdom : cdomains)
-        nmodules += cdom.units[UNIT_MODULE].size ();
+        nmodules += cdom.modules.size ();
     ROW ("Number of modules", to_string (nmodules).c_str());
 
     uint32_t ndevices = 0;
     for (ClockDomain &cdom : cdomains)
-        ndevices += cdom.units[UNIT_DEVICE].size ();
+        ndevices += cdom.modules.size ();
     ROW ("Number of devices", to_string (ndevices).c_str());
 
     for (auto i = 0; i < cdomains.size(); i++)
