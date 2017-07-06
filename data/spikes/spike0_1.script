@@ -1,0 +1,24 @@
+#!Tsim Script
+
+CLASSNAME: SpikeFileScript
+SCRIPT:
+	section
+		cycle=0, data=19
+	endsection
+
+	section
+		cycle=0, data=0/9/16
+	endsection
+
+	section
+		cycle=0, data=13/15
+	endsection
+
+	section
+		cycle=0, data=17
+	endsection
+
+	section
+		cycle=0, data=1/9
+	endsection
+
