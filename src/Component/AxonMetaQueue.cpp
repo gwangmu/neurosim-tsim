@@ -42,8 +42,6 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Meta]);
     //SelectMessage *sel_msg = static_cast<SelectMessage*>(inmsgs[IPORT_Core_sel]);
 
-    DEBUG_PRINT ("%p, %p", nb_msg, axon_msg);
-
     if(nb_msg)
     {
         uint32_t idx = nb_msg->value;
@@ -64,7 +62,6 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
         uint16_t ax_len = axon_msg->len;
 
         outmsgs[OPORT_Axon] = new AxonMessage (0, ax_addr, ax_len);
-
         DEBUG_PRINT ("[AMQ] Recieve Axon data %lu %u", ax_addr, ax_len);
     }
 

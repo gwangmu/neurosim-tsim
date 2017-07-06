@@ -57,17 +57,17 @@ Controller::Controller (string iname, Component *parent, uint32_t num_board)
     pcie_controller->Connect ("packet_out", pkt_recv->GetEndpoint (Endpoint::LHS));
     pkt_decoder->Connect ("packet", pkt_recv->GetEndpoint (Endpoint::RHS));
     
-    pkt_decoder->Connect ("ts_end", pkt_recv->GetEndpoint (Endpoint::LHS));
+    pkt_decoder->Connect ("ts_end", remote_tsend->GetEndpoint (Endpoint::LHS));
     ts_mgr->Connect ("remote_tsend", remote_tsend->GetEndpoint (Endpoint::RHS));
 
     ExportPort ("DynFin", ts_mgr, "dynfin");
     ExportPort ("Idle", ts_mgr, "idle");
     ExportPort ("TSParity", ts_mgr, "ts_parity");
     
-    ExportPort ("Axon", pkt_constructor, "axon"); 
+    ExportPort ("AxonIn", pkt_constructor, "axon"); 
     ExportPort ("BoardID", pkt_constructor, "board_id");
 
-    ExportPort ("Axon", pkt_decoder, "axon");
+    ExportPort ("AxonOut", pkt_decoder, "axon");
 }
 
 

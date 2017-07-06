@@ -48,7 +48,7 @@ void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs,
     if (is_idle)
     {
         DEBUG_PRINT ("[Src] Generate signal 0");
-        outmsgs[PORT_DATAOUT] = new SignalMessage (0, false);
+        outmsgs[PORT_DATAOUT] = new SignalMessage (-1, false);
         is_idle = false;
     }
 

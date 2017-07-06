@@ -36,6 +36,6 @@ void PCIeController::Operation (Message **inmsgs, Message **outmsgs,
         int rhs = pkt_msg->rhs;
         
         // Send packet
-        SIM_WARNING ("PCIe controller is not implemented", GetFullName().c_str());
+        SIM_WARNING ("PCIe controller is not implemented. DROP the packet.", GetFullName().c_str());
     }
 }

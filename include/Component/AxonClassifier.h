@@ -22,7 +22,8 @@ private:
     uint32_t IPORT_Dram, IPORT_TSparity;
 
     // Output port
-    uint32_t OPORT_Synapse, OPORT_TSparity, OPORT_Axon, OPORT_Sel; 
+    uint32_t OPORT_Synapse, OPORT_TSparity, OPORT_Axon, OPORT_Sel;
+    uint32_t OPORT_BoardID;
     uint32_t OPORT_idle;
 
     // Internal state

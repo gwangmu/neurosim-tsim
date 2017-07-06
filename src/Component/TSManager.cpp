@@ -34,6 +34,8 @@ TSManager::TSManager (string iname, Component *parent, uint32_t num_boards)
     
     this->num_boards = num_boards;
     this->end_counter = 0;
+
+    this->cur_timestep = 0;
 }
 
 void TSManager::Operation (Message **inmsgs, Message **outmsgs, 
@@ -86,12 +88,15 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
 
     if (end_counter == num_boards)
     {
-        DEBUG_PRINT ("[TSM] Update Timestep parity %d to %d", ts_parity, !ts_parity);
         ts_parity = !ts_parity;
 
         outmsgs[OPORT_TSParity] = new SignalMessage (-1, ts_parity);
 
         end_counter = 0;
-        is_finish = false; 
+        is_finish = false;
+        cur_timestep++;
+        DEBUG_PRINT ("[TSM] Current Timestep %d", cur_timestep);
+        DEBUG_PRINT ("[TSM] Update Timestep parity %d to %d", !ts_parity, ts_parity);
+
     }
 }

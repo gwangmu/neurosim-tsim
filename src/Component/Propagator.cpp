@@ -68,6 +68,7 @@ Propagator::Propagator (string iname, Component *parent)
     ExportPort ("SynTS", axon_classifier, "ts_out");
     ExportPort ("BoardAxon", axon_classifier, "axon_out");
     ExportPort ("Index", axon_classifier, "tar_idx");
+    ExportPort ("BoardID", axon_classifier, "board_id");
     ExportPort ("Idle", axon_classifier, "idle");
 }
 

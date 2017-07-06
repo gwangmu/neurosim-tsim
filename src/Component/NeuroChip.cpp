@@ -5,6 +5,8 @@
 #include <TSim/Pathway/RRFaninWire.h>
 
 #include <TSim/Utility/Prototype.h>
+#include <TSim/Device/AndGate.h>
+#include <TSim/Pathway/IntegerMessage.h>
 
 #include <Component/DataSourceModule.h>
 #include <Component/DataSinkModule.h>
@@ -33,31 +35,26 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     : Component ("NeuroChip", iname, parent)
 {
     /** Parameters **/
-    int axon_meta_queue_size = 32; 
+    int axon_meta_queue_size = 1; 
         
     /** Components **/
     std::vector<Component*> cores;
     for (int i=0; i<num_cores; i++)
         cores.push_back (new NeuroCore ("core" + to_string(i) , this, num_propagators));
 
-    //Component *neurocore = new NeuroCore ("core0", this);
-   
     /** Modules **/
     Module *axon_transmitter = new AxonTransmitter ("axon_transmitter", this);
     Module *syn_distributor = new SynDataDistrib ("syn_distributor", this, num_propagators);
+    AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_cores);
 
     /** Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
-    
-    std::vector<Module*> ds_dynfin;
-    for (int i=0; i<num_cores; i++)
-        ds_dynfin.push_back (new DataSinkModule <SignalMessage, bool> ("ds_dynfin" + to_string(i), this));
 
     // Wires
     std::vector<Wire*> core_DynFin;
     for (int i =0; i<num_cores; i++)
-        core_DynFin.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
+        core_DynFin.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
     
     std::vector<FanoutWire*> syn_data;
     std::vector<FanoutWire*> syn_parity;
@@ -75,7 +72,7 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     for (int i=0; i<num_cores; i++)
     {
         cores[i]->Connect ("DynFin", core_DynFin[i]->GetEndpoint (Endpoint::LHS));
-        ds_dynfin[i]->Connect ("datain", core_DynFin[i]->GetEndpoint (Endpoint::RHS));
+        dynfin_and->Connect ("input" + to_string(i), core_DynFin[i]->GetEndpoint (Endpoint::RHS));
 
         cores[i]->Connect ("AxonData", axon_data->GetEndpoint (Endpoint::LHS, i));
         axon_data->GetEndpoint(Endpoint::LHS, i)->SetCapacity (axon_meta_queue_size);
@@ -106,5 +103,7 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
         ExportPort ("SynCidx" + to_string(i), syn_distributor, "syn_cidx" + to_string(i));
         ExportPort ("SynTS" + to_string(i), syn_distributor, "syn_ts_in" + to_string(i));
     }
+
+    ExportPort ("DynFin", dynfin_and, "output");
 }
 

@@ -93,7 +93,7 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
     {
         DEBUG_PRINT ("[NBC] Read Reqest");
         outmsgs[OPORT_sSRAM] = new IndexMessage (0, read_idx_counter_);
-        outmsgs[OPORT_dSRAM] = new IndexMessage (ts_parity_, read_idx_counter_);
+        outmsgs[OPORT_dSRAM] = new IndexMessage (0, read_idx_counter_);
         read_idx_counter_++;
     }
 }

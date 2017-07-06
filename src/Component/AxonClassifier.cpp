@@ -2,6 +2,7 @@
 
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
+#include <TSim/Pathway/IntegerMessage.h>
 
 #include <Message/DramMessage.h>
 #include <Message/IndexMessage.h>
@@ -31,10 +32,12 @@ AxonClassifier::AxonClassifier (string iname, Component *parent)
     
     OPORT_Axon = CreatePort ("axon_out", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
+    OPORT_BoardID = CreatePort ("board_id", Module::PORT_OUTPUT,
+            Prototype<SelectMessage>::Get());
     OPORT_Sel = CreatePort ("tar_idx", Module::PORT_OUTPUT,
             Prototype<SelectMessage>::Get());
     OPORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
 
     is_idle_ = true;
 }
@@ -48,16 +51,17 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         bool is_board = dram_msg->intra_board;
         int target_module = is_board? 1:0; // 0: chip, 1: controller
 
-        outmsgs[OPORT_Sel] = new SelectMessage (target_module, dram_msg->target_idx); 
         if(is_board)
         {
             outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16);
+            outmsgs[OPORT_BoardID] = new SelectMessage (0, dram_msg->target_idx); 
             DEBUG_PRINT ("[AEC] Send routing information to controller");
         }
         else
         {
             outmsgs[OPORT_Synapse] = new SynapseMessage (0, dram_msg->val32, dram_msg->val16);
             outmsgs[OPORT_TSparity] = new SignalMessage (0, ts_parity);
+            outmsgs[OPORT_Sel] = new SelectMessage (0, dram_msg->target_idx); 
             DEBUG_PRINT ("[AEC] Send synapse data to chip");
         }
     }
@@ -73,11 +77,11 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
     if(*outque_size == 0 && !is_idle_)
     {
         is_idle_ = true;
-        outmsgs[OPORT_idle] = new SignalMessage (0, is_idle_);
+        outmsgs[OPORT_idle] = new IntegerMessage (1);
     }
     else if (*outque_size != 0 && is_idle_)
     {
         is_idle_ = false;
-        outmsgs[OPORT_idle] = new SignalMessage (0, is_idle_);
+        outmsgs[OPORT_idle] = new IntegerMessage (0);
     }
 }

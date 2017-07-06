@@ -43,14 +43,14 @@ void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs,
             return;
         }
 
-        DEBUG_PRINT ("Broadcast end message");
+        DEBUG_PRINT ("[PkC] Broadcast end message");
         outmsgs[OPORT_Packet] = new PacketMessage (0, -1, TSEND, 1);
     }
     else if(axon_msg && sel_msg)
     {
         outmsgs[OPORT_Packet] = new PacketMessage (0, sel_msg->value, 
                 AXON, axon_msg->value, axon_msg->len);
-        DEBUG_PRINT ("Send packet to %d", sel_msg->value);  
+        DEBUG_PRINT ("[PkC] Send packet to %d", sel_msg->value);  
     }
     else if(unlikely(axon_msg || sel_msg))
     {

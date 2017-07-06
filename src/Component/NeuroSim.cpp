@@ -4,6 +4,8 @@
 #include <TSim/Pathway/FanoutWire.h>
 #include <TSim/Pathway/RRFaninWire.h>
 #include <TSim/Utility/Prototype.h>
+#include <TSim/Device/AndGate.h>
+#include <TSim/Pathway/IntegerMessage.h>
 
 #include <Component/DataSourceModule.h>
 #include <Component/DataSinkModule.h>
@@ -39,9 +41,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     /** Parameters **/
     const int num_boards = 1;
     const int num_chips = 1;
-    const int num_propagators = 4;
+    const int num_propagators = 1;
     
-    const int num_cores = 8;
+    const int num_cores = 1;
 
     /** Components **/
     std::vector<Component*> neurochips;
@@ -52,41 +54,49 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     for (int i=0; i<num_propagators; i++)
         propagators.push_back(new Propagator ("propagator" + to_string(i), this));
 
-    //Controller *controller = new Controller ("controller", this, num_board);
+    Controller *controller = new Controller ("controller", this, num_boards);
 
     /** Modules **/
+    AndGate *idle_and = new AndGate ("idle_and", this, num_propagators);
+    AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_chips);
 
     /** Module & Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
     
     // Modules
-    Module *ds_parity = new DataSourceModule ("ds_parity", this);
-    
-    Module *ds_board = new DataSinkModule <AxonMessage, uint32_t> ("ds_board", this);
-    Module *ds_idle = new DataSinkModule <SignalMessage, bool> ("ds_idle", this);
+    //Module *ds_parity = new DataSourceModule ("ds_parity", this);
+    //Module *ds_board = new DataSinkModule <AxonMessage, uint32_t> ("ds_board", this);
+    //Module *ds_idle = new DataSinkModule <SignalMessage, bool> ("ds_idle", this);
 
     // Wires
     std::vector<RRFaninWire*> axon_data;
     for (int i=0; i<num_propagators; i++)
-        axon_data.push_back (new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_chips));
+        axon_data.push_back (new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_chips + 1));
     FanoutWire *cur_TSParity = new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 
             num_cores + num_propagators);
     
     std::vector<Wire*> syn_data;
     std::vector<Wire*> syn_parity;
     std::vector<Wire*> syn_cidx;
-    std::vector<Wire*> board_axon;
     std::vector<Wire*> prop_idle;
     for (int i=0; i<num_propagators; i++)
     {
         syn_data.push_back (new Wire (this, conattr, Prototype<SynapseMessage>::Get()));
         syn_parity.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
         syn_cidx.push_back (new Wire (this, conattr, Prototype<SelectMessage>::Get()));
-        board_axon.push_back (new Wire (this, conattr, Prototype<AxonMessage>::Get()));
-        prop_idle.push_back (new Wire (this, conattr, Prototype<SignalMessage>::Get()));
+        prop_idle.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
     }
-   
+    
+    RRFaninWire *board_axon = new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_propagators);
+    RRFaninWire *board_id = new RRFaninWire (this, conattr, Prototype<SelectMessage>::Get(), num_propagators);
+    Wire *prop_idle_and = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+
+    std::vector<Wire*> chip_dynfin;
+    for (int i=0; i<num_chips; i++)
+        chip_dynfin.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
+
+    Wire *dynfin = new Wire (this, conattr, Prototype<IntegerMessage>::Get()); 
 
     /** Connect **/
     for (int i=0; i<num_chips; i++)
@@ -99,10 +109,24 @@ NeuroSim::NeuroSim (string iname, Component *parent)
             neurochips[i]->Connect ("CurTSParity" + to_string(c), 
                     cur_TSParity->GetEndpoint (Endpoint::RHS, c));
         }
+
+        neurochips[i]->Connect ("DynFin", chip_dynfin[i]->GetEndpoint (Endpoint::LHS));
+        dynfin_and->Connect ("input" + to_string(i), chip_dynfin[i]->GetEndpoint (Endpoint::RHS));
     }
 
-    ds_parity->Connect ("dataout", cur_TSParity->GetEndpoint (Endpoint::LHS));
-    
+
+    //ds_parity->Connect ("dataout", cur_TSParity->GetEndpoint (Endpoint::LHS));
+    //ds_board->Connect ("datain", board_axon[i]->GetEndpoint (Endpoint::RHS));
+    idle_and->Connect ("output", prop_idle_and->GetEndpoint (Endpoint::LHS));
+    dynfin_and->Connect ("output", dynfin->GetEndpoint (Endpoint::LHS));
+
+    controller->Connect ("TSParity", cur_TSParity->GetEndpoint (Endpoint::LHS));
+    controller->Connect ("AxonIn", board_axon->GetEndpoint (Endpoint::RHS));
+    controller->Connect ("BoardID", board_id->GetEndpoint (Endpoint::RHS));
+    controller->Connect ("Idle", prop_idle_and->GetEndpoint (Endpoint::RHS));
+    controller->Connect ("DynFin", dynfin->GetEndpoint (Endpoint::RHS));   
+
+    //ds_idle->Connect ("datain", prop_idle[i]->GetEndpoint (Endpoint::RHS));
     for (int i=0; i<num_propagators; i++)
     {
         propagators[i]->Connect ("Axon", axon_data[i]->GetEndpoint (Endpoint::RHS));
@@ -112,10 +136,12 @@ NeuroSim::NeuroSim (string iname, Component *parent)
         propagators[i]->Connect ("SynTS", syn_parity[i]->GetEndpoint (Endpoint::LHS));
         propagators[i]->Connect ("Index", syn_cidx[i]->GetEndpoint (Endpoint::LHS));
         
-        propagators[i]->Connect ("BoardAxon", board_axon[i]->GetEndpoint (Endpoint::LHS));
+        propagators[i]->Connect ("BoardAxon", board_axon->GetEndpoint (Endpoint::LHS, i));
+        propagators[i]->Connect ("BoardID", board_id->GetEndpoint (Endpoint::LHS, i));
         propagators[i]->Connect ("Idle", prop_idle[i]->GetEndpoint (Endpoint::LHS));
-        ds_board->Connect ("datain", board_axon[i]->GetEndpoint (Endpoint::RHS));
-        ds_idle->Connect ("datain", prop_idle[i]->GetEndpoint (Endpoint::RHS));
+        
+        idle_and->Connect ("input" + to_string(i), prop_idle[i]->GetEndpoint (Endpoint::RHS)); 
+        controller->Connect ("AxonOut", axon_data[i]->GetEndpoint (Endpoint::LHS, num_chips));
 
         for (int c=0; c<num_chips; c++)
         {

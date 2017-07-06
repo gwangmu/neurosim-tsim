@@ -51,6 +51,8 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
 
         if(unlikely((synTS != coreTS && synTS_msg->value == coreTS)))
         {
+            DEBUG_PRINT ("[SDQ] Fail. coreTS: %d, synTS: %d, msgTS: %d", 
+                    coreTS, synTS, synTS_msg->value);
             SIM_ERROR ("Order of synapse data is broken", GetFullName().c_str());
             return;
         }
@@ -58,33 +60,51 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         synTS = synTS_msg->value;
         if(synTS == coreTS)
         {
-            if(internal_queue_.empty())
+            DEBUG_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
+            outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
+    
+            if (is_empty)
             {
-                DEBUG_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
-                outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
-            }
-            else
-            {
-                SynData sd;
-                sd.weight = weight;
-                sd.idx = idx;
+                is_empty = false;
+                DEBUG_PRINT ("[SDQ] Axon metadata queue has data");
 
-                internal_queue_.push_back(sd);
+                outmsgs[OPORT_Empty] = new IntegerMessage (0);
             }
+            
+            // if(internal_queue_.empty())
+            // {
+            //     DEBUG_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
+            //     outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
+            // }
+            // else
+            // {
+            //     // DEBUG_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
+            //     //         coreTS, synTS);
+
+            //     // SynData sd;
+            //     // sd.weight = weight;
+            //     // sd.idx = idx;
+
+            //     // internal_queue_.push_back(sd);
+            // }
         }
         else
         {
-            if(unlikely((internal_queue_.size() + *outque_size) >= max_queue_size_))
-            {
-                SIM_ERROR ("Synapse Data Queue is exceeded", GetFullName().c_str());
-                return;
-            }
+            // if(unlikely((internal_queue_.size() + *outque_size) >= max_queue_size_))
+            // {
+            //     SIM_ERROR ("Synapse Data Queue is exceeded", GetFullName().c_str());
+            //     return;
+            // }
 
-            SynData sd;
-            sd.weight = weight;
-            sd.idx = idx;
+            // SynData sd;
+            // sd.weight = weight;
+            // sd.idx = idx;
 
-            internal_queue_.push_back(sd);
+            // internal_queue_.push_back(sd);
+            
+            DEBUG_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
+                     coreTS, synTS);
+            syn_msg = nullptr; 
         }
 
     }
@@ -97,33 +117,26 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
     if (coreTS_msg)
     {
         coreTS = coreTS_msg->value;
-        DEBUG_PRINT("[SDQ] Update TS parity");
+        synTS = coreTS;
+        DEBUG_PRINT("[SDQ] Update TS parity (%d)", coreTS);
     }
 
-    if ((coreTS == synTS) && !internal_queue_.empty())
-    {
-        SynData sd = internal_queue_.front();
-        internal_queue_.pop_front();
+    // if ((coreTS == synTS) && !internal_queue_.empty())
+    // {
+    //     SynData sd = internal_queue_.front();
+    //     internal_queue_.pop_front();
 
-        outmsgs[OPORT_Acc] = new SynapseMessage (0, sd.weight, sd.idx); 
-    }
+    //     outmsgs[OPORT_Acc] = new SynapseMessage (0, sd.weight, sd.idx); 
+    // }
 
     if(!is_empty && *outque_size == 0)
     {
-        is_empty = true;
-        DEBUG_PRINT ("[SDQ] Axon metatda queue is empty");
+        if(outmsgs[OPORT_Acc] == nullptr)
+        {
+            is_empty = true;
+            DEBUG_PRINT ("[SDQ] Axon metatda queue is empty");
 
-        outmsgs[OPORT_Empty] = new IntegerMessage (1);
+            outmsgs[OPORT_Empty] = new IntegerMessage (1);
+        }
     }
-    else if (is_empty && (*outque_size != 0))
-    {
-        is_empty = false;
-        DEBUG_PRINT ("[SDQ] Axon metadata queue has data");
-
-        outmsgs[OPORT_Empty] = new IntegerMessage (0);
-    }
-
-
-
-    //if(sel_msg)
 }

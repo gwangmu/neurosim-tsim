@@ -2,6 +2,7 @@
 
 
 #include <TSim/Module/Module.h>
+#include <TSim/Simulation/Testbench.h>
 
 #include <cinttypes>
 #include <string>
@@ -9,9 +10,12 @@
 
 using namespace std;
 
+class NeuroSimTestbench;
 
 class TSManager: public Module
 {
+    VISIBLE_TO(NeuroSimTestbench);
+
 public:
     TSManager (string iname, Component *parent, uint32_t num_boards);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
@@ -33,4 +37,6 @@ private:
 
     uint32_t num_boards;
     uint32_t end_counter;
+
+    int cur_timestep;
 };

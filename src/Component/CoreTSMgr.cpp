@@ -25,7 +25,7 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
     PORT_TSparity = CreatePort ("Tsparity", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
     PORT_DynFin = CreatePort ("DynFin", Module::PORT_OUTPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
 
     for (int i=0; i<5; i++)
         state[i] = true;
@@ -47,27 +47,27 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     if(nbc_msg)
     {
-        DEBUG_PRINT ("[TSMgr] NB Controller is end? %d", nbc_msg->value);
+        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", nbc_msg->value);
         state[NBC] = nbc_msg->value;
     }
     if(nb_msg)
     {
-        DEBUG_PRINT ("[TSMgr] NB Controller is end? %d", nb_msg->value);
+        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", nb_msg->value);
         state[NB] = nb_msg->value;
     }
     if(amq_msg)
     {
-        DEBUG_PRINT ("[TSMgr] NB Controller is end? %d", amq_msg->value);
+        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", amq_msg->value);
         state[AMQ] = amq_msg->value;
     }
     if(acc_msg)
     {
-        DEBUG_PRINT ("[TSMgr] NB Controller is end? %d", acc_msg->value);
+        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", acc_msg->value);
         state[Acc] = acc_msg->value;
     }
     if(sdq_msg)
     {
-        DEBUG_PRINT ("[TSMgr] NB Controller is end? %lu", sdq_msg->value);
+        DEBUG_PRINT ("[CoTS] NB Controller is end? %lu", sdq_msg->value);
         state[SDQ] = sdq_msg->value;
     }
 
@@ -76,13 +76,13 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     bool dynfin = state[NBC] && state[NB] && state[AMQ];
     if(!is_dynfin && dynfin)
     {
-        DEBUG_PRINT ("[TSMgr] Dynamics finished");
-        outmsgs[PORT_DynFin] = new SignalMessage (0, true);
+        DEBUG_PRINT ("[CoTS] Dynamics finished");
+        outmsgs[PORT_DynFin] = new IntegerMessage (1);
         is_dynfin = true;
     }
     else if (is_dynfin && !dynfin)
     {
-        outmsgs[PORT_DynFin] = new SignalMessage (0, false);
+        outmsgs[PORT_DynFin] = new IntegerMessage (0);
         is_dynfin = false;
     }
 
@@ -91,7 +91,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     if(parity_msg)
     {
         next_tsparity_ = parity_msg->value;
-        DEBUG_PRINT ("[TSMgr] Update TS parity to %d", next_tsparity_);
+        DEBUG_PRINT ("[CoTS] Update TS parity to %d", next_tsparity_);
     }
 
     if(cur_tsparity_ != next_tsparity_)
@@ -103,7 +103,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
         if (all_finish)
         {
             cur_tsparity_ = next_tsparity_;
-            outmsgs[PORT_TSparity] = new SignalMessage (0, cur_tsparity_);
+            outmsgs[PORT_TSparity] = new SignalMessage (-1, cur_tsparity_);
 
             // Initiate Neuron Block Controller, change its state
             state[NBC] = false;

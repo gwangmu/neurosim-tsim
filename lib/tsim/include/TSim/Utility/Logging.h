@@ -46,9 +46,10 @@
             iname, ##__VA_ARGS__);                        \
 } while (0)
 
-#define SIM_WARNING(msg, iname, ...)                    \
-    DESIGN_ERROR(msg, iname, ##__VA_ARGS__)
-
+#define SIM_WARNING(msg, iname, ...) do {                      \
+    fprintf (stderr, "(%s) warning: " msg "\n",            \
+            iname, ##__VA_ARGS__);                        \
+} while (0)
 
 #define PRINT(msg, ...) do {                               \
     fprintf (stdout, msg "\n", ##__VA_ARGS__);           \

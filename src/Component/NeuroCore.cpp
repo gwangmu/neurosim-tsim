@@ -179,8 +179,9 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     for (int i=0; i<num_propagators; i++)
     {
         syn_queue[i]->Connect("core_ts", core_TSParity->GetEndpoint (Endpoint::RHS, 3 + i)); 
-        syn_queue[i]->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
         syn_queue[i]->Connect("empty", sdq_empty[i]->GetEndpoint (Endpoint::LHS));
+        syn_queue[i]->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
+        synapse_info->GetEndpoint (Endpoint::LHS)->SetCapacity (syn_queue_size);
 
         empty_and->Connect("input" + to_string(i), sdq_empty[i]->GetEndpoint (Endpoint::RHS));
     }

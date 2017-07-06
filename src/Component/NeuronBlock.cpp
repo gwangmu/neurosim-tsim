@@ -76,9 +76,10 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         outmsgs[OPORT_wdata] = new IndexMessage (0, s);
 
         DEBUG_PRINT ("[NB] Start %uth neuron dynamics", neuron_idx);
-
+        
         if(is_idle_)
             outmsgs[OPORT_idle] = new SignalMessage (0, false);
+
 
         idle_time_ = 0;
         is_idle_ = false;
@@ -89,6 +90,7 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         {
             outmsgs[OPORT_idle] = new SignalMessage (0, true);
             is_idle_ = true;
+            GetScript()->NextSection(); 
         }
         
         idle_time_++;
