@@ -1,8 +1,11 @@
 #pragma once        //< Why is this NOT a standard?
 
 #include <TSim/Interface/IClockable.h>
+#include <TSim/Base/Metadata.h>
 #include <TSim/Utility/AccessKey.h>
+#include <TSim/Utility/Logging.h>
 
+#include <type_traits>
 #include <cinttypes>
 #include <string>
 #include <vector>
@@ -48,14 +51,37 @@ protected:
         class Clocker
         {
         public:
-            Clocker (IClockable *iclk, IClockable::ClockFunction clkfn)
-                : iclk (iclk), clkfn (clkfn) {}
+            template <
+                typename T,
+                typename = typename std::enable_if<
+                    std::is_base_of<Metadata, T>::value &&
+                    std::is_base_of<IClockable, T>::value
+                >::type
+            >
+            Clocker (T *cls, IClockable::ClockFunction clkfn)
+                : iclk (dynamic_cast<IClockable *>(cls)),
+                meta (dynamic_cast<Metadata *>(cls)), clkfn (clkfn) {}
 
+            // TODO: optimizable?
             inline void Invoke (PERMIT(Simulator)) 
             { (iclk->*clkfn) (TRANSFER_KEY(Simulator)); }
+            
+            inline string GetTagString ()
+            { 
+                string fntype = "";
+                if (clkfn == &IClockable::PreClock)
+                    fntype = "PreClock";
+                else if (clkfn == &IClockable::PostClock)
+                    fntype = "PostClock";
+                else
+                    SYSTEM_ERROR ("unknown clock function");
+
+                return (meta ? meta->GetName() + "." + fntype : "");
+            }
 
         private:
             IClockable *iclk;
+            Metadata *meta;
             IClockable::ClockFunction clkfn;
         };            
         vector<Clocker> clockers;
@@ -77,6 +103,7 @@ public:
     void ReportActivityEvents ();
 
 private:
+    void ReportClockFunctionSchedule (ClockDomain &cdom);
     void ReportComponentRec (Component *comp, uint32_t level);
 
     // 'AttachTestbench' subfunctions

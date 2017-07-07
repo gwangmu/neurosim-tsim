@@ -237,9 +237,9 @@ double Pathway::GetConsumedEnergy ()
 
 
 
-bool Pathway::IsPostModulePathway ()
+bool Pathway::IsPreModulePathway ()
 {
-    for (Endpoint &endpt : endpts.lhs)
+    for (Endpoint &endpt : endpts.rhs)
     {
         if (dynamic_cast<Module *>(endpt.GetConnectedUnit()))
             return true;

@@ -234,6 +234,7 @@ bool Simulator::LoadTestbench ()
             }
 
             uint64_t ctrl_msg = 0;
+            bool ctrl_sched = false;
             uint64_t in_msg = 0;
 
             void SetNumCtrl (uint32_t n) { ctrl_msg = (uint64_t)-1 << n; }
@@ -241,6 +242,8 @@ bool Simulator::LoadTestbench ()
             void ResolveCtrlMsg (uint32_t id) { ctrl_msg |= (1 << id); }
             void ResolveInputMsg (uint32_t id) { in_msg |= (1 << id); }
             bool IsCtrlResolved () { return (ctrl_msg == (uint64_t)-1); }
+            void ScheduleCtrl () { ctrl_sched = true; }
+            bool IsCtrlScheduled () { return ctrl_sched; }
             bool IsInputResolved () { return (in_msg == (uint64_t)-1); }
         };
 
@@ -252,7 +255,7 @@ bool Simulator::LoadTestbench ()
                     cdom.clockers.push_back (ClockDomain::Clocker (module, &IClockable::PreClock));
 
                 for (Pathway *pathway : cdom.pathways)
-                    if (pathway->IsPostModulePathway ())
+                    if (pathway->IsPreModulePathway ())
                         cdom.clockers.push_back (ClockDomain::Clocker (pathway, &IClockable::PreClock));
 
                 for (Module *module : cdom.modules)
@@ -304,6 +307,8 @@ bool Simulator::LoadTestbench ()
             {
                 while (!prstates.empty ())
                 {
+                    bool sched_something = false;
+
                     for (auto &entry : prstates)
                     {
                         Pathway *pathway = entry.first;
@@ -311,8 +316,11 @@ bool Simulator::LoadTestbench ()
 
                         if (prstate.IsResolved ())
                         {
-                            operation ("schedule resolved pathways");
-                            cdom.clockers.push_back (ClockDomain::Clocker (pathway, &IClockable::PostClock));
+                            operation ("schedule resolved pathways")
+                            {
+                                cdom.clockers.push_back (ClockDomain::Clocker (pathway, &IClockable::PostClock));
+                                sched_something = true;
+                            }
 
                             operation ("resolve devices")
                             {
@@ -343,8 +351,15 @@ bool Simulator::LoadTestbench ()
                         
                         if (drstate.IsCtrlResolved ())
                         {
-                            operation ("schedule ctrl-resolved devices");
-                            cdom.clockers.push_back (ClockDomain::Clocker (device, &IClockable::PreClock));
+                            operation ("schedule ctrl-resolved devices")
+                            {
+                                if (!drstate.IsCtrlScheduled ())
+                                {
+                                    cdom.clockers.push_back (ClockDomain::Clocker (device, &IClockable::PreClock));
+                                    drstate.ScheduleCtrl ();
+                                    sched_something = true;
+                                }
+                            }
 
                             operation ("resolve pathways' rhs_block")
                             {
@@ -365,6 +380,7 @@ bool Simulator::LoadTestbench ()
                                     SYSTEM_ERROR ("INPUT cannot be resolved before CONTROL resolved");
 
                                 cdom.clockers.push_back (ClockDomain::Clocker (device, &IClockable::PostClock));
+                                sched_something = true;
                             }
 
                             operation ("resolve pathways' lhs_msg")
@@ -380,12 +396,23 @@ bool Simulator::LoadTestbench ()
                             drstates.erase (device);
                         }                    
                     }
+
+                    if (!sched_something)
+                        DESIGN_FATAL ("cannot proceed clock function scheduling. (possible device loop)",
+                                tb->GetName().c_str());
                 }
 
                 if (!drstates.empty ())
                     SYSTEM_ERROR ("empty 'prstates' must imply empty 'drstate'");
             }
         }
+
+        for (ClockDomain &cdom : cdomains)
+        {
+            PRINT ("");
+            ReportClockFunctionSchedule (cdom);
+        }
+        PRINT ("");
     }
 
     task ("init this->fscrs, this->regs")
@@ -644,7 +671,7 @@ void Simulator::ReportDesignSummary ()
     macrotask ("< Design summary >");
 
 #define STROKE PRINT ("%s", string(46, '-').c_str())
-#define ROW(f, v) PRINT (" %-29s %14s ", f, v);
+#define ROW(f, v) PRINT (" %-29s %14s ", f, v)
 
     STROKE;
     ROW ("Specification", "Value");
@@ -685,7 +712,7 @@ void Simulator::ReportSimulationSummary ()
     macrotask ("< Simulation summary >");
 
 #define STROKE PRINT ("%s", string(46, '-').c_str())
-#define ROW(f, v) PRINT (" %-29s %14s ", f, v);
+#define ROW(f, v) PRINT (" %-29s %14s ", f, v)
         
     STROKE;
     ROW ("Result", "Value");
@@ -733,7 +760,7 @@ void Simulator::ReportActivityEvents ()
     macrotask ("< Activity and Events >");
 
 #define STROKE PRINT ("%s", string(120, '-').c_str())
-#define LABEL(f, v, en, p, e) PRINT (" %-50s  %18s %12s %12s  %s ", f, v, en, p, e);
+#define LABEL(f, v, en, p, e) PRINT (" %-50s  %18s %12s %12s  %s ", f, v, en, p, e)
 
     STROKE;
     LABEL ("Component Name", "Activity (%)", "Energy (mJ)", "Power (mW)", "Events");
@@ -742,13 +769,35 @@ void Simulator::ReportActivityEvents ()
     STROKE;
 
 #undef STROKE
+#undef LABEL
+}
+
+
+void Simulator::ReportClockFunctionSchedule (ClockDomain &cdom)
+{
+    macrotask ("< Scheduled Clock Functions (%s) >", cdom.name.c_str());
+
+#define STROKE PRINT ("%s", string(58, '-').c_str())
+#define LABEL(n, v) PRINT (" %-3s   %-50s ", n, v)
+#define ROW(n, v) PRINT (" % 3d   %-50s ", n, v)
+
+    STROKE;
+    LABEL ("No.", "Clock Function");
+    STROKE;
+    for (auto i = 0; i < cdom.clockers.size(); i++)
+        ROW (i + 1, cdom.clockers[i].GetTagString().c_str());
+    STROKE;
+
+#undef STROKE
+#undef LABEL
 #undef ROW
+
 }
 
 
 void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 {
-#define ROW(f, v, en, p, e) PRINT (" %-60s % 9.2lf %12s %12s  %s ", f, v, en, p, e);
+#define ROW(f, v, en, p, e) PRINT (" %-60s % 9.2lf %12s %12s  %s ", f, v, en, p, e)
 
     if (Unit *unit = dynamic_cast<Unit *>(comp))
     {
