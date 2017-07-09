@@ -1,3 +1,11 @@
+#define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
+#define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
+#define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
+#define SET_UNIT_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
+#define SET_UNIT_STATIC_POWER(mod,pow) modstapow[mod] = pow
+#define SET_PATHWAY_DIS_POWER(path,pow) pathdispow[path] = pow
+#define SET_PARAMETER(pname,param) modparams[pname] = param
+
 #include <TSim/Simulation/Testbench.h>
 
 #include <TSim/Simulation/Simulator.h>
@@ -52,6 +60,8 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_UNIT_STATIC_POWER (toked[1], stoi (toked[2]));
             else if (toked[0] == "PATHWAY_DIS_POWER")    
                 SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
+            else if (toked[0] == "PARAMETER")    
+                SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
             else
             {
                 SIM_ERROR ("unknown parameter name '%s' (regdata: %s, lineno: %u)",
@@ -70,8 +80,7 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
 }
 
 
-string Testbench::GetStringParam (Testbench::ParamType ptype, 
-        string pname, PERMIT(Simulator))
+string Testbench::GetStringParam (Testbench::ParamType ptype, string pname)
 {
     if (ptype == Testbench::FILESCRIPT_PATH)
     {
@@ -91,8 +100,7 @@ string Testbench::GetStringParam (Testbench::ParamType ptype,
         SYSTEM_ERROR ("parameter '%u' is not a string", ptype);
 }
 
-uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype,
-        string pname, PERMIT(Simulator))
+uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype, string pname)
 {
     if (ptype == Testbench::CLOCK_PERIOD)
     {
@@ -119,6 +127,13 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype,
     {
         if (pathdispow.count (pname))
             return pathdispow[pname];
+        else
+            return -1;
+    }
+    else if (ptype == Testbench::PARAMETER)
+    {
+        if (modparams.count (pname))
+            return modparams[pname];
         else
             return -1;
     }

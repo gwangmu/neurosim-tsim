@@ -141,11 +141,11 @@ bool Simulator::LoadTestbench ()
 
             module->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
-                                   module->GetInstanceName(), KEY(Simulator)),
+                                   module->GetInstanceName()),
                  KEY(Simulator));
             module->SetStaticPower 
                 (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
-                                   module->GetInstanceName(), KEY(Simulator)),
+                                   module->GetInstanceName()),
                  KEY(Simulator));
         }
 
@@ -161,11 +161,11 @@ bool Simulator::LoadTestbench ()
 
             device->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
-                                   device->GetInstanceName(), KEY(Simulator)),
+                                   device->GetInstanceName()),
                  KEY(Simulator));
             device->SetStaticPower 
                 (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
-                                   device->GetInstanceName(), KEY(Simulator)),
+                                   device->GetInstanceName()),
                  KEY(Simulator));
         }
 
@@ -183,7 +183,7 @@ bool Simulator::LoadTestbench ()
 
             pathway->SetDissipationPower 
                 (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetInstanceName(), KEY(Simulator)),
+                                   pathway->GetInstanceName()),
                  KEY(Simulator));
         }
         
@@ -192,7 +192,7 @@ bool Simulator::LoadTestbench ()
 
         for (ClockDomain &cdomain : cdomains)
         {
-            cdomain.period = tb->GetUIntParam (Testbench::CLOCK_PERIOD, cdomain.name, KEY(Simulator));
+            cdomain.period = tb->GetUIntParam (Testbench::CLOCK_PERIOD, cdomain.name);
 
             for (Module *module : cdomain.modules)
                 module->SetClockPeriod (cdomain.period, KEY(Simulator));
@@ -434,8 +434,7 @@ bool Simulator::LoadTestbench ()
             for (FileScript *fscr : fscrs)
             {
                 string pname = fscr->GetParent()->GetInstanceName();
-                string path = tb->GetStringParam (Testbench::FILESCRIPT_PATH,
-                        pname, KEY(Simulator));
+                string path = tb->GetStringParam (Testbench::FILESCRIPT_PATH, pname);
 
                 if (path != "")
                 {
@@ -455,8 +454,7 @@ bool Simulator::LoadTestbench ()
             for (FileRegister *reg : regs)
             {
                 string pname = reg->GetParent()->GetInstanceName();
-                string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH,
-                        pname, KEY(Simulator));
+                string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH, pname);
 
                 if (path != "")
                 {

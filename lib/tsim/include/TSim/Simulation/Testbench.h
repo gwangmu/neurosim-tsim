@@ -6,14 +6,13 @@
 /* to be used at the bottom of testbench header */
 #define EXPORT_TESTBENCH(TB) Testbench *simtb = new TB()
 
-/* to be used in constructor */
-#define SET_FILESCRIPT_PATH(scr,path) fscrpaths[scr] = path
-#define SET_REGISTER_DATAPATH(reg,path) regpaths[reg] = path
-#define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
-#define SET_UNIT_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
-#define SET_UNIT_STATIC_POWER(mod,pow) modstapow[mod] = pow
-#define SET_PATHWAY_DIS_POWER(path,pow) pathdispow[path] = pow
-
+/* to be used by module constructors */
+#define USING_TESTBENCH extern Testbench *simtb
+#define IMPORT_PARAMETER(x, def) {                  \
+    x = simtb->GetUIntParam (Testbench::PARAMETER,  \
+            GetInstanceName() + "." + #x);          \
+    if (x == -1) x = def;                           \
+}
 
 #include <TSim/Base/Metadata.h>
 
@@ -38,7 +37,8 @@ public:
         CLOCK_PERIOD,
         UNIT_DYNAMIC_POWER,
         UNIT_STATIC_POWER,
-        PATHWAY_DIS_POWER
+        PATHWAY_DIS_POWER,
+        PARAMETER
     };
 
 public:
@@ -49,8 +49,8 @@ public:
     virtual Component *const GetTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
     bool LoadSimulationSpec (string specfilename, PERMIT(Simulator));
 
-    string GetStringParam (ParamType ptype, string pname, PERMIT(Simulator));
-    uint32_t GetUIntParam (ParamType ptype, string pname, PERMIT(Simulator));
+    string GetStringParam (ParamType ptype, string pname);
+    uint32_t GetUIntParam (ParamType ptype, string pname);
 
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
 
@@ -63,5 +63,6 @@ protected:
     map<string, uint32_t> moddynpow;
     map<string, uint32_t> modstapow;
     map<string, uint32_t> pathdispow;
+    map<string, uint32_t> modparams;
 };
     

@@ -1,3 +1,4 @@
+#include <TSim/Simulation/Testbench.h>
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Pathway/IntegerMessage.h>
@@ -12,13 +13,16 @@
 using namespace std;
 
 
+USING_TESTBENCH;
+
+
 DataSinkModule::DataSinkModule (string iname, Component *parent)
     : Module ("DataSinkModule", iname, parent, 1)
 {
     // create ports
     PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<IntegerMessage>::Get());
 
-    recvdata = 0;
+    IMPORT_PARAMETER (recvdata, 500);
 }
 
 // NOTE: called only if not stalled
