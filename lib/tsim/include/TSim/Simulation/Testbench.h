@@ -8,14 +8,12 @@
 
 /* to be used by module constructors */
 #define USING_TESTBENCH extern Testbench *simtb
-#define IMPORT_PARAMETER(x, def) {                  \
-    x = simtb->GetUIntParam (Testbench::PARAMETER,  \
-            GetInstanceName() + "." + #x);          \
-    if (x == -1) x = def;                           \
-}
+#define GET_PARAMETER(x) \
+    simtb->GetUIntParam (Testbench::PARAMETER, #x);
 
 #include <TSim/Base/Metadata.h>
 
+#include <TSim/Utility/LazyComponentCreator.h>
 #include <TSim/Utility/AccessKey.h>
 #include <cinttypes>
 #include <string>
@@ -42,12 +40,14 @@ public:
     };
 
 public:
-    Testbench (const char *clsname, Component *topcomp)
-        : Metadata (clsname, ""), TOP_COMPONENT (topcomp) {}
+    Testbench (const char *clsname, LazyComponentCreatorBase *creator)
+        : Metadata (clsname, ""), creator (creator), TOP_COMPONENT (nullptr) {}
 
     /* Called by 'Simulator' */
-    virtual Component *const GetTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
     bool LoadSimulationSpec (string specfilename, PERMIT(Simulator));
+    void CreateComponentAndInitialize (PERMIT(Simulator));
+    virtual void Initialize (PERMIT(Simulator)) = 0;
+    virtual Component *const GetTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
 
     string GetStringParam (ParamType ptype, string pname);
     uint32_t GetUIntParam (ParamType ptype, string pname);
@@ -55,7 +55,8 @@ public:
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
 
 protected:
-    Component *const TOP_COMPONENT;
+    Component *TOP_COMPONENT;
+    LazyComponentCreatorBase *creator;
 
     map<string, string> fscrpaths;
     map<string, string> regpaths;
@@ -65,4 +66,3 @@ protected:
     map<string, uint32_t> pathdispow;
     map<string, uint32_t> modparams;
 };
-    

@@ -60,15 +60,15 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_UNIT_STATIC_POWER (toked[1], stoi (toked[2]));
             else if (toked[0] == "PATHWAY_DIS_POWER")    
                 SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
-            else if (toked[0] == "PARAMETER")    
-                SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
+            else if (toked[0] == "PARAMETER")
+                SET_PARAMETER (toked[1], stoi (toked[2]));
             else
             {
-                SIM_ERROR ("unknown parameter name '%s' (regdata: %s, lineno: %u)",
+                SIM_ERROR ("unknown spec name '%s' (regdata: %s, lineno: %u)",
                         GetName().c_str(), toked[0].c_str(), specfilename.c_str(), lineno);
                 return false;
             }
-                DEBUG_PRINT ("parameter (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+                DEBUG_PRINT ("spec (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
 
             lineno++;
         }
@@ -77,6 +77,17 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
     }
 
     return true;
+}
+
+
+void Testbench::CreateComponentAndInitialize (PERMIT(Simulator))
+{
+    if (!creator)
+        SYSTEM_ERROR ("creator cannot be null");
+
+    TOP_COMPONENT = creator->Create ();
+
+    Initialize (TRANSFER_KEY(Simulator));
 }
 
 
@@ -132,10 +143,15 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype, string pname)
     }
     else if (ptype == Testbench::PARAMETER)
     {
+        DEBUG_PRINT ("%d, %s", ptype, pname.c_str());
         if (modparams.count (pname))
             return modparams[pname];
         else
+        {
+            DESIGN_FATAL ("parameter '%s' has not been specified", 
+                    GetName().c_str(), pname.c_str());
             return -1;
+        }
     }
     else
         SYSTEM_ERROR ("parameter '%u' is not an integer", ptype);

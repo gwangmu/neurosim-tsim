@@ -14,6 +14,7 @@ class ExampleTestbench: public Testbench
 {
 public:
     ExampleTestbench ();
+    virtual void Initialize (PERMIT(Simulator));
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:

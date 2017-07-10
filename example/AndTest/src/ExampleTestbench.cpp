@@ -16,7 +16,9 @@ class Simulator;
 EXPORT_TESTBENCH (ExampleTestbench);
 
 ExampleTestbench::ExampleTestbench ()
-    : Testbench ("ExampleTestbench", new ExampleComponent ("top", nullptr)) 
+    : Testbench ("ExampleTestbench", new LazyComponentCreator<ExampleComponent> ()) {}
+
+void ExampleTestbench::Initialize (PERMIT(Simulator))
 {
     datasink = dynamic_cast<DataSinkModule *>(TOP_COMPONENT->GetUnit ("datasink"));
     if (!datasink)
@@ -25,5 +27,6 @@ ExampleTestbench::ExampleTestbench ()
 
 bool ExampleTestbench::IsFinished (PERMIT(Simulator))
 {
+    DEBUG_PRINT ("%u", datasink->recvdata);
     return (datasink->recvdata >= 50);
 }

@@ -4,4 +4,4 @@ FILESCRIPT_PATH(datasource): example/AndTest/data/fscr1.script
 REGISTER_DATAPATH(reg1): example/AndTest/data/reg1.regdata
 CLOCK_PERIOD(main): 500
 
-PARAMETER(datasink.recvdata): 20
+PARAMETER(param1): 10

@@ -22,7 +22,7 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
     // create ports
     PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<IntegerMessage>::Get());
 
-    IMPORT_PARAMETER (recvdata, 500);
+    recvdata = GET_PARAMETER (param1);
 }
 
 // NOTE: called only if not stalled

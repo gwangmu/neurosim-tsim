@@ -17,15 +17,13 @@ EXPORT_TESTBENCH (NeuroSimTestbench);
 
 
 NeuroSimTestbench::NeuroSimTestbench ()
-    : Testbench ("NeuroSimTestbench", new NeuroSim ("top", nullptr)) 
+    : Testbench ("NeuroSimTestbench", new LazyComponentCreator<NeuroSim> ()) {}
+
+void NeuroSimTestbench::Initialize (PERMIT(Simulator))
 {
     ts_mgr = dynamic_cast<TSManager*> (TOP_COMPONENT->GetUnit("ts_manager"));
     if (!ts_mgr)
         SYSTEM_ERROR ("what the?");
-
-    // datasink = dynamic_cast<DataSinkModule<AxonMessage, uint32_t> *>(TOP_COMPONENT->GetUnit ("datasink"));
-    // if (!datasink)
-    //     SYSTEM_ERROR ("what the?");
 }
 
 bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))

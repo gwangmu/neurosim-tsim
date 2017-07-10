@@ -17,6 +17,7 @@ class NeuroSimTestbench: public Testbench
 {
 public:
     NeuroSimTestbench ();
+    virtual void Initialize (PERMIT(Simulator));
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:

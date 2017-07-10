@@ -62,6 +62,18 @@ bool Simulator::LoadTestbench ()
             PrintGraphVizSource (opt.gvfilename);
     }
 
+    task ("load simulation spec")
+    {
+        if (!tb->LoadSimulationSpec (specfilename, KEY(Simulator)))
+            DESIGN_FATAL ("cannot load simulation spec '%s'",
+                    tb->GetName().c_str(), specfilename.c_str());
+    }
+
+    task ("init testbench")
+    {
+        tb->CreateComponentAndInitialize (KEY(Simulator));
+    }
+
     vector<Module *> modules;
     vector<Device *> devices;
     vector<Pathway *> pathways;
@@ -116,13 +128,6 @@ bool Simulator::LoadTestbench ()
 
         PRINT ("total %u module(s), %u device(s) (with %u gate(s)), %u pathway(s) found",
                 nmodules, ndevices, ngates, npathways);
-    }
-
-    task ("load simulation spec")
-    {
-        if (!tb->LoadSimulationSpec (specfilename, KEY(Simulator)))
-            DESIGN_FATAL ("cannot load simulation spec '%s'",
-                    tb->GetName().c_str(), specfilename.c_str());
     }
 
     task ("init this->cdomains")
