@@ -52,22 +52,22 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
     if(nb_msg)
     {
-        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", nb_msg->value);
+        DEBUG_PRINT ("[CoTS] NeuronBlock is end? %d", nb_msg->value);
         state[NB] = nb_msg->value;
     }
     if(amq_msg)
     {
-        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", amq_msg->value);
+        DEBUG_PRINT ("[CoTS] Axon metadat Queue is end? %d", amq_msg->value);
         state[AMQ] = amq_msg->value;
     }
     if(acc_msg)
     {
-        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", acc_msg->value);
+        DEBUG_PRINT ("[CoTS] Accumulator is end? %d", acc_msg->value);
         state[Acc] = acc_msg->value;
     }
     if(sdq_msg)
     {
-        DEBUG_PRINT ("[CoTS] NB Controller is end? %lu", sdq_msg->value);
+        DEBUG_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
         state[SDQ] = sdq_msg->value;
     }
 
@@ -106,6 +106,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_TSparity] = new SignalMessage (-1, cur_tsparity_);
 
             // Initiate Neuron Block Controller, change its state
+            DEBUG_PRINT ("[CoTS] Update Core TS parity to %d", cur_tsparity_);
             state[NBC] = false;
         }
     }
