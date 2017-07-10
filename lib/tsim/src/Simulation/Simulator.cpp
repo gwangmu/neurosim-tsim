@@ -146,11 +146,11 @@ bool Simulator::LoadTestbench ()
 
             module->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
-                                   module->GetInstanceName()),
+                                   module->GetClassName()),
                  KEY(Simulator));
             module->SetStaticPower 
                 (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
-                                   module->GetInstanceName()),
+                                   module->GetClassName()),
                  KEY(Simulator));
         }
 
@@ -166,11 +166,11 @@ bool Simulator::LoadTestbench ()
 
             device->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
-                                   device->GetInstanceName()),
+                                   device->GetClassName()),
                  KEY(Simulator));
             device->SetStaticPower 
                 (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
-                                   device->GetInstanceName()),
+                                   device->GetClassName()),
                  KEY(Simulator));
         }
 
@@ -188,7 +188,7 @@ bool Simulator::LoadTestbench ()
 
             pathway->SetDissipationPower 
                 (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetInstanceName()),
+                                   pathway->GetClassName()),
                  KEY(Simulator));
         }
         
@@ -438,7 +438,7 @@ bool Simulator::LoadTestbench ()
         {
             for (FileScript *fscr : fscrs)
             {
-                string pname = fscr->GetParent()->GetInstanceName();
+                string pname = fscr->GetParent()->GetFullNameWOClass();
                 string path = tb->GetStringParam (Testbench::FILESCRIPT_PATH, pname);
 
                 if (path != "")
@@ -458,7 +458,7 @@ bool Simulator::LoadTestbench ()
         {
             for (FileRegister *reg : regs)
             {
-                string pname = reg->GetParent()->GetInstanceName();
+                string pname = reg->GetParent()->GetFullNameWOClass();
                 string path = tb->GetStringParam (Testbench::REGISTER_DATAPATH, pname);
 
                 if (path != "")

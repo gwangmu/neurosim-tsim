@@ -8,6 +8,9 @@ using namespace std;
 class Metadata
 {
 public:
+    static inline string SEPARATOR () { return "."; }
+    static inline string SCOPE () { return "::"; }
+
     Metadata (const char *clsname, string iname)
     {
         if (!clsname)
@@ -17,7 +20,12 @@ public:
         if (iname.empty ())
             this->iname = "(noname)";
         else
+        {
+            if (iname.find(SEPARATOR()) != string::npos)
+                DESIGN_FATAL ("instance name cannot contain '%s'",
+                        (string (clsname) + " " + iname).c_str(), SEPARATOR().c_str());
             this->iname = iname;
+        }
     }
 
     virtual string GetInstanceName () { return iname; }

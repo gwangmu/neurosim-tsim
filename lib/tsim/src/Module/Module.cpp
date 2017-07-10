@@ -59,6 +59,7 @@ bool Module::SetScript (Script *script)
                 GetFullName().c_str(), this->script->GetName().c_str(), 
                 script->GetName().c_str());
 
+    DEBUG_PRINT ("%p", script->GetParent ());
     if (script->GetParent ()) {
         DESIGN_ERROR ("'%s' has already been assigned",
                 GetFullName().c_str(), script->GetName().c_str());

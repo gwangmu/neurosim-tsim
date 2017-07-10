@@ -1,7 +1,10 @@
 #!TSim Simulation Spec
 
-FILESCRIPT_PATH(datasource): example/AndTest/data/fscr1.script
-REGISTER_DATAPATH(reg1): example/AndTest/data/reg1.regdata
+FILESCRIPT_PATH(top.datasource): example/AndTest/data/fscr1.script
+#REGISTER_DATAPATH(): example/AndTest/data/reg1.regdata
 CLOCK_PERIOD(main): 500
+
+UNIT_DYNAMIC_POWER(DataSourceModule): 300
+UNIT_STATIC_POWER(DataSourceModule): 300
 
 PARAMETER(param1): 10

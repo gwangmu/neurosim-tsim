@@ -50,7 +50,7 @@ string Component::GetFullNameWOClass ()
     if (familyname.empty ())
         return GetInstanceName();
     else
-        return (familyname + "::" + GetInstanceName());
+        return (familyname + Metadata::SEPARATOR() + GetInstanceName());
 }
 
 uint32_t Component::GetNumChildModules ()

@@ -14,7 +14,7 @@ class Module;
 class Script: public Metadata
 {
 public:
-    Script (const char *clsname): Metadata (clsname, "") {}
+    Script (const char *clsname): Metadata (clsname, ""), parent (nullptr) {}
 
     Module* GetParent () { return parent; }
     void SetParent (Module *module, PERMIT(Module)) { parent = module; }
