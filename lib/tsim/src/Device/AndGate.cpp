@@ -21,7 +21,7 @@ Message* AndGate::Logic (Message const * const *inmsgs)
     if (!cached || (newoutmsg.value != cached_output.value))
     {
         retmsg = new IntegerMessage (newoutmsg.value);
-        DEBUG_PRINT ("[AND] sending %p %lu (before: %lu) (cached %d)", this, 
+        DEBUG_PRINT ("sending %p %lu (before: %lu) (cached %d)", retmsg, 
                 newoutmsg.value, cached_output.value, cached);
         cached_output.value = newoutmsg.value;
         cached = true;

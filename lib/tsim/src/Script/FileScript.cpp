@@ -108,6 +108,11 @@ bool FileScript::LoadScriptFromFile (string filename)
                         instrno = 1;
                         sections.push_back (ScriptSection());
                         state = READING_INSTRUCTIONS;
+                            
+                        instr_info.cycle = -1;
+                        instr_info.data = "";
+                        prev_instr_info = instr_info;
+
                     }
                     else
                     {
@@ -192,6 +197,7 @@ bool FileScript::LoadScriptFromFile (string filename)
 
                             instr_info.cycle = -1;
                             instr_info.data = "";
+                            
                             instrno++;
                             total_ninstr++;
                         }
