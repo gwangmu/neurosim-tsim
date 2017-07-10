@@ -50,7 +50,7 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
 
     if (spk_inst)
     {
-        DEBUG_PRINT ("instruction received");
+        DEBUG_PRINT ("[NB] Spike instruction received");
 
         spike_trace_.clear();
         spike_trace_.assign (spk_inst->spike_idx.begin(), spk_inst->spike_idx.end());
@@ -90,7 +90,9 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         {
             outmsgs[OPORT_idle] = new SignalMessage (0, true);
             is_idle_ = true;
-            GetScript()->NextSection(); 
+            GetScript()->NextSection();
+
+            DEBUG_PRINT ("[NB] NB is idle. Process next section");
         }
         
         idle_time_++;

@@ -52,7 +52,7 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         dyn_fin = (val != 0)? 1:0;
 
         if(dyn_fin)
-            DEBUG_PRINT("[TSM] Dynamics Finished");
+            DEBUG_PRINT("[TSM] Dynamics Finished, %p", fin_msg);
 
         is_finish = dyn_fin && prop_idle;
     }
@@ -67,7 +67,7 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            DEBUG_PRINT("[TSM] Propagator is busy");
+            DEBUG_PRINT("[TSM] Propagator is busy, %p", idle_msg);
         }
         is_finish = dyn_fin && prop_idle;
     }
