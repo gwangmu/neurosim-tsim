@@ -1,5 +1,6 @@
 #include <TSim/Script/FileScript.h>
 #include <TSim/Script/Instruction.h>
+#include <TSim/Module/Module.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Utility/String.h>
 
@@ -265,8 +266,8 @@ IssueCount FileScript::Validate (PERMIT(Simulator))
 
     if (!loaded)
     {
-        DESIGN_WARNING ("script file not loaded", GetName().c_str());
-        icount.warning++;
+        DESIGN_ERROR ("script file not loaded", GetParent()->GetFullName().c_str());
+        icount.error++;
     }
 
     return icount;

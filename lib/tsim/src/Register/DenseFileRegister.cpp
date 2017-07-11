@@ -13,7 +13,8 @@ struct RegisterWord;
 class Simulator;
 
 
-DenseFileRegister::DenseFileRegister (const char *clsname, Type type, Attr attr, RegisterWord *wproto)
+DenseFileRegister::DenseFileRegister (const char *clsname, Type type, 
+        Attr attr, RegisterWord *wproto)
     : FileRegister (clsname, type, attr, wproto)
 {
     words.resize (attr.addrsize);

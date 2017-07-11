@@ -22,8 +22,8 @@ public:
     /* Universal */
     Module (const char* clsname, string iname, Component *parent, uint32_t pdepth);
 
-    Script* GetScript () { return script; }
-    Register* GetRegister () { return reg; }
+    inline Script* GetScript () { return script; }
+    inline Register* GetRegister () { return reg; }
 
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator));

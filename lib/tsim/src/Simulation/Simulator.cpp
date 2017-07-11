@@ -589,41 +589,6 @@ bool Simulator::Simulate ()
             {
                 for (ClockDomain::Clocker &clocker : curCDom->clockers)
                     clocker.Invoke (KEY(Simulator));
-
-                #if 0
-                operation ("pre-clock modules");
-                for (Unit *unit : curCDom->units[UNIT_MODULE])
-                    unit->PreClock (KEY(Simulator));
-
-                operation ("pre-clock pathways (normal)");
-                for (auto pathway_class : { PATHWAY_NORMAL, PATHWAY_POSTDEV })
-                    for (Pathway *pathway : curCDom->pathways[pathway_class])
-                        pathway->PreClock (KEY(Simulator));
-
-                operation ("post-clock modules");
-                for (Unit *unit : curCDom->units[UNIT_MODULE])
-                    unit->PostClock (KEY(Simulator));
-
-                operation ("post-clock pathways (ctrls)");
-                for (Pathway *pathway : curCDom->pathways[PATHWAY_CTRL])
-                    pathway->PostClock (KEY(Simulator));
-
-                operation ("devices (preparatory)");
-                for (Unit *unit : curCDom->units[UNIT_DEVICE])
-                    unit->PreClock (KEY(Simulator));
-
-                operation ("post-clock pathways (normal)");
-                for (Pathway *pathway : curCDom->pathways[PATHWAY_NORMAL])
-                    pathway->PostClock (KEY(Simulator));
-
-                operation ("post-clock devices");
-                for (Unit *unit : curCDom->units[UNIT_DEVICE])
-                    unit->PostClock (KEY(Simulator));
-
-                operation ("post-clock pathways (post-devices)");
-                for (Pathway *pathway : curCDom->pathways[PATHWAY_POSTDEV])
-                    pathway->PostClock (KEY(Simulator));
-                #endif
             }
 
             if (curtime > opt.timelimit) 

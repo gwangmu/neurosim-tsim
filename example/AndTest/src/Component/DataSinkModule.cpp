@@ -3,6 +3,8 @@
 #include <TSim/Utility/Logging.h>
 #include <TSim/Pathway/IntegerMessage.h>
 
+#include <Register/ExampleFileRegister.h>
+#include <Register/ExampleRegisterWord.h>
 #include <Script/ExampleFileScript.h>
 #include <Component/DataSinkModule.h>
 
@@ -23,6 +25,9 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
     PORT_DATAIN = CreatePort ("datain", Module::PORT_INPUT, Prototype<IntegerMessage>::Get());
 
     recvdata = GET_PARAMETER (param1);
+
+    Register::Attr regattr (64, 1024);  // word=64 bits, addr=1024 words
+    SetRegister (new ExampleFileRegister (Register::SRAM, regattr));
 }
 
 // NOTE: called only if not stalled
@@ -34,5 +39,9 @@ void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, const uint3
     {
         recvdata = inmsg->value;
         DEBUG_PRINT ("val = %x,", recvdata);
+        
+        const ExampleRegisterWord *word = static_cast<const ExampleRegisterWord *>(GetRegister()->GetWord (0x0000));
+        DEBUG_PRINT ("regval = %x", word->value);
+        GetRegister()->SetWord (0x0000, new ExampleRegisterWord (recvdata));
     }
 }

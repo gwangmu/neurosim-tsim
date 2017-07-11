@@ -1,6 +1,7 @@
 #include <TSim/Register/FileRegister.h>
 #include <TSim/Register/RegisterWord.h>
 #include <TSim/Utility/AccessKey.h>
+#include <TSim/Module/Module.h>
 
 #include <string>
 #include <vector>
@@ -161,7 +162,7 @@ IssueCount FileRegister::Validate (PERMIT(Simulator))
 
     if (!loaded)
     {
-        SIM_ERROR ("register file not loaded", GetName().c_str());
+        SIM_ERROR ("register file not loaded", GetParent()->GetFullName().c_str());
         icount.error++;
     }
 

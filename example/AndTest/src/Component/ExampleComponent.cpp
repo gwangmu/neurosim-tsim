@@ -23,8 +23,8 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
     SetClock ("main");
 
     // add child modules/components
-    Module *datasource = new DataSourceModule ("datasource", this);
-    Module *datasource2 = new DataSourceModule ("datasource2", this);
+    Module *datasource = new DataSourceModule ("datasource0", this);
+    Module *datasource2 = new DataSourceModule ("datasource1", this);
     Module *datasink = new DataSinkModule ("datasink", this);
 
     AndGate *mux = new AndGate ("mux", this, 2);

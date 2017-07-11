@@ -39,6 +39,8 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
     {
         uint32_t lineno = 1;
         string line;
+        uint32_t range_start = -1;
+        uint32_t range_end = -1;
 
         while (getline (specfile, line))
         {
@@ -62,6 +64,10 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
             else if (toked[0] == "PARAMETER")
                 SET_PARAMETER (toked[1], stoi (toked[2]));
+            else if (line.length() > 1 && line[0] == '[')
+            {
+                
+            }
             else
             {
                 SIM_ERROR ("unknown spec name '%s' (regdata: %s, lineno: %u)",

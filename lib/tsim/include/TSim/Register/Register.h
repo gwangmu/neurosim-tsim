@@ -37,8 +37,9 @@ public:
     Module* GetParent () { return parent; }
     void SetParent (Module *module, PERMIT(Module)) { parent = module; }
 
+    // TODO: need to be optimized
     virtual const RegisterWord* GetWord (uint64_t addr) = 0;
-    virtual bool SetWord (uint64_t addr, RegisterWord word) = 0;
+    virtual bool SetWord (uint64_t addr, RegisterWord *word) = 0;
 
 private:
     Module *parent;

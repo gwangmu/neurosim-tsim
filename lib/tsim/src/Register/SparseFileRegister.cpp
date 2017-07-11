@@ -12,7 +12,8 @@ struct RegisterWord;
 class Simulator;
 
 
-SparseFileRegister::SparseFileRegister (const char *clsname, Type type, Attr attr, RegisterWord *wproto)
+SparseFileRegister::SparseFileRegister (const char *clsname, Type type, 
+        Attr attr, RegisterWord *wproto)
     : FileRegister (clsname, type, attr, wproto) {}
 
 const RegisterWord* SparseFileRegister::GetWord (uint64_t addr)
