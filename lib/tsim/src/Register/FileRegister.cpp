@@ -100,7 +100,10 @@ bool FileRegister::LoadDataFromFile (string filename)
                             vector<string> item = String::Tokenize (toked[i], "=");
 
                             if (item[0] == "addr")
-                                word_info.addr = stoi (item[1]);
+                            {
+                                std::string::size_type sz = 0;
+                                word_info.addr = stoul (item[1], &sz, 0);
+                            }
                             else if (item[0] == "data")
                                 word_info.data = item[1];
                             else
@@ -112,6 +115,7 @@ bool FileRegister::LoadDataFromFile (string filename)
                         }
 
                         RegisterWord *newword = ParseRawString (word_info.data);
+
                         if (!newword)
                         {
                             SIM_ERROR ("invalid register word data (regdata: %s, line: %u)",

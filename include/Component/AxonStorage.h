@@ -37,14 +37,12 @@ private:
     DramMessage* dram_result;
 
     // Temp states
-    bool is_request;
-    uint32_t delay_counter;
-    uint32_t delay;
     uint32_t counter; 
 
     DDR4* dram_spec_;
     Memory<DDR4, Controller> *dram_;
+    uint32_t dram_size_;
 
     bool send(uint64_t addr);
-    void callback(uint32_t reqID);
+    void callback(uint32_t reqID, uint32_t addr);
 };

@@ -45,7 +45,7 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     /** Modules **/
     Module *axon_transmitter = new AxonTransmitter ("axon_transmitter", this);
     Module *syn_distributor = new SynDataDistrib ("syn_distributor", this, num_propagators);
-    AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_cores);
+    AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_cores + 1);
 
     /** Wires **/
     // create pathways
@@ -55,7 +55,8 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     std::vector<Wire*> core_DynFin;
     for (int i =0; i<num_cores; i++)
         core_DynFin.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
-    
+    Wire* transmitter_idle = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+
     std::vector<FanoutWire*> syn_data;
     std::vector<FanoutWire*> syn_parity;
     for (int i=0; i<num_propagators; i++)
@@ -68,7 +69,9 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
 
     /** Connect **/
     axon_transmitter->Connect ("axon_in", axon_data->GetEndpoint (Endpoint::RHS));
-            
+    axon_transmitter->Connect ("idle", transmitter_idle->GetEndpoint (Endpoint::LHS));
+    dynfin_and->Connect ("input" + to_string(num_cores), transmitter_idle->GetEndpoint (Endpoint::RHS));
+
     for (int i=0; i<num_cores; i++)
     {
         cores[i]->Connect ("DynFin", core_DynFin[i]->GetEndpoint (Endpoint::LHS));

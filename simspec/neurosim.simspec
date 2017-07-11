@@ -2,11 +2,20 @@
 
 # External file
 FILESCRIPT_PATH(top.chip0.core0.neuron_block): data/spikes/spike0_0.script
-FILESCRIPT_PATH(top.chip0.core1.neuron_block): data/spikes/spike0_1.script
-FILESCRIPT_PATH(top.chip1.core0.neuron_block): data/spikes/spike1_0.script
-FILESCRIPT_PATH(top.chip1.core1.neuron_block): data/spikes/spike1_1.script
+
+REGISTER_DATAPATH(top.chip0.core0.axon_meta_table): data/meta/meta0_0.script
+
+REGISTER_DATAPATH(top.propagator0.axon_storage): data/dram/dram0.script
 
 # Clock
 CLOCK_PERIOD(main): 500
+
+# Parameters
+PARAMETER(num_neurons): 15
+PARAMETER(num_cores): 1
+PARAMETER(num_chips): 1
+PARAMETER(num_propagators): 1
+PARAMETER(dram_size): 4096
+PARAMETER(max_timestep): 5
 
 # Unit power

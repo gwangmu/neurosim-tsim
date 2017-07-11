@@ -30,7 +30,4 @@ private:
 
     /* Statistics */
     uint32_t read_n, write_n;
-
-    /* Temp reg */
-    uint32_t counter;
 };
