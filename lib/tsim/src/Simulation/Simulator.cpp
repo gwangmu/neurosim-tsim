@@ -16,6 +16,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <set>
 
 using namespace std;
 
@@ -156,18 +157,18 @@ bool Simulator::LoadTestbench ()
 
         for (Device *device : devices)
         {
-            //string nclock = device->GetClock ();
-            std::set <string> clock_set = device->GetClockSet(); 
+            set<string> clockset = device->GetClockSet(); 
 
-            if (clock_set.empty())
+            if (clockset.empty())
                 DESIGN_FATAL ("undefined device clock (device: %s)",
                         tb->GetName().c_str(), device->GetName().c_str());
 
-            for (auto& nclock: clock_set)
+            for (auto& nclock: clockset)
             {
                 mapCDoms[nclock].name = nclock;
                 mapCDoms[nclock].devices.push_back (device);
             }
+
             device->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
                                    device->GetClassName()),

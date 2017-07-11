@@ -222,6 +222,23 @@ string Pathway::GetClock ()
     return clockname;
 }
 
+set<string> Pathway::GetClockSet ()
+{
+    set<string> clockset;
+
+    for (Endpoint &ept : endpts.lhs)
+    {
+        set<string> clocks = ept.GetConnectedUnit()->GetClockSet();
+        for (string clock : clocks)
+        {
+            if (clock == "") return set<string>();
+            clockset.insert (clock);
+        }
+    }
+
+    return clockset;
+}
+
 
 double Pathway::GetConsumedEnergy ()
 {
