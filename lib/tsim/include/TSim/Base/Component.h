@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -48,6 +49,7 @@ public:
     Component (const char* clsname, string iname, Component *parent);
 
     virtual string GetClock ();
+    virtual set<string> GetClockSet ();
     string GetFullName ();
     string GetFullNameWOClass ();
     Component* GetParent () { return parent; }

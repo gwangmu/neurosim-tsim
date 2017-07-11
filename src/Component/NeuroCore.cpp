@@ -37,6 +37,7 @@
 
 using namespace std;
 
+USING_TESTBENCH;
 
 NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     : Component ("NeuroCore", iname, parent)
@@ -44,9 +45,10 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     // Parameters
     int syn_queue_size = 64;
     int pipeline_depth = 2;
-    
+    int num_neurons = GET_PARAMETER (num_neurons);
+
     Module *neuron_block = new NeuronBlock ("neuron_block", this, pipeline_depth);
-    Module *nb_controller = new NBController ("nb_controller", this, 16);
+    Module *nb_controller = new NBController ("nb_controller", this, num_neurons);
    
     Module *state_sram = new StateSRAM ("state_sram", this, 64, 16);
     Module *deltaG_storage = new DeltaStorage ("delta_storage", this, 64, 16); 

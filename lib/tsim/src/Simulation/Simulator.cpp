@@ -16,6 +16,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <set>
 
 using namespace std;
 
@@ -156,18 +157,18 @@ bool Simulator::LoadTestbench ()
 
         for (Device *device : devices)
         {
-            //string nclock = device->GetClock ();
-            std::set <string> clock_set = device->GetClockSet(); 
+            set<string> clockset = device->GetClockSet(); 
 
-            if (clock_set.empty())
+            if (clockset.empty())
                 DESIGN_FATAL ("undefined device clock (device: %s)",
                         tb->GetName().c_str(), device->GetName().c_str());
 
-            for (auto& nclock: clock_set)
+            for (auto& nclock: clockset)
             {
                 mapCDoms[nclock].name = nclock;
                 mapCDoms[nclock].devices.push_back (device);
             }
+
             device->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
                                    device->GetClassName()),
@@ -180,15 +181,17 @@ bool Simulator::LoadTestbench ()
 
         for (Pathway *pathway : pathways)
         {
-            string nclock = pathway->GetClock ();
-            if (nclock == "")
+            set<string> clockset = pathway->GetClockSet(); 
+
+            if (clockset.empty())
                 DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
                         tb->GetName().c_str(), pathway->GetName().c_str());
-            
-            if (mapCDoms[nclock].name == "")
-                mapCDoms[nclock].name = nclock;
 
-            mapCDoms[nclock].pathways.push_back (pathway);
+            for (auto& nclock: clockset)
+            {
+                mapCDoms[nclock].name = nclock;
+                mapCDoms[nclock].pathways.push_back (pathway);
+            }
 
             pathway->SetDissipationPower 
                 (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
@@ -287,6 +290,13 @@ bool Simulator::LoadTestbench ()
                         // NOTE: resolved by base clock functions
                         if (dynamic_cast<Module *>(pathway->GetLHS(i).GetConnectedUnit()))
                             prstates.find(pathway)->second.ResolveLHSMsg (i);
+
+                        // NOTE: resolved if LHS unit not in this domain
+                        if (Device *device = dynamic_cast<Device *>(pathway->GetLHS(i).GetConnectedUnit()))
+                        {
+                            if (find (cdom.devices.begin(), cdom.devices.end(), device) == cdom.devices.end())
+                                prstates.find(pathway)->second.ResolveLHSMsg (i);
+                        }
                     }
 
                     for (auto i = 0; i < pathway->GetNumRHS(); i++)
@@ -295,6 +305,13 @@ bool Simulator::LoadTestbench ()
                         // NOTE: LHS blocking was determined at the previous clock
                         if (dynamic_cast<Module *>(pathway->GetRHS(i).GetConnectedUnit()))
                             prstates.find(pathway)->second.ResolveRHSBlock (i);
+
+                        // NOTE: resolved if RHS unit not in this domain
+                        if (Device *device = dynamic_cast<Device *>(pathway->GetRHS(i).GetConnectedUnit()))
+                        {
+                            if (find (cdom.devices.begin(), cdom.devices.end(), device) == cdom.devices.end())
+                                prstates.find(pathway)->second.ResolveRHSBlock (i);
+                        }
                     }
 
                     if (pathway->IsControlPathway ())
@@ -307,9 +324,29 @@ bool Simulator::LoadTestbench ()
                 }
 
                 for (Device *device : cdom.devices)
+                {
                     drstates.insert (make_pair (device, 
                                 DeviceResolveState (device->GetNumInPorts(),
                                     device->GetNumCtrlPorts())));
+
+                    for (auto i = 0; i < device->GetNumInPorts(); i++)
+                    {
+                        Pathway *pathway = device->GetInEndpoint(i)->GetParent();
+
+                        // NOTE: resolved if INPUT path not in this domain
+                        if (find (cdom.pathways.begin(), cdom.pathways.end(), pathway) == cdom.pathways.end())
+                            drstates.find(device)->second.ResolveInputMsg (i);
+                    }
+
+                    for (auto i = 0; i < device->GetNumCtrlPorts(); i++)
+                    {
+                        Pathway *pathway = device->GetCtrlEndpoint(i)->GetParent();
+
+                        // NOTE: resolved if CONTROL path not in this domain
+                        if (find (cdom.pathways.begin(), cdom.pathways.end(), pathway) == cdom.pathways.end())
+                            drstates.find(device)->second.ResolveCtrlMsg (i);
+                    }
+                }
             }
 
             task ("schedule rest of clock functions")

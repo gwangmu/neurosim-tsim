@@ -63,27 +63,20 @@ string Device::GetClock ()
     return clockname;
 }
 
-std::set<string> Device::GetClockSet ()
+set<string> Device::GetClockSet ()
 {
-    std::set<string> clock_set; 
-    string clockname;
+    set<string> clockset;
 
     for (auto i = 0; i < ninports; i++)
     {
-        if (inports[i].endpt->GetParent()->GetClock() == "")
-        {
-            DEBUG_PRINT ("[FW] No clock %s", inports[i].endpt->GetParent()->GetName().c_str());
-            return std::set<string>();
-        }
+        set<string> clocks = inports[i].endpt->GetParent()->GetClockSet();
+        if (clocks.empty ()) return set<string>();
         
-        clockname = inports[i].endpt->GetParent()->GetClock();
-        clock_set.insert (clockname);
+        for (string clock : clocks)
+            clockset.insert (clock);
     }
 
-    for (auto& c: clock_set)
-        DEBUG_PRINT ("[FW] clock %s", c.c_str());
-
-    return clock_set;
+    return clockset;
 }
 
 /* functions for 'Component' */
