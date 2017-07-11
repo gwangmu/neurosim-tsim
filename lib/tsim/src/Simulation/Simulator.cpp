@@ -156,14 +156,18 @@ bool Simulator::LoadTestbench ()
 
         for (Device *device : devices)
         {
-            string nclock = device->GetClock ();
-            if (nclock == "")
+            //string nclock = device->GetClock ();
+            std::set <string> clock_set = device->GetClockSet(); 
+
+            if (clock_set.empty())
                 DESIGN_FATAL ("undefined device clock (device: %s)",
                         tb->GetName().c_str(), device->GetName().c_str());
 
-            mapCDoms[nclock].name = nclock;
-            mapCDoms[nclock].devices.push_back (device);
-
+            for (auto& nclock: clock_set)
+            {
+                mapCDoms[nclock].name = nclock;
+                mapCDoms[nclock].devices.push_back (device);
+            }
             device->SetDynamicPower 
                 (tb->GetUIntParam (Testbench::UNIT_DYNAMIC_POWER, 
                                    device->GetClassName()),

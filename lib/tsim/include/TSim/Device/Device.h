@@ -7,6 +7,7 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -25,6 +26,7 @@ public:
     /* Universal */
     Device (const char* clsname, string iname, Component *parent, Message *msgproto);
     virtual string GetClock (); 
+    std::set <string> GetClockSet();
 
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator));
