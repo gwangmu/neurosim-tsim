@@ -16,10 +16,10 @@
 
 USING_TESTBENCH;
 
-AxonStorage::AxonStorage (string iname, Component* parent)
+AxonStorage::AxonStorage (string iname, Component* parent, uint8_t io_buf_size)
     : Module ("AxonStorage", iname, parent, 0)
 {
-    SetClock ("dram");
+    //SetClock ("dram");
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
             Prototype<IndexMessage>::Get());
@@ -36,7 +36,7 @@ AxonStorage::AxonStorage (string iname, Component* parent)
 
     /* Initialize parameters */
     dram_size_ = GET_PARAMETER (dram_size);
-    io_buf_size_ = 4;
+    this->io_buf_size_ = io_buf_size;
     io_buffer.resize(io_buf_size_);
 
     /* Initialize DRAM (ramulator */
@@ -170,7 +170,8 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
         uint16_t val16;
         
         // Synapse type
-        if(data & (1<<31))
+        bool syn_type = (data >> 63) & 1;
+        if(!syn_type)
         {
             intra_board = false;
             val32 = (data >> 21) & (0xffffffff);
@@ -180,6 +181,7 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
         }
         else
         {
+            DEBUG_PRINT ("[DRAM] Data: %lu, %lu", data, data>>63);
             SIM_ERROR ("Not Implemented. (Routing information)", GetFullName().c_str());
         }
 

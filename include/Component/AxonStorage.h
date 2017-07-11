@@ -19,7 +19,7 @@ using namespace std;
 class AxonStorage: public Module
 {
 public:
-    AxonStorage (string iname, Component *parent);
+    AxonStorage (string iname, Component *parent, uint8_t io_buf_size);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             const uint32_t *outque_size, Instruction *instr);
 

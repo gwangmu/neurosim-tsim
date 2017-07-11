@@ -13,7 +13,7 @@
 
 using namespace std;
 
-AxonStreamer::AxonStreamer (string iname, Component *parent)
+AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size)
     : Module ("AxonStreamer", iname, parent, 1)
 {
     IPORT_Axon = CreatePort ("axon_in", Module::PORT_INPUT,
@@ -26,7 +26,7 @@ AxonStreamer::AxonStreamer (string iname, Component *parent)
     is_idle_ = false;
 
     // DRAM Spec.
-    read_bytes = 64; 
+    read_bytes = io_buf_size; 
 }
 
 void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, 
