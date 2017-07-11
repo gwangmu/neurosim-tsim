@@ -22,7 +22,7 @@ AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
     OPORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
 
-    is_idle_ = true;
+    is_idle_ = false;
 }
 
 void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs, 

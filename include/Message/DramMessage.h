@@ -14,7 +14,7 @@ public:
     // NOTE: must provide default constructor
     DramMessage () : Message ("DramMessage") {}
 
-    DramMessage (uint32_t destrhsid, uint64_t val32, uint16_t val16, bool intra_board, bool idx)
+    DramMessage (uint32_t destrhsid, uint64_t val32, uint16_t val16, bool intra_board, uint8_t idx)
         : Message ("DramMessage", destrhsid)
     {
         this->val32 = val32;
