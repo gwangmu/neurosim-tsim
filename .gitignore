@@ -12,4 +12,6 @@ bin/
 *.dot
 *.png
 makegv
-third_party/*
+*run
+parse.py
+tmp/
