@@ -288,6 +288,13 @@ bool Simulator::LoadTestbench ()
                         // NOTE: resolved by base clock functions
                         if (dynamic_cast<Module *>(pathway->GetLHS(i).GetConnectedUnit()))
                             prstates.find(pathway)->second.ResolveLHSMsg (i);
+
+                        // NOTE: resolved if LHS unit not in this domain
+                        if (Device *device = dynamic_cast<Device *>(pathway->GetLHS(i).GetConnectedUnit()))
+                        {
+                            if (find (cdom.devices.begin(), cdom.devices.end(), device) == cdom.devices.end())
+                                prstates.find(pathway)->second.ResolvLHSMsg (i);
+                        }
                     }
 
                     for (auto i = 0; i < pathway->GetNumRHS(); i++)
@@ -296,6 +303,13 @@ bool Simulator::LoadTestbench ()
                         // NOTE: LHS blocking was determined at the previous clock
                         if (dynamic_cast<Module *>(pathway->GetRHS(i).GetConnectedUnit()))
                             prstates.find(pathway)->second.ResolveRHSBlock (i);
+
+                        // NOTE: resolved if RHS unit not in this domain
+                        if (Device *device = dynamic_cast<Device *>(pathway->GetRHS(i).GetConnectedUnit()))
+                        {
+                            if (find (cdom.devices.begin(), cdom.devices.end(), device) == cdom.devices.end())
+                                prstates.find(pathway)->second.ResolvRHSBlock (i);
+                        }
                     }
 
                     if (pathway->IsControlPathway ())
@@ -308,9 +322,11 @@ bool Simulator::LoadTestbench ()
                 }
 
                 for (Device *device : cdom.devices)
+                {
                     drstates.insert (make_pair (device, 
                                 DeviceResolveState (device->GetNumInPorts(),
                                     device->GetNumCtrlPorts())));
+                }
             }
 
             task ("schedule rest of clock functions")
