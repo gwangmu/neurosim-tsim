@@ -33,6 +33,7 @@ AxonMetaQueue::AxonMetaQueue (string iname, Component *parent)
             Prototype<SignalMessage>::Get());
 
     is_empty = true;
+    ongoing_jobs = 0;
 }
 
 void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, 
@@ -51,6 +52,15 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
         {
             DEBUG_PRINT ("[AMQ] Receive spike (idx: %d, queue size: %u)", idx, *outque_size);
             outmsgs[OPORT_SRAM] = new IndexMessage (0, idx);
+            ongoing_jobs++;
+            
+            if (is_empty)
+            {
+                is_empty = false;
+                DEBUG_PRINT ("[AMQ] Axon metadata queue has data");
+
+                outmsgs[OPORT_Empty] = new SignalMessage (0, false);
+            }
         }
         else
             DEBUG_PRINT ("[AMQ] Receive NB output (idx: %d)", idx);
@@ -63,21 +73,14 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
 
         outmsgs[OPORT_Axon] = new AxonMessage (0, ax_addr, ax_len);
         DEBUG_PRINT ("[AMQ] Recieve Axon data %lu %u", ax_addr, ax_len);
+        ongoing_jobs--;
     }
-
-    if(!is_empty && *outque_size == 0)
+    else if(!is_empty && *outque_size == 0 && ongoing_jobs==0)
     {
         is_empty = true;
         DEBUG_PRINT ("[AMQ] Axon metatda queue is empty");
 
         outmsgs[OPORT_Empty] = new SignalMessage (0, true);
-    }
-    else if (is_empty && (*outque_size != 0))
-    {
-        is_empty = false;
-        DEBUG_PRINT ("[AMQ] Axon metadata queue has data");
-
-        outmsgs[OPORT_Empty] = new SignalMessage (0, false);
     }
 
 

@@ -30,4 +30,5 @@ private:
     
     // Internal states
     bool is_empty;
+    int ongoing_jobs;
 };

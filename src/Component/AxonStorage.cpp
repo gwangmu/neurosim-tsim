@@ -104,7 +104,7 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_data] = Message::RESERVE();
     }
 
-    if(!is_idle_ && (entry_cnt==0))
+    if(!is_idle_ && (entry_cnt==0) && (*outque_size==0))
     {
         DEBUG_PRINT ("[DRAM] DRAM is idle");
         is_idle_ = true;

@@ -32,19 +32,19 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs,
 
     if(axon_msg)
     {
-        DEBUG_PRINT ("[AMT] Receive axon message (addr %lu)", axon_msg->value) 
+        DEBUG_PRINT ("[AT] Receive axon message (addr %lu)", axon_msg->value) 
         outmsgs[OPORT_Axon] = new AxonMessage (0, axon_msg->value, axon_msg->len); 
         
         if (is_idle_)
         {
-            DEBUG_PRINT ("[AMR] Axon metadata receiver is busy");
+            DEBUG_PRINT ("[AT] Axon metadata transmitter is busy");
             is_idle_ = false;
             outmsgs[OPORT_idle] = new IntegerMessage (0);
         }
     }
-    else if(!is_idle_)
+    else if(!is_idle_ && *outque_size==0)
     {
-        DEBUG_PRINT ("[AMR] Axon metadata receiver is idle");
+        DEBUG_PRINT ("[AT] Axon metadata transmitter is idle");
         is_idle_ = true;
         outmsgs[OPORT_idle] = new IntegerMessage (1);
     }

@@ -45,7 +45,7 @@ void AxonMetaTable::Operation (Message **inmsgs, Message **outmsgs,
         uint64_t dram_addr = metadata >> 16;
         uint16_t len = metadata & 0xffff; 
 
-        DEBUG_PRINT("[AT] Receive read request (idx: %u), and send message (addr: %lu, len %d)",
+        DEBUG_PRINT("[AMT] Receive read request (idx: %u), and send message (addr: %lu, len %d)",
                 read_addr, dram_addr, len);
         
         outmsgs[RPORT_data] = new AxonMessage (0, dram_addr, len);

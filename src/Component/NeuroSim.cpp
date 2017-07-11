@@ -102,7 +102,10 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     for (int i=0; i<num_chips; i++)
     {
         for (int p=0; p<num_propagators; p++)
+        {
             neurochips[i]->Connect ("Axon", axon_data[p]->GetEndpoint (Endpoint::LHS, i));
+            axon_data[p]->GetEndpoint (Endpoint::LHS, i)->SetCapacity(1);
+        }
 
         for (int c=0; c<num_cores; c++)
         {
