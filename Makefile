@@ -24,7 +24,7 @@ AR=ar
 MAKE=make 
 
 # compiler flags
-CXXFLAGS=--std=c++11 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG) -g
+CXXFLAGS=--std=c++11 -ferror-limit=3 -DRAMULATOR $(if $(NDEBUG),-DNDEBUG) -g
 LDFLAGS=-O3
 ARFLAGS=-rc
 #################
@@ -49,6 +49,14 @@ TSIM_LIB=$(TSIM_DIR)/libtsim.a
 TSIM_SRC=$(filter %.$(CPPEXT),\
 		 $(wildcard $(addsuffix /*,$(shell find $(TSIM_DIR)/src -type d))))
 
+RAM=Ramulator
+RAM_DIR=$(LIBDIR)/ramulator
+RAM_HDRDIR=$(RAM_DIR)/src
+RAM_LIB=$(RAM_DIR)/libram.a
+RAM_SRCS := $(filter-out $(RAMULATOR_SRCDIR)/Main.cpp $(RAMULATOR_SRCDIR)/Gem5Wrapper.cpp, \
+	$(wildcard $(RAMULATOR_SRCDIR)/*.cpp))
+
+
 # TODO: add variables for new library
 #[lib]=[lib_name]
 #[lib]_DIR=$(LIBDIR)/[lib_dirname]
@@ -56,7 +64,7 @@ TSIM_SRC=$(filter %.$(CPPEXT),\
 #[lib]_LIB=$([lib]_DIR)/[lib_bindir_name]
 
 # libraies in use
-USING_LIBS=TSIM  		# TODO: add [lib] in this list.
+USING_LIBS=TSIM RAM  		# TODO: add [lib] in this list.
 #############
 
 ### Helper functions ###

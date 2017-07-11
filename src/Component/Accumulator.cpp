@@ -72,6 +72,13 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         outmsgs[PORT_waddr] = new IndexMessage (0, idx);
         outmsgs[PORT_wdata] = new DeltaGMessage (0, 0);
     }
+    else if (!is_idle_ && idx_queue.empty())
+    {
+        is_idle_ = true;
+        DEBUG_PRINT ("[Acc] Accumulator is idle");
+
+        outmsgs[PORT_idle] = new SignalMessage (0, true); 
+    }
 
     // Update TS parity
     SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[PORT_TSparity]);
@@ -81,13 +88,6 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         DEBUG_PRINT ("[Acc] Update TS parity (%d)", ts_parity);
     }  
 
-    if (!is_idle_ && idx_queue.empty())
-    {
-        is_idle_ = true;
-        DEBUG_PRINT ("[Acc] Accumulator is idle");
-
-        outmsgs[PORT_idle] = new SignalMessage (0, true); 
-    }
 }
 
 

@@ -49,26 +49,26 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
     if(fin_msg)
     {
         bool val = fin_msg->value;
-        dyn_fin = (val != 0)? 1:0;
-
-        if(dyn_fin)
+        if(!dyn_fin && val)
             DEBUG_PRINT("[TSM] Dynamics Finished, %p", fin_msg);
-
+        
+        dyn_fin = (val != 0)? 1:0;
         is_finish = dyn_fin && prop_idle;
     }
     if(idle_msg)
     {
         bool val = idle_msg->value;
-        prop_idle = (val != 0)? 1:0;
 
-        if(prop_idle)
+        if(!prop_idle && val)
         {
             DEBUG_PRINT("[TSM] Propagator is idle, %p", idle_msg);
         }
-        else
+        else if (prop_idle && !val)
         {
             DEBUG_PRINT("[TSM] Propagator is busy, %p", idle_msg);
         }
+        
+        prop_idle = (val != 0)? 1:0;
         is_finish = dyn_fin && prop_idle;
     }
 
