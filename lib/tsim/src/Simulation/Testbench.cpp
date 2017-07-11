@@ -39,6 +39,8 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
     {
         uint32_t lineno = 1;
         string line;
+
+        // TODO: multi-variable support
         uint32_t range_start = -1;
         uint32_t range_end = -1;
 
@@ -84,7 +86,7 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
             }
             else if (toked[0] == "CLOCK_PERIOD")
             {
-                SET_CLOCK_PERIOD (toked[1], stoi (toked[2]));
+                SET_CLOCK_PERIOD (toked[1], TO_SIM_TIMEUNIT (stof (toked[2])));
                 DEBUG_PRINT ("clock period (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
             else if (toked[0] == "UNIT_DYNAMIC_POWER")    

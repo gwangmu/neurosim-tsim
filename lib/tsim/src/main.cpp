@@ -22,12 +22,12 @@ Simulator::Option LoadSimOption (int argc, char *argv[])
         {
             if (arg == "-p")
             {
-                opt.tsinterval = stoi (string (argv[i + 1]));
+                opt.tsinterval = TO_SIM_TIMEUNIT (stof (string (argv[i + 1])));
                 i++;
             }
             else if (arg == "-l")
             {
-                opt.timelimit = stoi (string (argv[i + 1]));
+                opt.timelimit = TO_SIM_TIMEUNIT (stof (string (argv[i + 1])));
                 i++;
             }
             else if (arg == "-gv")

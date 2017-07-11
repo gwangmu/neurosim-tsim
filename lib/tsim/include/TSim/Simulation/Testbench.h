@@ -11,6 +11,10 @@
 #define GET_PARAMETER(x) \
     simtb->GetUIntParam (Testbench::PARAMETER, #x);
 
+/* general */
+#define TO_SPEC_TIMEUNIT(simtime) (simtime / 1000)
+#define TO_SIM_TIMEUNIT(spectime) (spectime * 1000)
+
 #include <TSim/Base/Metadata.h>
 
 #include <TSim/Utility/LazyComponentCreator.h>
