@@ -624,11 +624,11 @@ bool Simulator::Simulate ()
 
             if (nexttstime <= curtime)
             {
-                PRINT ("Simulating %lu ns..", TO_SPEC_TIMEUNIT(curtime));
+                PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
                 nexttstime += opt.tsinterval;
             }
 
-            task ("simulate %lu ns", TO_SPEC_TIMEUNIT(curtime))
+            task ("simulate %.3lf ns", TO_SPEC_TIMEUNIT(curtime))
             {
                 for (ClockDomain::Clocker &clocker : curCDom->clockers)
                     clocker.Invoke (KEY(Simulator));
@@ -636,7 +636,7 @@ bool Simulator::Simulate ()
 
             if (curtime > opt.timelimit) 
             {
-                PRINT ("Simulation reached time limit (%lu ns)", 
+                PRINT ("Simulation reached time limit (%.3lf ns)", 
                         TO_SPEC_TIMEUNIT(opt.timelimit));
                 break;
             }
@@ -646,7 +646,7 @@ bool Simulator::Simulate ()
     auto end = chrono::steady_clock::now ();
     runtime = chrono::duration_cast<chrono::milliseconds>(end - start).count ();
 
-    PRINT ("Simulation finished at %lu ns", TO_SPEC_TIMEUNIT(curtime));
+    PRINT ("Simulation finished at %.3lf ns", TO_SPEC_TIMEUNIT(curtime));
 
     return true;
 }
