@@ -93,16 +93,18 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
     if(raddr_msg)
     {
         uint32_t read_addr = raddr_msg->value;
-        entry_cnt++;
 
-        DEBUG_PRINT("[DRAM] Receive read request");
 
         if(!send (read_addr))
         {
             inmsgs[PORT_addr] = nullptr;
         }
         else
+        {
+            DEBUG_PRINT("[DRAM] Receive read request %d", entry_cnt);
             outmsgs[PORT_data] = Message::RESERVE();
+            entry_cnt++;
+        }
     }
 
     if(!is_idle_ && (entry_cnt==0) && 
@@ -176,8 +178,10 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
             intra_board = false;
             val32 = (data >> 21) & (0xffffffff);
             destrhsid = (data >> 18) & (0x7);
-            target_idx  = (data >> 16) & (0x7);
+            target_idx  = (data >> 15) & (0x7);
             val16 = (data & (0x7fff));
+
+            DEBUG_PRINT ("[DRAM] destination %u/%u/%u", destrhsid, target_idx, val16);
         }
         else
         {
