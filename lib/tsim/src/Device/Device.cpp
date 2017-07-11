@@ -63,6 +63,23 @@ string Device::GetClock ()
     return clockname;
 }
 
+set<string> Device::GetClockSet ()
+{
+    set<string> clockset;
+
+    for (auto i = 0; i < ninports; i++)
+    {
+        set<string> clocks = inports[i].endpt->GetParent()->GetClockSet();
+        if (clocks.empty ()) return set<string>();
+        
+        for (string clock : clocks)
+            clockset.insert (clock);
+    }
+
+    return clockset;
+}
+
+
 std::set<string> Device::GetClockSet ()
 {
     std::set<string> clock_set; 

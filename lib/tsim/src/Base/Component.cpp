@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -35,6 +36,16 @@ string Component::GetClock ()
     else
         return parent->GetClock();
 }
+
+set<string> Component::GetClockSet ()
+{
+    set<string> clockset;
+    if (GetClock() != "")
+        clockset.insert (GetClock());
+
+    return clockset;
+}
+
 
 string Component::GetFullName ()
 {

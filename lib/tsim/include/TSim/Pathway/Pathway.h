@@ -9,6 +9,7 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -83,6 +84,7 @@ public:
     virtual string GetInstanceName ();
     Message *GetMsgPrototype () { return msgproto; }
     string GetClock ();
+    set<string> GetClockSet ();
 
     void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
 
