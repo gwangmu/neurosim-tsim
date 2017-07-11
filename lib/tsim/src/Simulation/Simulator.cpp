@@ -20,6 +20,8 @@
 
 using namespace std;
 
+// NOTE: CLOCK_PERIOD is written in NS (simspec), calculated in PS (simulation)
+
 /* Constructors */
 Simulator::ClockDomain::ClockDomain ()
 {
@@ -622,11 +624,11 @@ bool Simulator::Simulate ()
 
             if (nexttstime <= curtime)
             {
-                PRINT ("Simulating %lu ns..", curtime);
+                PRINT ("Simulating %lu ns..", TO_SPEC_TIMEUNIT(curtime));
                 nexttstime += opt.tsinterval;
             }
 
-            task ("simulate %lu ns", curtime)
+            task ("simulate %lu ns", TO_SPEC_TIMEUNIT(curtime))
             {
                 for (ClockDomain::Clocker &clocker : curCDom->clockers)
                     clocker.Invoke (KEY(Simulator));
@@ -634,7 +636,8 @@ bool Simulator::Simulate ()
 
             if (curtime > opt.timelimit) 
             {
-                PRINT ("Simulation reached time limit (%lu ns)", opt.timelimit);
+                PRINT ("Simulation reached time limit (%lu ns)", 
+                        TO_SPEC_TIMEUNIT(opt.timelimit));
                 break;
             }
         }
@@ -643,7 +646,7 @@ bool Simulator::Simulate ()
     auto end = chrono::steady_clock::now ();
     runtime = chrono::duration_cast<chrono::milliseconds>(end - start).count ();
 
-    PRINT ("Simulation finished at %lu ns", curtime);
+    PRINT ("Simulation finished at %lu ns", TO_SPEC_TIMEUNIT(curtime));
 
     return true;
 }
@@ -700,7 +703,7 @@ void Simulator::ReportDesignSummary ()
     {
         ClockDomain &cdom = cdomains[i];
 
-        float freq = 1.0f / cdom.period * 1000;
+        float freq = 1.0f / cdom.period * 1000000;
         const char *fieldname = "";
         if (i == 0) fieldname = "Clock frequency (MHz)";
 
