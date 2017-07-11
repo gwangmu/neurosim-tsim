@@ -86,7 +86,9 @@ SRCFILES:=$(filter %.$(CPPEXT),$(CODEFILES))
 OBJFILES:=$(subst $(SRCDIR),$(OBJDIR),$(SRCFILES:%.$(CPPEXT)=%.$(OBJEXT)))
 RMFILES:=$(OBJDIR) $(BIN)
 
-LIBS:=$(foreach LIB,$(USING_LIBS),$($(LIB)_LIB))
+LIBS:=$(foreach LIB,	\
+	$(if $(EXAMPLE),$(filter $(USING_LIBS),TSIM),$(USING_LIBS)),	\
+	$($(LIB)_LIB))
 ######################
 
 

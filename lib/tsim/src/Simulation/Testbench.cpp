@@ -39,6 +39,8 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
     {
         uint32_t lineno = 1;
         string line;
+        uint32_t range_start = -1;
+        uint32_t range_end = -1;
 
         while (getline (specfile, line))
         {
@@ -49,26 +51,74 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
 
             vector<string> toked = String::Tokenize (line, ":()");
             if (toked[0] == "FILESCRIPT_PATH")
-                SET_FILESCRIPT_PATH (toked[1], toked[2]);
+            {
+                if (range_start == -1 || range_end == -1)
+                    SET_FILESCRIPT_PATH (toked[1], toked[2]);
+                else
+                {
+                    for (uint32_t i = range_start; i <= range_end; i++)
+                    {
+                        string lhs = String::Replace (toked[1], "@", to_string(i));
+                        string rhs = String::Replace (toked[2], "@", to_string(i));
+                        SET_FILESCRIPT_PATH (lhs, rhs);
+
+                        DEBUG_PRINT ("file script (%s <-- %s)", lhs.c_str(), rhs.c_str());
+                    }
+                }
+            }
             else if (toked[0] == "REGISTER_DATAPATH")
-                SET_REGISTER_DATAPATH (toked[1], toked[2]);
+            {
+                if (range_start == -1 || range_end == -1)
+                    SET_REGISTER_DATAPATH (toked[1], toked[2]);
+                else
+                {
+                    for (uint32_t i = range_start; i <= range_end; i++)
+                    {
+                        string lhs = String::Replace (toked[1], "@", to_string(i));
+                        string rhs = String::Replace (toked[2], "@", to_string(i));
+                        SET_REGISTER_DATAPATH (lhs, rhs);
+
+                        DEBUG_PRINT ("file register (%s <-- %s)", lhs.c_str(), rhs.c_str());
+                    }
+                }
+            }
             else if (toked[0] == "CLOCK_PERIOD")
+            {
                 SET_CLOCK_PERIOD (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("clock period (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
             else if (toked[0] == "UNIT_DYNAMIC_POWER")    
+            {
                 SET_UNIT_DYNAMIC_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("unit dynpower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
             else if (toked[0] == "UNIT_STATIC_POWER")    
+            {
                 SET_UNIT_STATIC_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("unit stapower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
             else if (toked[0] == "PATHWAY_DIS_POWER")    
+            {
                 SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("path dispower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
             else if (toked[0] == "PARAMETER")
+            {
                 SET_PARAMETER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("parameter (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
+            else if (line.length() > 1 && line[0] == '[')
+            {
+                vector<string> toked = String::Tokenize (line, "[fromto] ");
+                range_start = stoi (toked[0]);
+                range_end = stoi (toked[1]);
+            }
             else
             {
                 SIM_ERROR ("unknown spec name '%s' (regdata: %s, lineno: %u)",
                         GetName().c_str(), toked[0].c_str(), specfilename.c_str(), lineno);
                 return false;
             }
-                DEBUG_PRINT ("spec (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
 
             lineno++;
         }

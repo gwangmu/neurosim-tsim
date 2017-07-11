@@ -1,6 +1,7 @@
 #!TSim Register Data
 
-CLASSNAME: TestRegister
-Data:
-    addr=0x1, data=0x8329
-    addr=0x2, data=0xFA2D
+CLASSNAME: ExampleFileRegister
+DATA:
+    addr=0x0000, data=0xBEEF
+    addr=0x0001, data=0x8329
+    addr=0x0002, data=0xFA2D
