@@ -3,22 +3,22 @@
 CLASSNAME: SpikeFileScript
 SCRIPT:
 	section
-		cycle=0, data=19
+		cycle=0, data=10
 	endsection
 
 	section
-		cycle=0, data=0/9/16
+		cycle=0, data=3/6
 	endsection
 
 	section
-		cycle=0, data=13/15
+		cycle=0, data=14
 	endsection
 
 	section
-		cycle=0, data=17
+		cycle=0, data=0/9
 	endsection
 
 	section
-		cycle=0, data=1/9
+		cycle=0, data=1
 	endsection
 

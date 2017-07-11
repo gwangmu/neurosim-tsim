@@ -40,7 +40,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
 
     /** Parameters **/
     const int num_boards = 1;
-    const int num_chips = 1;
+    const int num_chips = 2;
     const int num_propagators = 1;
     
     const int num_cores = 1;
@@ -65,11 +65,6 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     /** Module & Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
-    
-    // Modules
-    //Module *ds_parity = new DataSourceModule ("ds_parity", this);
-    //Module *ds_board = new DataSinkModule <AxonMessage, uint32_t> ("ds_board", this);
-    //Module *ds_idle = new DataSinkModule <SignalMessage, bool> ("ds_idle", this);
 
     // Wires
     std::vector<RRFaninWire*> axon_data;

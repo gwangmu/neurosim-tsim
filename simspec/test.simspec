@@ -1,7 +1,7 @@
 #!TSim Simulation Spec
 
 # External file
-FILESCRIPT_PATH(neuron_block): data/spike0.script
+FILESCRIPT_PATH(top.chip0.core0.neuron_block): data/spike0.script
 #REGISTER_DATAPATH(reg1): data/reg1.regdata
 
 # Clock

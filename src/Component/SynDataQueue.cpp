@@ -66,7 +66,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
             if (is_empty)
             {
                 is_empty = false;
-                DEBUG_PRINT ("[SDQ] Axon metadata queue has data");
+                DEBUG_PRINT ("[SDQ] Synapse Data queue has data");
 
                 outmsgs[OPORT_Empty] = new IntegerMessage (0);
             }

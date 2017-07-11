@@ -13,7 +13,7 @@
 #include <Ramulator/SpeedyController.h>
 
 AxonStorage::AxonStorage (string iname, Component* parent)
-    : Module ("AxonStorage", iname, parent, 1)
+    : Module ("AxonStorage", iname, parent, 0)
 {
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
@@ -90,7 +90,12 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
 
         DEBUG_PRINT("[DRAM] Receive read request");
 
-        this->send (read_addr);
+        if(!send (read_addr))
+        {
+            inmsgs[PORT_addr] = nullptr;
+        }
+        else
+            outmsgs[PORT_data] = Message::RESERVE();
     }
 
     if(!is_idle_ && (entry_cnt==0))

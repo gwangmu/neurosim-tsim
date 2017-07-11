@@ -27,7 +27,7 @@ def spike_generator():
     random.seed(706)
     for i in range (FLAGS.chip):
         for j in range (FLAGS.core):
-            f = open(FLAGS.path + filename('spikes/spike',i,j), 'w')
+            f = open(FLAGS.path + filename('data/spikes/spike',i,j), 'w')
             f.write("#!Tsim Script\n\n")
             f.write("CLASSNAME: SpikeFileScript\n")
             f.write("SCRIPT:\n")
@@ -40,7 +40,8 @@ def spike_generator():
                 s = s.strip('/')
 
                 f.write ("\tsection\n")
-                f.write("\t\tcycle=0, data=" + s)
+                if(len(spike_train) > 0):
+                    f.write("\t\tcycle=0, data=" + s)
                 f.write("\n\tendsection\n\n")
             
             f.close()
@@ -68,7 +69,7 @@ def meta_generator():
     last_addr = 0
     for i in range (FLAGS.chip):
         for j in range (FLAGS.core):
-            f = open(FLAGS.path + filename('meta/meta',i,j), 'w')
+            f = open(FLAGS.path + filename('data/meta/meta',i,j), 'w')
 
             f.write("#!Tsim Script\n\n")
             f.write("CLASSNAME: MetaRegister\n")
@@ -83,9 +84,30 @@ def meta_generator():
 
             f.close()
 
+def spec_generator():
+    f = open("simspec/neurosim.simspec", 'w')
+
+    f.write ("#!Tsim Simulation Spec\n\n")
+
+    f.write ("# External file\n")
+    for i in range(FLAGS.chip):
+        for j in range(FLAGS.core):
+            f.write("FILESCRIPT_PATH(top.chip%d.core%d.neuron_block): data/spikes/spike%d_%d.script\n" \
+                    %(i, j, i, j))
+
+    f.write ("\n# Clock\n")
+    f.write ("CLOCK_PERIOD(main): 500\n\n")
+
+    f.write ("# Unit power\n")
+
+
 def main():
+    print "chips: ", FLAGS.chip, "cores: ", FLAGS.core
+    
     spike_generator()
     meta_generator()
+
+    spec_generator()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -116,7 +138,7 @@ if __name__ == '__main__':
             help="Type of distribution (Not implemented")
 
     parser.add_argument("--sparsity",
-            type=int,
+            type=float,
             default=0.5,
             help="Neuron connection sparsity")
 

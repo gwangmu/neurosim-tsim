@@ -63,7 +63,7 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
     {
         uint32_t neuron_idx = in_msg->idx;
         
-        bool is_spike = (neuron_idx == spike_trace_.front());
+        bool is_spike = (spike_trace_.empty())? false : (neuron_idx == spike_trace_.front());
         if(is_spike)
             spike_trace_.pop_front();
         
@@ -100,16 +100,6 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
    
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

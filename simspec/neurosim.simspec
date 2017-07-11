@@ -1,0 +1,12 @@
+#!Tsim Simulation Spec
+
+# External file
+FILESCRIPT_PATH(top.chip0.core0.neuron_block): data/spikes/spike0_0.script
+FILESCRIPT_PATH(top.chip0.core1.neuron_block): data/spikes/spike0_1.script
+FILESCRIPT_PATH(top.chip1.core0.neuron_block): data/spikes/spike1_0.script
+FILESCRIPT_PATH(top.chip1.core1.neuron_block): data/spikes/spike1_1.script
+
+# Clock
+CLOCK_PERIOD(main): 500
+
+# Unit power

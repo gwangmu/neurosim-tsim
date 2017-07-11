@@ -32,7 +32,8 @@ Propagator::Propagator (string iname, Component *parent)
     : Component ("Propagator", iname, parent)
 {
     /** Parameters **/
-        
+    int dram_outque_size = 32;
+
     /** Components **/
    
     /** Modules **/
@@ -68,6 +69,7 @@ Propagator::Propagator (string iname, Component *parent)
    
     axon_storage->Connect ("r_data", dram_data->GetEndpoint (Endpoint::LHS));
     axon_classifier->Connect ("dram", dram_data->GetEndpoint (Endpoint::RHS));
+    dram_data->GetEndpoint (Endpoint::LHS)->SetCapacity (dram_outque_size);
 
     axon_receiver->Connect ("idle", recv_idle->GetEndpoint (Endpoint::LHS)); 
     axon_classifier->Connect ("idle", class_idle->GetEndpoint (Endpoint::LHS)); 
