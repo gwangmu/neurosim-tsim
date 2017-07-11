@@ -19,7 +19,7 @@ USING_TESTBENCH;
 AxonStorage::AxonStorage (string iname, Component* parent, uint8_t io_buf_size)
     : Module ("AxonStorage", iname, parent, 0)
 {
-    //SetClock ("dram");
+    SetClock ("dram");
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
             Prototype<IndexMessage>::Get());

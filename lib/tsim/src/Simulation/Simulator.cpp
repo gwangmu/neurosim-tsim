@@ -597,7 +597,7 @@ bool Simulator::Simulate ()
 
     macrotask ("Starting simulation..")
     {
-        uint64_t nexttstime = opt.tsinterval;
+        uint64_t nexttstime = 0;
         while (!tb->IsFinished (KEY(Simulator)))
         {
             ClockDomain *curCDom;
