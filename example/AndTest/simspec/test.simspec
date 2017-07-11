@@ -1,9 +1,7 @@
 #!TSim Simulation Spec
 
-#[from 0 to 7]
-#FILESCRIPT_PATH(top.datasource@): example/AndTest/data/fscr@.script
-FILESCRIPT_PATH(top.datasource0): example/AndTest/data/fscr1.script
-FILESCRIPT_PATH(top.datasource1): example/AndTest/data/fscr1.script
+[from 0 to 1]
+FILESCRIPT_PATH(top.datasource@): example/AndTest/data/fscr@.script
 REGISTER_DATAPATH(top.datasink): example/AndTest/data/reg1.regdata
 
 CLOCK_PERIOD(main): 500
