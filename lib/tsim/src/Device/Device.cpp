@@ -79,30 +79,6 @@ set<string> Device::GetClockSet ()
     return clockset;
 }
 
-
-std::set<string> Device::GetClockSet ()
-{
-    std::set<string> clock_set; 
-    string clockname;
-
-    for (auto i = 0; i < ninports; i++)
-    {
-        if (inports[i].endpt->GetParent()->GetClock() == "")
-        {
-            DEBUG_PRINT ("[FW] No clock %s", inports[i].endpt->GetParent()->GetName().c_str());
-            return std::set<string>();
-        }
-        
-        clockname = inports[i].endpt->GetParent()->GetClock();
-        clock_set.insert (clockname);
-    }
-
-    for (auto& c: clock_set)
-        DEBUG_PRINT ("[FW] clock %s", c.c_str());
-
-    return clock_set;
-}
-
 /* functions for 'Component' */
 bool Device::IsValidConnection (Port *port, Endpoint *endpt)
 {

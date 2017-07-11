@@ -181,15 +181,17 @@ bool Simulator::LoadTestbench ()
 
         for (Pathway *pathway : pathways)
         {
-            string nclock = pathway->GetClock ();
-            if (nclock == "")
+            set<string> clockset = pathway->GetClockSet(); 
+
+            if (clockset.empty())
                 DESIGN_FATAL ("undefined pathway clock (pathway: %s)",
                         tb->GetName().c_str(), pathway->GetName().c_str());
-            
-            if (mapCDoms[nclock].name == "")
-                mapCDoms[nclock].name = nclock;
 
-            mapCDoms[nclock].pathways.push_back (pathway);
+            for (auto& nclock: clockset)
+            {
+                mapCDoms[nclock].name = nclock;
+                mapCDoms[nclock].pathways.push_back (pathway);
+            }
 
             pathway->SetDissipationPower 
                 (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
