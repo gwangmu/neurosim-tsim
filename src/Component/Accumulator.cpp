@@ -46,7 +46,6 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
     SynapseMessage *syn_msg = static_cast<SynapseMessage*>(inmsgs[PORT_in]);
     if(syn_msg)
     {
-        int rhs = ts_parity? 1:0;
         outmsgs[PORT_raddr] = new IndexMessage (0, syn_msg->idx);
         idx_queue.push_back(syn_msg->idx);
 
@@ -63,7 +62,6 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
     if(dg_msg)
     {
         int idx = idx_queue.front();
-        int rhs = ts_parity? 1:0;
         idx_queue.pop_front();
 
         // Accumulation

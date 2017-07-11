@@ -49,7 +49,6 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
     if(dram_msg)
     {
         bool is_board = dram_msg->intra_board;
-        int target_module = is_board? 1:0; // 0: chip, 1: controller
 
         if(is_board)
         {
@@ -59,10 +58,12 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            outmsgs[OPORT_Synapse] = new SynapseMessage (0, dram_msg->val32, dram_msg->val16);
-            outmsgs[OPORT_TSparity] = new SignalMessage (0, ts_parity);
-            outmsgs[OPORT_Sel] = new SelectMessage (0, dram_msg->target_idx); 
-            DEBUG_PRINT ("[AEC] Send synapse data to chip");
+            uint32_t chip_idx = dram_msg->dest_idx;
+            outmsgs[OPORT_Synapse] = new SynapseMessage (chip_idx, dram_msg->val32, dram_msg->val16);
+            outmsgs[OPORT_TSparity] = new SignalMessage (chip_idx, ts_parity);
+            outmsgs[OPORT_Sel] = new SelectMessage (chip_idx, dram_msg->target_idx); 
+            DEBUG_PRINT ("[AEC] Send synapse data to chip %u (idx %u)"
+                    , chip_idx, dram_msg->val16);
         }
 
         if (is_idle_)

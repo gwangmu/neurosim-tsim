@@ -34,15 +34,17 @@ private:
     uint32_t entry_cnt;
     bool is_idle_;
     uint32_t req_counter;
-    DramMessage* dram_result;
+    
+    std::vector<DramMessage*> io_buffer; // For synch I/O clock and DRAM clock
+    uint8_t io_counter;
 
-    // Temp states
-    uint32_t counter; 
-
+    // DRAM specification
     DDR4* dram_spec_;
     Memory<DDR4, Controller> *dram_;
     uint32_t dram_size_;
+    uint8_t io_buf_size_;
 
+    // Internal function
     bool send(uint64_t addr);
     void callback(uint32_t reqID, uint32_t addr);
 };

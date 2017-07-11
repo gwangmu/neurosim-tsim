@@ -62,6 +62,10 @@ string Device::GetClock ()
     return clockname;
 }
 
+string Device::GetClockSet ()
+{
+
+}
 
 /* functions for 'Component' */
 bool Device::IsValidConnection (Port *port, Endpoint *endpt)

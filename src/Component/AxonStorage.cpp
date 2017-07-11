@@ -19,6 +19,7 @@ USING_TESTBENCH;
 AxonStorage::AxonStorage (string iname, Component* parent)
     : Module ("AxonStorage", iname, parent, 0)
 {
+    SetClock ("dram");
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
             Prototype<IndexMessage>::Get());
@@ -30,13 +31,13 @@ AxonStorage::AxonStorage (string iname, Component* parent)
     entry_cnt = 0;
     is_idle_ = false;
 
-    this->counter = 0;
 
     req_counter = 0;
 
     /* Initialize parameters */
     dram_size_ = GET_PARAMETER (dram_size);
-
+    io_buf_size_ = 4;
+    io_buffer.resize(io_buf_size_);
 
     /* Initialize DRAM (ramulator */
     string config_path;
@@ -104,7 +105,8 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_data] = Message::RESERVE();
     }
 
-    if(!is_idle_ && (entry_cnt==0) && (*outque_size==0))
+    if(!is_idle_ && (entry_cnt==0) && 
+            (*outque_size==0) && io_counter == 0)
     {
         DEBUG_PRINT ("[DRAM] DRAM is idle");
         is_idle_ = true;
@@ -118,10 +120,18 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
     }
     
     dram_->tick();
-    if(dram_result)
+    if(io_counter > 0)
     {
-        outmsgs[PORT_data] = dram_result;
-        dram_result = nullptr;
+        int idx = (io_buf_size_ - io_counter);
+        outmsgs[PORT_data] = io_buffer[idx];
+        
+        DEBUG_PRINT ("[DRAM] Send dram data to %u/%u/%u", 
+                io_buffer[idx]->dest_idx, 
+                io_buffer[idx]->target_idx, 
+                io_buffer[idx]->val16);
+        
+        io_buffer[idx] = nullptr;
+        io_counter--;
     }
 }
 
@@ -147,47 +157,50 @@ bool AxonStorage::send (uint64_t addr)
 void AxonStorage::callback (uint32_t reqID, uint32_t addr)
 {
     // Read data
-    const DramRegisterWord *word =
-        static_cast<const DramRegisterWord *>(GetRegister()->GetWord (addr));
-    uint64_t data = word->value;
-   
-    bool intra_board;
-    uint64_t val32;
-    uint32_t destrhsid;
-    uint8_t target_idx; 
-    uint16_t val16;
-    
-    // Synapse type
-    if(data & (1<<31))
+    for (int i=0; i<io_buf_size_; i++)
     {
-        intra_board = false;
-        val32 = (data >> 21) & (0xffffffff);
-        destrhsid = (data >> 18) & (0x7);
-        target_idx  = (data >> 16) & (0x7);
-        val16 = (data & (0x7fff));
-    }
-    else
-    {
-        SIM_ERROR ("Not Implemented. (Routing information)", GetFullName().c_str());
-    }
+        const DramRegisterWord *word =
+            static_cast<const DramRegisterWord *>(GetRegister()->GetWord (addr + i));
+        uint64_t data = word->value;
+       
+        bool intra_board;
+        uint64_t val32;
+        uint32_t destrhsid;
+        uint8_t target_idx; 
+        uint16_t val16;
+        
+        // Synapse type
+        if(data & (1<<31))
+        {
+            intra_board = false;
+            val32 = (data >> 21) & (0xffffffff);
+            destrhsid = (data >> 18) & (0x7);
+            target_idx  = (data >> 16) & (0x7);
+            val16 = (data & (0x7fff));
+        }
+        else
+        {
+            SIM_ERROR ("Not Implemented. (Routing information)", GetFullName().c_str());
+        }
 
-   
-    //outmsgs[PORT_data] = new DramMessage (destrhsid, val32, val16,
-    //        intra_board, target_idx);
-    if(dram_result == nullptr)
-    {
-        dram_result = new DramMessage (destrhsid, val32, val16,
-                intra_board, target_idx);
+       
+        //outmsgs[PORT_data] = new DramMessage (destrhsid, val32, val16,
+        //        intra_board, target_idx);
+        if(io_buffer[i] == nullptr)
+        {
+            io_buffer[i] = new DramMessage (destrhsid, val32, val16,
+                    intra_board, target_idx);
+        }
+        else
+        {
+            SIM_ERROR ("Dram output is overwritten", GetFullName().c_str());
+        }
     }
-    else
-    {
-        SIM_ERROR ("Dram output is overwritten", GetFullName().c_str());
-    }
+    io_counter = io_buf_size_;
 
     entry_cnt--;
 
     DEBUG_PRINT ("[DRAM] Receive dram request (reqID: %u, addr: %u)", reqID, addr);
-    DEBUG_PRINT ("[DRAM] Send dram data to %d", destrhsid);
 }
 
 
