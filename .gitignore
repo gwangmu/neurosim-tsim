@@ -12,3 +12,4 @@ bin/
 *.dot
 *.png
 makegv
+third_party/*

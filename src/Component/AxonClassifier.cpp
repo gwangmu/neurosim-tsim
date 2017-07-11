@@ -39,7 +39,7 @@ AxonClassifier::AxonClassifier (string iname, Component *parent)
     OPORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
 
-    is_idle_ = true;
+    is_idle_ = false;
 }
 
 void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs, 
@@ -64,6 +64,19 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[OPORT_Sel] = new SelectMessage (0, dram_msg->target_idx); 
             DEBUG_PRINT ("[AEC] Send synapse data to chip");
         }
+
+        if (is_idle_)
+        {
+            is_idle_ = false;
+            outmsgs[OPORT_idle] = new IntegerMessage (0);
+            DEBUG_PRINT ("[AEC] Axon entry classifier is busy");
+        }
+    }
+    else if(*outque_size == 0 && !is_idle_)
+    {
+        is_idle_ = true;
+        outmsgs[OPORT_idle] = new IntegerMessage (1);
+        DEBUG_PRINT ("[AEC] Axon entry classifier is idle");
     }
 
     SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[IPORT_TSparity]);
@@ -74,14 +87,4 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
     }
 
 
-    if(*outque_size == 0 && !is_idle_)
-    {
-        is_idle_ = true;
-        outmsgs[OPORT_idle] = new IntegerMessage (1);
-    }
-    else if (*outque_size != 0 && is_idle_)
-    {
-        is_idle_ = false;
-        outmsgs[OPORT_idle] = new IntegerMessage (0);
-    }
 }
