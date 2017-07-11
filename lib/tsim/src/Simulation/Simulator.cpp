@@ -324,11 +324,9 @@ bool Simulator::LoadTestbench ()
                 }
 
                 for (Device *device : cdom.devices)
-                {
                     drstates.insert (make_pair (device, 
                                 DeviceResolveState (device->GetNumInPorts(),
                                     device->GetNumCtrlPorts())));
-                }
             }
 
             task ("schedule rest of clock functions")
