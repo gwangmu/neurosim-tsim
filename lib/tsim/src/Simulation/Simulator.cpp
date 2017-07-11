@@ -295,7 +295,7 @@ bool Simulator::LoadTestbench ()
                         if (Device *device = dynamic_cast<Device *>(pathway->GetLHS(i).GetConnectedUnit()))
                         {
                             if (find (cdom.devices.begin(), cdom.devices.end(), device) == cdom.devices.end())
-                                prstates.find(pathway)->second.ResolvLHSMsg (i);
+                                prstates.find(pathway)->second.ResolveLHSMsg (i);
                         }
                     }
 
@@ -310,7 +310,7 @@ bool Simulator::LoadTestbench ()
                         if (Device *device = dynamic_cast<Device *>(pathway->GetRHS(i).GetConnectedUnit()))
                         {
                             if (find (cdom.devices.begin(), cdom.devices.end(), device) == cdom.devices.end())
-                                prstates.find(pathway)->second.ResolvRHSBlock (i);
+                                prstates.find(pathway)->second.ResolveRHSBlock (i);
                         }
                     }
 
@@ -324,9 +324,29 @@ bool Simulator::LoadTestbench ()
                 }
 
                 for (Device *device : cdom.devices)
+                {
                     drstates.insert (make_pair (device, 
                                 DeviceResolveState (device->GetNumInPorts(),
                                     device->GetNumCtrlPorts())));
+
+                    for (auto i = 0; i < device->GetNumInPorts(); i++)
+                    {
+                        Pathway *pathway = device->GetInEndpoint(i)->GetParent();
+
+                        // NOTE: resolved if INPUT path not in this domain
+                        if (find (cdom.pathways.begin(), cdom.pathways.end(), pathway) == cdom.pathways.end())
+                            drstates.find(device)->second.ResolveInputMsg (i);
+                    }
+
+                    for (auto i = 0; i < device->GetNumCtrlPorts(); i++)
+                    {
+                        Pathway *pathway = device->GetCtrlEndpoint(i)->GetParent();
+
+                        // NOTE: resolved if CONTROL path not in this domain
+                        if (find (cdom.pathways.begin(), cdom.pathways.end(), pathway) == cdom.pathways.end())
+                            drstates.find(device)->second.ResolveCtrlMsg (i);
+                    }
+                }
             }
 
             task ("schedule rest of clock functions")
