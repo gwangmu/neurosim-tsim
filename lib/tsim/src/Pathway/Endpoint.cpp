@@ -79,6 +79,10 @@ void Endpoint::SetCapacity (uint32_t capacity)
         DESIGN_ERROR ("RHS having TOGGLE message prototype does not make sense",
                 GetName().c_str());
 
+    if (capacity == 0 && parent->GetMsgPrototype()->BIT_WIDTH > parent->GetBitWidth())
+        DESIGN_FATAL ("pathway narrower than message width cannot have capacity=0 endpoint",
+                GetName().c_str());
+
     this->capacity = capacity;
 }
 

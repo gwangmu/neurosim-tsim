@@ -36,8 +36,8 @@ public:
 
 protected:  
     /* Called by 'Unit' */
-    virtual void OnCreatePort (Port &newport) final;
-    virtual bool IsValidConnection (Port *port, Endpoint *endpt) final;
+    virtual void OnCreatePort (Port &newport);
+    virtual bool IsValidConnection (Port *port, Endpoint *endpt);
 
     /* Called by this 'Module' */
     virtual void Operation (Message **inmsgs, Message **outmsgs, 

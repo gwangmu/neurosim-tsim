@@ -174,6 +174,8 @@ private:
     // connection
     Connection conn;
     Message *msgproto;
+    uint32_t cycles_per_msg;
+    uint32_t wait_cycles;
 
     // endpoints
     struct
