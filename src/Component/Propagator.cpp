@@ -32,24 +32,27 @@ Propagator::Propagator (string iname, Component *parent)
     : Component ("Propagator", iname, parent)
 {
     /** Parameters **/
-    int dram_outque_size = 32;
     int dram_size = 4096;
+    int dram_io_buf_size = 4;
+    int dram_outque_size = 64 * dram_io_buf_size;
 
     /** Components **/
    
     /** Modules **/
     Module *axon_receiver = new AxonMetaRecv ("axon_meta_receiver", this);
-    Module *axon_streamer = new AxonStreamer ("axon_streamer", this);
+    Module *axon_streamer = new AxonStreamer ("axon_streamer", this, dram_io_buf_size);
 
     Module *axon_classifier = new AxonClassifier ("axon_classifier", this);
-    Module *axon_storage = new AxonStorage ("axon_storage", this); 
+    Module *axon_storage = new AxonStorage ("axon_storage", this, dram_io_buf_size, dram_outque_size); 
 
     AndGate *prop_idle = new AndGate ("prop_idle", this, 4); 
 
     /** Module & Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
-    
+
+    INFO_PRINT ("[Prop] AEC %p", axon_classifier);
+
 
     // Wires
     Wire *axon_data = new Wire (this, conattr, Prototype<AxonMessage>::Get());

@@ -50,12 +50,10 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
 
     if (spk_inst)
     {
-        DEBUG_PRINT ("[NB] Spike instruction received");
+        INFO_PRINT ("[NB] Spike instruction received");
 
         spike_trace_.clear();
         spike_trace_.assign (spk_inst->spike_idx.begin(), spk_inst->spike_idx.end());
-
-        DEBUG_PRINT ("SPIKE TRACE - len %zu %zu", spk_inst->spike_idx.size(), spike_trace_.size());
     }
 
     // Add job in pipeline
@@ -69,13 +67,12 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         
 
         outmsgs[PORT_out] = new NeuronBlockOutMessage (0, neuron_idx, is_spike);
-        DEBUG_PRINT ("%p", outmsgs[PORT_out]);
         outmsgs[OPORT_waddr] = new IndexMessage (0, neuron_idx);
         
         State s = 0;
         outmsgs[OPORT_wdata] = new IndexMessage (0, s);
 
-        DEBUG_PRINT ("[NB] Start %uth neuron dynamics", neuron_idx);
+        INFO_PRINT ("[NB] Start %uth neuron dynamics", neuron_idx);
         
         if(is_idle_)
             outmsgs[OPORT_idle] = new SignalMessage (0, false);
@@ -92,7 +89,7 @@ void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
             is_idle_ = true;
             GetScript()->NextSection();
 
-            DEBUG_PRINT ("[NB] NB is idle. Process next section");
+            INFO_PRINT ("[NB] NB is idle. Process next section");
         }
         
         idle_time_++;

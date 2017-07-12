@@ -19,7 +19,7 @@ using namespace std;
 class AxonStorage: public Module
 {
 public:
-    AxonStorage (string iname, Component *parent);
+    AxonStorage (string iname, Component *parent, uint8_t io_buf_size, uint32_t dram_outque_size);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             const uint32_t *outque_size, Instruction *instr);
 
@@ -43,6 +43,7 @@ private:
     Memory<DDR4, Controller> *dram_;
     uint32_t dram_size_;
     uint8_t io_buf_size_;
+    uint32_t outque_size_;
 
     // Internal function
     bool send(uint64_t addr);

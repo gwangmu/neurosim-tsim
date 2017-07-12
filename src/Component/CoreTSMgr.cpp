@@ -47,27 +47,28 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     if(nbc_msg)
     {
-        DEBUG_PRINT ("[CoTS] NB Controller is end? %d", nbc_msg->value);
+        INFO_PRINT ("[CoTS] NB Controller is end? %d", nbc_msg->value);
         state[NBC] = nbc_msg->value;
     }
     if(nb_msg)
     {
-        DEBUG_PRINT ("[CoTS] NeuronBlock is end? %d", nb_msg->value);
+        INFO_PRINT ("[CoTS] NeuronBlock is end? %d", nb_msg->value);
         state[NB] = nb_msg->value;
     }
     if(amq_msg)
     {
-        DEBUG_PRINT ("[CoTS] Axon metadat Queue is end? %d", amq_msg->value);
+        if(state[AMQ] != amq_msg->value)
+            INFO_PRINT ("[CoTS] Axon metadat Queue is end? %d", amq_msg->value);
         state[AMQ] = amq_msg->value;
     }
     if(acc_msg)
     {
-        DEBUG_PRINT ("[CoTS] Accumulator is end? %d", acc_msg->value);
+        INFO_PRINT ("[CoTS] Accumulator is end? %d", acc_msg->value);
         state[Acc] = acc_msg->value;
     }
     if(sdq_msg)
     {
-        DEBUG_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
+        INFO_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
         state[SDQ] = sdq_msg->value;
     }
 
@@ -76,7 +77,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     bool dynfin = state[NBC] && state[NB] && state[AMQ];
     if(!is_dynfin && dynfin)
     {
-        DEBUG_PRINT ("[CoTS] Dynamics finished");
+        INFO_PRINT ("[CoTS] Dynamics finished");
         outmsgs[PORT_DynFin] = new IntegerMessage (1);
         is_dynfin = true;
     }
@@ -91,7 +92,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     if(parity_msg)
     {
         next_tsparity_ = parity_msg->value;
-        DEBUG_PRINT ("[CoTS] Update TS parity to %d", next_tsparity_);
+        INFO_PRINT ("[CoTS] Update TS parity to %d", next_tsparity_);
     }
 
     if(cur_tsparity_ != next_tsparity_)
@@ -106,7 +107,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_TSparity] = new SignalMessage (-1, cur_tsparity_);
 
             // Initiate Neuron Block Controller, change its state
-            DEBUG_PRINT ("[CoTS] Update Core TS parity to %d", cur_tsparity_);
+            INFO_PRINT ("[CoTS] Update Core TS parity to %d", cur_tsparity_);
             state[NBC] = false;
         }
     }

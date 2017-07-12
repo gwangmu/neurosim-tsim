@@ -47,11 +47,11 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         uint32_t weight = syn_msg->weight;
         uint16_t idx = syn_msg->idx;
        
-        DEBUG_PRINT("[SDQ] Receive synapse data");
+        INFO_PRINT("[SDQ] Receive synapse data");
 
         if(unlikely((synTS != coreTS && synTS_msg->value == coreTS)))
         {
-            DEBUG_PRINT ("[SDQ] Fail. coreTS: %d, synTS: %d, msgTS: %d", 
+            INFO_PRINT ("[SDQ] Fail. coreTS: %d, synTS: %d, msgTS: %d", 
                     coreTS, synTS, synTS_msg->value);
             SIM_ERROR ("Order of synapse data is broken", GetFullName().c_str());
             return;
@@ -60,25 +60,25 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         synTS = synTS_msg->value;
         if(synTS == coreTS)
         {
-            DEBUG_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
+            INFO_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
             outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
     
             if (is_empty)
             {
                 is_empty = false;
-                DEBUG_PRINT ("[SDQ] Synapse Data queue has data");
+                INFO_PRINT ("[SDQ] Synapse Data queue has data");
 
                 outmsgs[OPORT_Empty] = new IntegerMessage (0);
             }
             
             // if(internal_queue_.empty())
             // {
-            //     DEBUG_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
+            //     INFO_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
             //     outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
             // }
             // else
             // {
-            //     // DEBUG_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
+            //     // INFO_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
             //     //         coreTS, synTS);
 
             //     // SynData sd;
@@ -102,7 +102,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
 
             // internal_queue_.push_back(sd);
             
-            DEBUG_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
+            INFO_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
                      coreTS, synTS);
             syn_msg = nullptr; 
         }
@@ -118,7 +118,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
     {
         coreTS = coreTS_msg->value;
         synTS = coreTS;
-        DEBUG_PRINT("[SDQ] Update TS parity (%d)", coreTS);
+        INFO_PRINT("[SDQ] Update TS parity (%d)", coreTS);
     }
 
     // if ((coreTS == synTS) && !internal_queue_.empty())
@@ -134,7 +134,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         if(outmsgs[OPORT_Acc] == nullptr)
         {
             is_empty = true;
-            DEBUG_PRINT ("[SDQ] Axon metatda queue is empty");
+            INFO_PRINT ("[SDQ] Axon metatda queue is empty");
 
             outmsgs[OPORT_Empty] = new IntegerMessage (1);
         }

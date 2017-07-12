@@ -164,15 +164,17 @@ void Module::PreClock (PERMIT(Simulator))
                 if (!outport.endpt->IsSelectedLHSOfThisCycle ()
                         || outport.endpt->IsOverloaded ())
                 {
-                    DEBUG_PRINT("%s is stalled (capacity %d)",
-                            outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity());
+                    INFO_PRINT("[FW] %s is stalled (capacity %d) (condition %d || %d)",
+                            outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity(),
+                            !outport.endpt->IsSelectedLHSOfThisCycle (), outport.endpt->IsOverloaded()
+                            );
                     stalled = true;
                     break;
                 }
             }
             else if (outport.endpt->IsFull ())
             {
-                DEBUG_PRINT("%s is full (stall)", GetFullName().c_str());
+                INFO_PRINT("[FW] %s is full (stall)", GetFullName().c_str());
                 stalled = true;
                 ecount.oport_full[p]++;
                 break;

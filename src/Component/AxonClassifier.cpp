@@ -20,6 +20,8 @@ using namespace std;
 AxonClassifier::AxonClassifier (string iname, Component *parent)
     : Module ("AxonClassifier", iname, parent, 1)
 {
+    SetClock ("dram");
+    
     IPORT_Dram = CreatePort ("dram", Module::PORT_INPUT,
             Prototype<DramMessage>::Get());
     IPORT_TSparity = CreatePort ("ts_parity", Module::PORT_INPUT,
@@ -46,6 +48,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         const uint32_t *outque_size, Instruction *instr)
 {
     DramMessage *dram_msg = static_cast<DramMessage*>(inmsgs[IPORT_Dram]);
+
     if(dram_msg)
     {
         bool is_board = dram_msg->intra_board;
@@ -54,7 +57,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         {
             outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16);
             outmsgs[OPORT_BoardID] = new SelectMessage (0, dram_msg->target_idx); 
-            DEBUG_PRINT ("[AEC] Send routing information to controller");
+            INFO_PRINT ("[AEC] Send routing information to controller");
         }
         else
         {
@@ -62,7 +65,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[OPORT_Synapse] = new SynapseMessage (chip_idx, dram_msg->val32, dram_msg->val16);
             outmsgs[OPORT_TSparity] = new SignalMessage (chip_idx, ts_parity);
             outmsgs[OPORT_Sel] = new SelectMessage (chip_idx, dram_msg->target_idx); 
-            DEBUG_PRINT ("[AEC] Send synapse data to chip %u (idx %u)"
+            INFO_PRINT ("[AEC] Send synapse data to chip %u (idx %u)"
                     , chip_idx, dram_msg->val16);
         }
 
@@ -70,21 +73,21 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         {
             is_idle_ = false;
             outmsgs[OPORT_idle] = new IntegerMessage (0);
-            DEBUG_PRINT ("[AEC] Axon entry classifier is busy");
+            INFO_PRINT ("[AEC] Axon entry classifier is busy");
         }
     }
     else if(*outque_size == 0 && !is_idle_)
     {
         is_idle_ = true;
         outmsgs[OPORT_idle] = new IntegerMessage (1);
-        DEBUG_PRINT ("[AEC] Axon entry classifier is idle");
+        INFO_PRINT ("[AEC] Axon entry classifier is idle");
     }
 
     SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[IPORT_TSparity]);
     if(parity_msg)
     {
         ts_parity = parity_msg->value;
-        DEBUG_PRINT ("[AEC] Update TS parity");
+        INFO_PRINT ("[AEC] Update TS parity");
     }
 
 

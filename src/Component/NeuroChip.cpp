@@ -94,7 +94,6 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     }
     
     
-    ExportPort ("Axon", axon_transmitter, "axon_out");
     
     
     for (int i=0; i<num_cores; i++)
@@ -102,6 +101,7 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
 
     for (int i=0; i<num_propagators; i++)
     {
+        ExportPort ("Axon" + to_string(i), axon_transmitter, "axon_out" + to_string(i));
         ExportPort ("SynapseData" + to_string(i), syn_distributor, "syn_in" + to_string(i));
         ExportPort ("SynCidx" + to_string(i), syn_distributor, "syn_cidx" + to_string(i));
         ExportPort ("SynTS" + to_string(i), syn_distributor, "syn_ts_in" + to_string(i));

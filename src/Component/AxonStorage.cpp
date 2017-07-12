@@ -16,7 +16,7 @@
 
 USING_TESTBENCH;
 
-AxonStorage::AxonStorage (string iname, Component* parent)
+AxonStorage::AxonStorage (string iname, Component* parent, uint8_t io_buf_size, uint32_t dram_outque_size)
     : Module ("AxonStorage", iname, parent, 0)
 {
     SetClock ("dram");
@@ -36,7 +36,9 @@ AxonStorage::AxonStorage (string iname, Component* parent)
 
     /* Initialize parameters */
     dram_size_ = GET_PARAMETER (dram_size);
-    io_buf_size_ = 4;
+   
+    this->outque_size_ = dram_outque_size;
+    this->io_buf_size_ = io_buf_size;
     io_buffer.resize(io_buf_size_);
 
     /* Initialize DRAM (ramulator */
@@ -54,8 +56,6 @@ AxonStorage::AxonStorage (string iname, Component* parent)
     ramulator::DDR4::Org org = ramulator::DDR4::Org::DDR4_4Gb_x8;
     ramulator::DDR4::Speed speed = ramulator::DDR4::Speed::DDR4_2400R;
 
-    DEBUG_PRINT("Make DDR4 instance (org %d, speed %d)",
-            int(org), int(speed));
     dram_spec_ = new DDR4 (org, speed);
     
     int C = configs.get_channels(), R = configs.get_ranks();
@@ -63,7 +63,6 @@ AxonStorage::AxonStorage (string iname, Component* parent)
     dram_spec_->set_channel_number(C);
     dram_spec_->set_rank_number(R);
     
-    DEBUG_PRINT("Make DDR4 controller");
     std::vector<Controller<DDR4>*>ctrls;
     for(int c=0; c < C; c++)
     {
@@ -76,9 +75,7 @@ AxonStorage::AxonStorage (string iname, Component* parent)
 
     dram_ = new Memory<DDR4, Controller> (configs, ctrls);
 
-    DEBUG_PRINT ("[DRAM] Initialize %s DRAM", standard.c_str());
-
-    /* DRAM data */
+    INFO_PRINT ("[DRAM] Initialize %s DRAM", standard.c_str());
     Register::Attr regattr (64, dram_size_);
     SetRegister (new DramFileRegister (Register::SRAM, regattr));
 }
@@ -93,28 +90,27 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
     if(raddr_msg)
     {
         uint32_t read_addr = raddr_msg->value;
-        entry_cnt++;
 
-        DEBUG_PRINT("[DRAM] Receive read request");
-
-        if(!send (read_addr))
-        {
+        if(((entry_cnt + io_buf_size_) > outque_size_) || (!send(read_addr)))
             inmsgs[PORT_addr] = nullptr;
-        }
         else
+        {
+            INFO_PRINT("[DRAM] Receive read request %d", entry_cnt);
             outmsgs[PORT_data] = Message::RESERVE();
+            entry_cnt += io_buf_size_;
+        }
     }
 
     if(!is_idle_ && (entry_cnt==0) && 
             (*outque_size==0) && io_counter == 0)
     {
-        DEBUG_PRINT ("[DRAM] DRAM is idle");
+        INFO_PRINT ("[DRAM] DRAM is idle");
         is_idle_ = true;
         outmsgs[PORT_idle] = new IntegerMessage (1);
     }
     else if(is_idle_ && (entry_cnt != 0))
     {
-        DEBUG_PRINT ("[DRAM] DRAM is busy");
+        INFO_PRINT ("[DRAM] DRAM is busy");
         is_idle_ = false;
         outmsgs[PORT_idle] = new IntegerMessage (0);
     }
@@ -123,15 +119,21 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
     if(io_counter > 0)
     {
         int idx = (io_buf_size_ - io_counter);
-        outmsgs[PORT_data] = io_buffer[idx];
         
-        DEBUG_PRINT ("[DRAM] Send dram data to %u/%u/%u", 
-                io_buffer[idx]->dest_idx, 
-                io_buffer[idx]->target_idx, 
-                io_buffer[idx]->val16);
-        
-        io_buffer[idx] = nullptr;
+        if(io_buffer[idx] != nullptr)
+        {
+            outmsgs[PORT_data] = io_buffer[idx];
+            
+            INFO_PRINT ("[DRAM] Send dram data to %u/%u/%u", 
+                    io_buffer[idx]->dest_idx, 
+                    io_buffer[idx]->target_idx, 
+                    io_buffer[idx]->val16);
+            INFO_PRINT ("[DRAM] outque %u/%u", *outque_size, outque_size_);
+
+            io_buffer[idx] = nullptr;
+        }
         io_counter--;
+        entry_cnt--;
     }
 }
 
@@ -147,7 +149,7 @@ bool AxonStorage::send (uint64_t addr)
 
     if(dram_->send(req))
     {
-        DEBUG_PRINT ("[DRAM] Send dram request (ID: %u, addr: %lu)", reqID, addr);
+        INFO_PRINT ("[DRAM] Send dram request (ID: %u, addr: %lu)", reqID, addr);
         return true;
     }
     else
@@ -162,7 +164,10 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
         const DramRegisterWord *word =
             static_cast<const DramRegisterWord *>(GetRegister()->GetWord (addr + i));
         uint64_t data = word->value;
-       
+      
+        bool valid = (data >> 63) & 1;
+        if(!valid) continue;
+
         bool intra_board;
         uint64_t val32;
         uint32_t destrhsid;
@@ -170,16 +175,20 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
         uint16_t val16;
         
         // Synapse type
-        if(data & (1<<31))
+        bool syn_type = (data >> 62) & 1;
+        if(!syn_type)
         {
             intra_board = false;
             val32 = (data >> 21) & (0xffffffff);
             destrhsid = (data >> 18) & (0x7);
-            target_idx  = (data >> 16) & (0x7);
+            target_idx  = (data >> 15) & (0x7);
             val16 = (data & (0x7fff));
+
+            INFO_PRINT ("[DRAM] destination %u/%u/%u", destrhsid, target_idx, val16);
         }
         else
         {
+            INFO_PRINT ("[DRAM] Data: %lu, %lu", data, data>>63);
             SIM_ERROR ("Not Implemented. (Routing information)", GetFullName().c_str());
         }
 
@@ -198,9 +207,7 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
     }
     io_counter = io_buf_size_;
 
-    entry_cnt--;
-
-    DEBUG_PRINT ("[DRAM] Receive dram request (reqID: %u, addr: %u)", reqID, addr);
+    INFO_PRINT ("[DRAM] Receive dram request (reqID: %u, addr: %u)", reqID, addr);
 }
 
 

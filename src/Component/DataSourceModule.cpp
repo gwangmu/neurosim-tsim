@@ -38,7 +38,7 @@ void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs,
     uint32_t instrval = (ininstr ? ininstr->data3 : 0);
 
     if (ininstr)
-        DEBUG_PRINT ("instruction received (%s, %s, %u)",
+        INFO_PRINT ("instruction received (%s, %s, %u)",
                 ininstr->data1.c_str(), ininstr->data2.c_str(), ininstr->data3);
 
     //State s;
@@ -47,7 +47,7 @@ void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs,
     
     if (is_idle)
     {
-        DEBUG_PRINT ("[Src] Generate signal 0");
+        INFO_PRINT ("[Src] Generate signal 0");
         outmsgs[PORT_DATAOUT] = new SignalMessage (-1, false);
         is_idle = false;
     }
@@ -56,7 +56,7 @@ void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs,
     // NOTE: you can call 'NextSection' anywhere within 'Operation'
     if (counter == 10)
     {
-        DEBUG_PRINT ("proceed to next section");
+        INFO_PRINT ("proceed to next section");
         GetScript()->NextSection ();
     }
 }

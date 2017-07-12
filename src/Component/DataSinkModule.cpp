@@ -39,7 +39,7 @@ void DataSinkModule<M, T>::Operation (Message **inmsgs, Message **outmsgs,
     if (inmsg) 
     {
         recvdata = inmsg->value;
-        DEBUG_PRINT ("[Sink] val = %u", recvdata);
+        INFO_PRINT ("[Sink] val = %u", recvdata);
     }
 }
 

@@ -51,14 +51,14 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
 
     if(parity_msg)
     {
-        DEBUG_PRINT ("[NBC] Receive TSParity. Reset NB controller");
+        INFO_PRINT ("[NBC] Receive TSParity. Reset NB controller");
         ts_parity_ = parity_msg->value;
         read_idx_counter_ = 0;
         nb_idx_counter_ = 0;
         
         if(is_finish_)
         {
-            DEBUG_PRINT("[NBC] Start NB controller");
+            INFO_PRINT("[NBC] Start NB controller");
             outmsgs[OPORT_End] = new SignalMessage(0, false);
             is_finish_ = false;
         }
@@ -66,11 +66,11 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
 
     if(state_msg && deltaG_msg)
     {
-        DEBUG_PRINT ("[NBC] Receive state/delta message from SRAM");
+        INFO_PRINT ("[NBC] Receive state/delta message from SRAM");
         state_reg = state_msg->value;
         deltaG_reg = deltaG_msg->value;
         
-        DEBUG_PRINT ("[NBC] Initiate neuron block (Nidx: %d)", nb_idx_counter_);
+        INFO_PRINT ("[NBC] Initiate neuron block (Nidx: %d)", nb_idx_counter_);
         outmsgs[OPORT_NB] = new NeuronBlockInMessage (0, nb_idx_counter_, state_reg, deltaG_reg);
 
         nb_idx_counter_++;
@@ -78,7 +78,7 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
 
         if (nb_idx_counter_ == max_idx_)
         {
-            DEBUG_PRINT ("[NBC] Finish controller jobs");
+            INFO_PRINT ("[NBC] Finish controller jobs");
             outmsgs[OPORT_End] = new SignalMessage(0, true);
             is_finish_ = true;
         }
@@ -91,7 +91,7 @@ void NBController::Operation (Message **inmsgs, Message **outmsgs, const uint32_
 
     if(read_idx_counter_ != max_idx_ && !is_finish_)
     {
-        DEBUG_PRINT ("[NBC] Read Reqest");
+        INFO_PRINT ("[NBC] Read Reqest");
         outmsgs[OPORT_sSRAM] = new IndexMessage (0, read_idx_counter_);
         outmsgs[OPORT_dSRAM] = new IndexMessage (0, read_idx_counter_);
         read_idx_counter_++;

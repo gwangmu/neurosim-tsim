@@ -38,7 +38,7 @@ void StateSRAM::Operation (Message **inmsgs, Message **outmsgs,
         State value = 0;
         outmsgs[RPORT_data] = new StateMessage (0, value);
 
-        DEBUG_PRINT("[SRAM] Receive read request, and send message");
+        INFO_PRINT("[StSRAM] Receive read request, and send message");
     }
 
 
@@ -48,7 +48,7 @@ void StateSRAM::Operation (Message **inmsgs, Message **outmsgs,
 
     if(waddr_msg && wdata_msg)
     {
-        DEBUG_PRINT("[SRAM] Receive write request");
+        INFO_PRINT("[StSRAM] Receive write request");
         uint32_t write_addr = waddr_msg->value;
     }
     else if (unlikely (waddr_msg || wdata_msg))

@@ -50,7 +50,7 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
     {
         bool val = fin_msg->value;
         if(!dyn_fin && val)
-            DEBUG_PRINT("[TSM] Dynamics Finished, %p", fin_msg);
+            INFO_PRINT("[TSM] Dynamics Finished, %p", fin_msg);
         
         dyn_fin = (val != 0)? 1:0;
         is_finish = dyn_fin && prop_idle;
@@ -61,11 +61,11 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
 
         if(!prop_idle && val)
         {
-            DEBUG_PRINT("[TSM] Propagator is idle, %p", idle_msg);
+            INFO_PRINT("[TSM] Propagator is idle, %p", idle_msg);
         }
         else if (prop_idle && !val)
         {
-            DEBUG_PRINT("[TSM] Propagator is busy, %p", idle_msg);
+            INFO_PRINT("[TSM] Propagator is busy, %p", idle_msg);
         }
         
         prop_idle = (val != 0)? 1:0;
@@ -82,12 +82,12 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
             return;
         }
         
-        DEBUG_PRINT ("[TSM] Get remote TS end signal");
+        INFO_PRINT ("[TSM] Get remote TS end signal");
     }
 
     if (is_finish && is_start)
     {
-        DEBUG_PRINT ("[TSM] The chip is finished");
+        INFO_PRINT ("[TSM] The chip is finished");
         outmsgs[OPORT_TSend] = new SignalMessage (-1, true);
         end_counter++;
     }
@@ -105,8 +105,8 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         cur_timestep++;
         is_start = false;
 
-        DEBUG_PRINT ("[TSM] Current Timestep %d", cur_timestep);
-        DEBUG_PRINT ("[TSM] Update Timestep parity %d to %d", !ts_parity, ts_parity);
+        INFO_PRINT ("[TSM] Current Timestep %d", cur_timestep);
+        INFO_PRINT ("[TSM] Update Timestep parity %d to %d", !ts_parity, ts_parity);
 
     }
 }

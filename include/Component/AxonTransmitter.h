@@ -23,7 +23,10 @@ private:
     uint32_t IPORT_Axon;
 
     // Output port
-    uint32_t OPORT_Axon, OPORT_idle;
+    std::vector<uint32_t> OPORT_Axons;
+    uint32_t OPORT_idle;
 
     bool is_idle_;
+    uint32_t num_propagator;
+    uint32_t dram_size;
 };
