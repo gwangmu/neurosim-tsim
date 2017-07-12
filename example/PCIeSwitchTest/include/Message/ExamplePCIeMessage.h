@@ -10,7 +10,7 @@ using namespace std;
 struct ExamplePCIeMessage: public PCIeMessage
 {
 private:
-    static const uint32_t PAYLOAD_SIZE = 4 * 8;
+    static const uint32_t PAYLOAD_SIZE = 4;     // NOTE: in bytes
 
 public:
     // NOTE: must provide default constructor

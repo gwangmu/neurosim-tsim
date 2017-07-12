@@ -22,8 +22,7 @@ class PCIeSwitch: public Module
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             const uint32_t *outque_size, Instruction *instr);
 
-    uint64_t GetAccumTXDataSize () { return txsize; }
-    uint64_t GetAccumRXDataSize () { return rxsize; }
+    uint64_t GetAccumTrafficBytes () { return traffic_size_bits / 8; }
 
   private:
     // ports
@@ -41,6 +40,5 @@ class PCIeSwitch: public Module
     uint32_t next_idx;
 
     // report state
-    uint64_t txsize;
-    uint64_t rxsize;
+    uint64_t traffic_size_bits;
 };

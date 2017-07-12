@@ -19,6 +19,7 @@ class Device;
 class Pathway;
 class FileScript;
 class FileRegister;
+class PCIeSwitch;
 
 
 class Simulator final
@@ -119,6 +120,7 @@ private:
     vector<ClockDomain> cdomains;
     vector<FileScript *> fscrs;
     vector<FileRegister *> regs;
+    vector<PCIeSwitch *> pswitches;
 
     // Simulation states
     uint64_t curtime;

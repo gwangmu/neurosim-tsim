@@ -22,7 +22,7 @@ public:
 
     PCIeMessage (const char *clsname, uint32_t payload_size, 
             uint32_t devid, uint32_t busid = 0)
-        : Message (clsname, -1, payload_size + PACKET_HEADER_SIZE), 
+        : Message (clsname, -1, payload_size * 8 + PACKET_HEADER_SIZE), 
           BUS_ID (busid), DEV_ID (devid)
     {
         if (payload_size == 0)

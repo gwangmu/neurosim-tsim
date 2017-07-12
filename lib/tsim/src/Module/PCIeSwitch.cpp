@@ -44,7 +44,7 @@ PCIeSwitch::PCIeSwitch (string iname, Component *parent, PCIeMessage *msgproto,
     }
 
     this->busid = busid;
-    txsize = rxsize = 0;
+    traffic_size_bits = 0;
     next_idx = cur_idx = -1;
 }
 
@@ -93,6 +93,8 @@ void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs,
                 PRINT ("%s forwarded %p to %u (cur_idx: %u)", GetName().c_str(), pciemsg, pciemsg->DEV_ID, cur_idx);
                 pciemsg->MarkRecycle ();
                 outmsgs[PORT_TX[pciemsg->DEV_ID]] = pciemsg;
+
+                traffic_size_bits += pciemsg->BIT_WIDTH;
             }
             else
             {
