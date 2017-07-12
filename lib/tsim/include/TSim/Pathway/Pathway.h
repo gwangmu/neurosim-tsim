@@ -175,6 +175,10 @@ private:
     Connection conn;
     Message *msgproto;
 
+    // multi-cycle transfer
+    uint32_t cycles_per_msg;
+    uint32_t wait_cycles;
+
     // endpoints
     struct
     {

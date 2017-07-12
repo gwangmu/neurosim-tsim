@@ -66,6 +66,10 @@ Pathway::Pathway (const char *clsname, Component *parent,
                 clsname, (parent ? parent->GetFullName().c_str() : "(null)"));
     this->msgproto = msgproto;
 
+    cycles_per_msg = (msgproto->BIT_WIDTH == 0 ? 
+          0 : (msgproto->BIT_WIDTH - 1) / conattr.bitwidth);
+    wait_cycles = cycles_per_msg;
+
     InitReadyState ();
 
     SetConnectionAttr (conattr);
@@ -440,29 +444,36 @@ void Pathway::PostClock (PERMIT(Simulator))
 
         if (msg_to_assign)
         {
-            if (IsReady (msg_to_assign->DEST_RHS_ID))
+            if (likely (!wait_cycles))
             {
-                endpts.lhs[GetTargetLHSID ()].Pop ();
-
-                if (msg_to_assign->DEST_RHS_ID != -1)
-                    msg_to_assign->SetNumDestination (1);
-                else
-                    msg_to_assign->SetNumDestination (endpts.rhs.size());
-
-                conn.Assign (msg_to_assign);
-            }
-            else 
-            {
-                if (msg_to_assign->DEST_RHS_ID != -1)
+                if (IsReady (msg_to_assign->DEST_RHS_ID))
                 {
-                    ecount.rhs_blocked[msg_to_assign->DEST_RHS_ID]++;
+                    endpts.lhs[GetTargetLHSID ()].Pop ();
+
+                    if (msg_to_assign->DEST_RHS_ID != -1)
+                        msg_to_assign->SetNumDestination (1);
+                    else
+                        msg_to_assign->SetNumDestination (endpts.rhs.size());
+
+                    conn.Assign (msg_to_assign);
                 }
-                else
+                else 
                 {
-                    for (auto i = 0; i < endpts.rhs.size(); i++)
-                        ecount.rhs_blocked[i]++;
+                    if (msg_to_assign->DEST_RHS_ID != -1)
+                    {
+                        ecount.rhs_blocked[msg_to_assign->DEST_RHS_ID]++;
+                    }
+                    else
+                    {
+                        for (auto i = 0; i < endpts.rhs.size(); i++)
+                            ecount.rhs_blocked[i]++;
+                    }
                 }
+
+                wait_cycles = cycles_per_msg;
             }
+            else
+                wait_cycles--;
         }
     }
 

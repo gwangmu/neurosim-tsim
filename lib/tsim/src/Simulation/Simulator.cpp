@@ -3,6 +3,7 @@
 #include <TSim/Simulation/Testbench.h>
 #include <TSim/Base/Unit.h>
 #include <TSim/Module/Module.h>
+#include <TSim/Module/PCIeSwitch.h>
 #include <TSim/Device/Device.h>
 #include <TSim/Device/Gate.h>
 #include <TSim/Register/FileRegister.h>
@@ -81,6 +82,7 @@ bool Simulator::LoadTestbench ()
     vector<Device *> devices;
     vector<Pathway *> pathways;
     uint32_t nmodules = 0;
+    uint32_t npswitches = 0;
     uint32_t ndevices = 0;
     uint32_t ngates = 0;
     uint32_t npathways = 0;
@@ -113,6 +115,12 @@ bool Simulator::LoadTestbench ()
                     {
                         modules.push_back (module);
                         nmodules++;
+
+                        if (PCIeSwitch *pswitch = dynamic_cast<PCIeSwitch *>(module))
+                        {
+                            pswitches.push_back (pswitch);
+                            npswitches++;
+                        }
                     }
                     else if (Device *device = dynamic_cast<Device *>(unit))
                     {
@@ -726,6 +734,8 @@ void Simulator::ReportSimulationSummary ()
 #define STROKE PRINT ("%s", string(46, '-').c_str())
 #define ROW(f, v) PRINT (" %-29s %14s ", f, v)
         
+    double simtime = (double)curtime / 10E9;
+
     STROKE;
     ROW ("Result", "Value");
     STROKE;
@@ -750,10 +760,20 @@ void Simulator::ReportSimulationSummary ()
 
         ROW (fieldname, ("(" + cdom.name + ") " + to_string (cdom.ncycles)).c_str());
     }
+    
+    for (auto i = 0; i < pswitches.size(); i++)
+    {
+        double traffic = (double)pswitches[i]->GetAccumTrafficBytes() / (1 << 20) / simtime;
+        const char *fieldname = "";
+        if (i == 0) fieldname = "PCIe switch traffic (MB/s)";
+
+        ROW (fieldname, ("(" + pswitches[i]->GetInstanceName() + ") " + 
+                    to_string (traffic)).c_str());
+    }
 
     STROKE;
 
-    ROW ("Simulation time (s)", to_string((double)curtime / 10E9).c_str());
+    ROW ("Simulation time (s)", to_string(simtime).c_str());
 
     double energy = tb->GetTopComponent(KEY(Simulator))->GetAggregateConsumedEnergy ();
     ROW ("Estimated energy (J)", (energy == -1 ? "Unknown" : to_string(energy).c_str()));

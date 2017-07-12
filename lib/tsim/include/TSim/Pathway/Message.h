@@ -14,15 +14,19 @@ public:
     // For prototype creation. 
     // DO NOT USE FOR ORDINARY MESSAGE CREATION
     Message (const char *clsname)
-        : Metadata (clsname, ""), DEST_RHS_ID (-1), type (PLAIN), dispcount (-1) {}
+        : Metadata (clsname, ""), DEST_RHS_ID (-1), type (PLAIN), 
+          dispcount (-1), BIT_WIDTH (0) {}
 
-    Message (const char *clsname, uint32_t destrhsid)
-        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (PLAIN), dispcount (-1) {}
+    Message (const char *clsname, uint32_t destrhsid, uint32_t bitwidth = 0)
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (PLAIN), 
+          dispcount (-1), BIT_WIDTH (bitwidth) {}
 
-    Message (const char *clsname, Type type, uint32_t destrhsid)
-        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (type), dispcount (-1) {}
+    Message (const char *clsname, Type type, uint32_t destrhsid, uint32_t bitwidth = 0)
+        : Metadata (clsname, ""), DEST_RHS_ID (destrhsid), type (type), 
+          dispcount (-1), BIT_WIDTH (bitwidth) {}
 
-    uint32_t DEST_RHS_ID;     // NOTE: -1 to broadcast
+    uint32_t BIT_WIDTH;         // NOTE: 0 by default, CONST
+    uint32_t DEST_RHS_ID;       // NOTE: -1 to broadcast
 
 /*>> Below this is for OUTPUT RESERVATION <<*/
 public:
@@ -39,6 +43,12 @@ public:
 
 /*>> Below this is for MESSAGE DISPOSAL <<*/
 public:
+    // Only for Module
+    inline void MarkRecycle ()
+    {
+        dispcount += 2;
+    }
+
     // Only for Pathway
     inline void SetNumDestination (uint32_t n_dest) 
     { 

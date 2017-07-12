@@ -51,6 +51,12 @@
             iname, ##__VA_ARGS__);                        \
 } while (0)
 
+
+#define DESIGN_INFO(msg, iname, ...) do {               \
+    fprintf (stderr, "(%s) info: " msg "\n",          \
+            iname, ##__VA_ARGS__);                        \
+} while (0)
+
 #define PRINT(msg, ...) do {                               \
     fprintf (stdout, msg "\n", ##__VA_ARGS__);           \
 } while (0)
