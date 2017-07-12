@@ -48,7 +48,7 @@ void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs,
         int64_t value = 0;
         outmsgs[NPORT_rdata] = new DeltaGMessage (0, value);
 
-        DEBUG_PRINT("[DGSRAM] Receive read request, and send message");
+        INFO_PRINT("[DGSRAM] Receive read request, and send message");
     }
     
     raddr_msg = static_cast<IndexMessage*>(inmsgs[APORT_raddr]);
@@ -59,7 +59,7 @@ void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs,
         int64_t value = 0;
         outmsgs[APORT_rdata] = new DeltaGMessage (0, value);
 
-        DEBUG_PRINT("[DGSRAM] Receive read request, and send message");
+        INFO_PRINT("[DGSRAM] Receive read request, and send message");
     }
 
 
@@ -69,7 +69,7 @@ void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs,
 
     if(waddr_msg && wdata_msg)
     {
-        DEBUG_PRINT("[DGSRAM] Receive write request");
+        INFO_PRINT("[DGSRAM] Receive write request");
         uint32_t write_addr = waddr_msg->value;
     }
     else if (unlikely (waddr_msg || wdata_msg))
@@ -85,7 +85,7 @@ void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs,
         cur_parity = parity_msg->value;
         {
             // Reset current parity SRAM
-            DEBUG_PRINT ("[DGSRAM] Reset SRAM");
+            INFO_PRINT ("[DGSRAM] Reset SRAM");
         }
     }
 }

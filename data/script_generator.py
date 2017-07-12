@@ -59,7 +59,7 @@ def generate_syn (length):
 
         weight = int(random.random() * (1<<16))
 
-        data = (weight << 21) | (chip_idx << 18) | (core_idx << 15) | neuron_idx
+        data = (1 << 63) | (weight << 21) | (chip_idx << 18) | (core_idx << 15) | neuron_idx
         dram_data.append(data)
 
     return dram_data
@@ -70,8 +70,24 @@ def generate_meta(last_addr):
     
     meta_table = []
     dram_data = []
+
+    dram_idx = (last_addr / FLAGS.dram_size) + 1
+    if(dram_idx > FLAGS.propagator):
+        raise ValueError ("Small dram size")
+
     for n in range(FLAGS.neurons):
         length = np.random.binomial(num_neurons, sparsity)
+        
+        if ((last_addr + length) > dram_idx*FLAGS.dram_size):
+            offset = (dram_idx * FLAGS.dram_size) - last_addr
+            print ("last addr %d, offset %d, len %d" %(last_addr, offset, length))
+
+            last_addr += offset
+            for o in range(offset):
+                dram_data.append(0)
+
+            dram_idx += 1
+        
         meta_table.append((last_addr, length))
 
         dram_data += generate_syn (length) 
@@ -110,6 +126,13 @@ def meta_generator():
 
             f.close()
 
+    # dram_size = 1
+    # while (dram_size < (len(dram_info) // FLAGS.propagator)):
+    #     dram_size = dram_size * 2
+    # FLAGS.dram_size = dram_size
+
+    print ("Dram size: %d (require: %d)" %(FLAGS.dram_size, len(dram_info)//FLAGS.propagator))
+
     if(len(dram_info) > FLAGS.dram_size*FLAGS.propagator):
         raise ValueError ("dram_size error %d" %(len(dram_info)))
 
@@ -121,13 +144,12 @@ def meta_generator():
 
         for addr in range(FLAGS.dram_size):
             idx = i*FLAGS.dram_size + addr
-            if(idx >= len(dram_info)):
-                break
-                
-            f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, dram_info[idx]))
+            if(idx < len(dram_info)):
+                f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, dram_info[idx]))
+            else:
+                f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, 0))
 
         f.close() 
-            
 
 def spec_generator():
     f = open("simspec/neurosim.simspec", 'w')
@@ -152,8 +174,8 @@ def spec_generator():
                 %(i, i))
     
     f.write ("\n# Clock\n")
-    f.write ("CLOCK_PERIOD(main): 500\n")
-    f.write ("CLOCK_PERIOD(dram): 1000\n")
+    f.write ("CLOCK_PERIOD(main): 50\n")
+    f.write ("CLOCK_PERIOD(dram): 25\n")
     
     f.write ("\n# Parameters\n")
     f.write ("PARAMETER(num_neurons): %d\n" %(FLAGS.neurons))
@@ -167,7 +189,7 @@ def spec_generator():
 
 
 def main():
-    print "chips: ", FLAGS.chip, "cores: ", FLAGS.core
+    print "chips: ", FLAGS.chip, "cores: ", FLAGS.core, "propagators", FLAGS.propagator
     
     spike_generator()
     meta_generator()

@@ -49,7 +49,7 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         outmsgs[PORT_raddr] = new IndexMessage (0, syn_msg->idx);
         idx_queue.push_back(syn_msg->idx);
 
-        DEBUG_PRINT ("[Acc] Request deltaG (idx: %d)", syn_msg->idx);
+        INFO_PRINT ("[Acc] Request deltaG (idx: %d)", syn_msg->idx);
 
         if(is_idle_)
         {
@@ -65,7 +65,7 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
         idx_queue.pop_front();
 
         // Accumulation
-        DEBUG_PRINT ("[Acc] Accumulation (idx: %d)", idx);
+        INFO_PRINT ("[Acc] Accumulation (idx: %d)", idx);
         
         outmsgs[PORT_waddr] = new IndexMessage (0, idx);
         outmsgs[PORT_wdata] = new DeltaGMessage (0, 0);
@@ -73,7 +73,7 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
     else if (!is_idle_ && idx_queue.empty())
     {
         is_idle_ = true;
-        DEBUG_PRINT ("[Acc] Accumulator is idle");
+        INFO_PRINT ("[Acc] Accumulator is idle");
 
         outmsgs[PORT_idle] = new SignalMessage (0, true); 
     }
@@ -83,7 +83,7 @@ void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t
     if (parity_msg)
     {
         ts_parity = parity_msg->value;
-        DEBUG_PRINT ("[Acc] Update TS parity (%d)", ts_parity);
+        INFO_PRINT ("[Acc] Update TS parity (%d)", ts_parity);
     }  
 
 }

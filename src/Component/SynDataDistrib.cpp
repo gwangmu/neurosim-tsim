@@ -16,6 +16,8 @@ using namespace std;
 SynDataDistrib::SynDataDistrib (string iname, Component *parent, uint32_t num_propagator)
     : Module ("SynDataDistrib", iname, parent, 1)
 {
+    SetClock ("dram");
+    
     num_prop_ = num_propagator;;
     for (int i=0; i<num_prop_; i++)
     {
@@ -54,7 +56,7 @@ void SynDataDistrib::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[OPORT_Syn[i]] = new SynapseMessage (rhs, weight, idx);
             outmsgs[OPORT_TS[i]] = new SignalMessage (rhs, ts_msg->value);
             
-            DEBUG_PRINT ("[SDD] Distribute Synapse Data to %d", rhs);
+            INFO_PRINT ("[SDD] Distribute Synapse Data to %d", rhs);
         }
         else if (unlikely (syn_msg || sel_msg))
         {

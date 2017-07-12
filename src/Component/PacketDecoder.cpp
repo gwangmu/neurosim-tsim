@@ -36,12 +36,12 @@ void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs,
        PacketType type = pkt_msg->type;
        if(type == TSEND)
        {
-           DEBUG_PRINT ("[PkD] Receive remote TS end message");
+           INFO_PRINT ("[PkD] Receive remote TS end message");
            outmsgs[OPORT_TSEnd] = new SignalMessage (0, pkt_msg->value);
        }
        else if(type == AXON)
        {
-           DEBUG_PRINT ("[PkD] Receive Axon message");
+           INFO_PRINT ("[PkD] Receive Axon message");
            outmsgs[OPORT_Axon] = new AxonMessage (0, pkt_msg->value,
                    pkt_msg->val16);
        }

@@ -79,6 +79,19 @@
     #define DEBUG_PRINT(msg, ...)
 #endif
 
+#ifndef NINFO
+    #define INFO_PRINT(msg, ...) PRINT(msg, ##__VA_ARGS__)
+    #define SIM_DEBUG(msg, ...) do {                \
+        fprintf (stderr, "debug: (%s, line %d) "    \
+                msg "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+    } while(0)
+
+#else
+    #define INFO_PRINT(msg, ...)
+    #define SIM_DEBUG(msg, ...)
+#endif    
+
+
 #define macrotask(msg, ...) {                               \
         fprintf (stdout, msg "\n", ##__VA_ARGS__);            \
     }

@@ -103,7 +103,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     {
         for (int p=0; p<num_propagators; p++)
         {
-            neurochips[i]->Connect ("Axon", axon_data[p]->GetEndpoint (Endpoint::LHS, i));
+            neurochips[i]->Connect ("Axon" + to_string(p), axon_data[p]->GetEndpoint (Endpoint::LHS, i));
             axon_data[p]->GetEndpoint (Endpoint::LHS, i)->SetCapacity(1);
         }
 
@@ -141,6 +141,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
         
         propagators[i]->Connect ("BoardAxon", board_axon->GetEndpoint (Endpoint::LHS, i));
         propagators[i]->Connect ("BoardID", board_id->GetEndpoint (Endpoint::LHS, i));
+        board_axon->GetEndpoint (Endpoint::LHS, i)->SetCapacity (4);
+        board_id->GetEndpoint (Endpoint::LHS, i)->SetCapacity (4);
+        
         propagators[i]->Connect ("Idle", prop_idle[i]->GetEndpoint (Endpoint::LHS));
     
         syn_data[i]->GetEndpoint (Endpoint::LHS)->SetCapacity (axon_entry_queue_size);

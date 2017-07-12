@@ -1,6 +1,7 @@
 #include <Component/NeuroCore.h>
 
 #include <TSim/Pathway/Wire.h>
+#include <TSim/Pathway/RRFaninWire.h>
 #include <TSim/Pathway/FanoutWire.h>
 #include <TSim/Pathway/IntegerMessage.h>
 #include <TSim/Utility/Prototype.h>
@@ -108,14 +109,13 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     std::vector<Wire*> sdq_empty;
     for (int i=0; i<num_propagators; i++)
         sdq_empty.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
-    Wire *synapse_info = new Wire (this, conattr, Prototype<SynapseMessage>::Get());
+    RRFaninWire *synapse_info = new RRFaninWire (this, conattr, Prototype<SynapseMessage>::Get(), num_propagators);
 
     Wire *sdq_empty_and = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
 
     // Core Timestep Manager
     FanoutWire *core_TSParity = 
         new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 3 + num_propagators);
-
 
     /*******************************************************************************/
     /*** Connect modules ***/
@@ -182,11 +182,12 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     {
         syn_queue[i]->Connect("core_ts", core_TSParity->GetEndpoint (Endpoint::RHS, 3 + i)); 
         syn_queue[i]->Connect("empty", sdq_empty[i]->GetEndpoint (Endpoint::LHS));
-        syn_queue[i]->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS));
-        synapse_info->GetEndpoint (Endpoint::LHS)->SetCapacity (syn_queue_size);
+        syn_queue[i]->Connect("acc", synapse_info->GetEndpoint (Endpoint::LHS, i));
+        synapse_info->GetEndpoint (Endpoint::LHS, i)->SetCapacity (syn_queue_size);
 
         empty_and->Connect("input" + to_string(i), sdq_empty[i]->GetEndpoint (Endpoint::RHS));
     }
+    
     empty_and->Connect("output", sdq_empty_and->GetEndpoint (Endpoint::LHS));
 
     /*** Export port ***/    
@@ -194,7 +195,7 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     ExportPort ("AxonData", axon_queue, "axon");
     ExportPort ("CurTSParity", core_tsmgr, "curTS");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
-
+    
     for(int i=0; i<num_propagators; i++)
     {
         ExportPort ("SynData" + to_string(i), syn_queue[i], "syn");

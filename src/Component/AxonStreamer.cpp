@@ -41,7 +41,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
         read_addr_ = base_addr_;
         is_idle_ = false;        
         
-        DEBUG_PRINT("[AS] Start DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
+        INFO_PRINT("[AS] Start DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
 
         outmsgs[OPORT_idle] = new IntegerMessage (0);
     }
@@ -50,14 +50,14 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
 
     if(!is_idle_ && (read_addr_ < base_addr_ + ax_len_))
     {
-        DEBUG_PRINT ("[AS] Send read request");
+        INFO_PRINT ("[AS] Send read request");
         outmsgs[OPORT_Addr] = new IndexMessage (0, read_addr_);
         
         read_addr_ += read_bytes;
     }
     else if(!is_idle_)
     {
-        DEBUG_PRINT ("[AS] Finish DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
+        INFO_PRINT ("[AS] Finish DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
         is_idle_ = true;
         outmsgs[OPORT_idle] = new IntegerMessage (1);
     }

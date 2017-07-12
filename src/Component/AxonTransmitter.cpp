@@ -44,21 +44,22 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs,
 
     if(axon_msg)
     {
-        DEBUG_PRINT ("[AT] Receive axon message (addr %lu)", axon_msg->value);
+        INFO_PRINT ("[AT] Receive axon message (addr %lu)", axon_msg->value);
 
         uint8_t prop_idx = axon_msg->value / dram_size;
-        outmsgs[OPORT_Axons[prop_idx]] = new AxonMessage (0, axon_msg->value, axon_msg->len); 
+        uint32_t addr = axon_msg->value % dram_size;
+        outmsgs[OPORT_Axons[prop_idx]] = new AxonMessage (0, addr, axon_msg->len); 
         
         if (is_idle_)
         {
-            DEBUG_PRINT ("[AT] Axon metadata transmitter is busy");
+            INFO_PRINT ("[AT] Axon metadata transmitter is busy");
             is_idle_ = false;
             outmsgs[OPORT_idle] = new IntegerMessage (0);
         }
     }
     else if(!is_idle_ && *outque_size==0)
     {
-        DEBUG_PRINT ("[AT] Axon metadata transmitter is idle");
+        INFO_PRINT ("[AT] Axon metadata transmitter is idle");
         is_idle_ = true;
         outmsgs[OPORT_idle] = new IntegerMessage (1);
     }
