@@ -67,7 +67,7 @@ Pathway::Pathway (const char *clsname, Component *parent,
     this->msgproto = msgproto;
 
     cycles_per_msg = (msgproto->BIT_WIDTH == 0 ? 
-            0 : (msgproto->BIT_WIDTH - 1) / conattr.bitwidth);
+          0 : (msgproto->BIT_WIDTH - 1) / conattr.bitwidth);
     wait_cycles = cycles_per_msg;
 
     InitReadyState ();

@@ -43,6 +43,12 @@ public:
 
 /*>> Below this is for MESSAGE DISPOSAL <<*/
 public:
+    // Only for Module
+    inline void MarkRecycle ()
+    {
+        dispcount += 2;
+    }
+
     // Only for Pathway
     inline void SetNumDestination (uint32_t n_dest) 
     { 
