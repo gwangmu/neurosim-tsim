@@ -1,0 +1,284 @@
+(PCIeSwitch pswitch) info: resetting input queue size to 4..
+(PCIeSwitch pswitch) info: resetting output queue size to 4..
+(PCIeSwitch pswitch) info: resetting input queue size to 4..
+(PCIeSwitch pswitch) info: resetting output queue size to 4..
+(PCIeSwitch pswitch) info: resetting input queue size to 4..
+(PCIeSwitch pswitch) info: resetting output queue size to 4..
+(PCIeSwitch pswitch) info: resetting input queue size to 4..
+(PCIeSwitch pswitch) info: resetting output queue size to 4..
+Loading 'ExampleTestbench (noname)'..
+total 5 module(s), 0 device(s) (with 0 gate(s)), 8 pathway(s) found
+total 2 clock domain(s) formed
+
+< Scheduled Clock Functions (main) >
+----------------------------------------------------------
+ No.   Clock Function                                     
+----------------------------------------------------------
+   1   DataSourceModule datasource0.PreClock              
+   2   DataSourceModule datasource1.PreClock              
+   3   DataSourceModule datasource2.PreClock              
+   4   DataSourceModule datasource3.PreClock              
+   5   Wire datasource0.out-pswitch.rx0.PreClock          
+   6   Wire datasource1.out-pswitch.rx1.PreClock          
+   7   Wire datasource2.out-pswitch.rx2.PreClock          
+   8   Wire datasource3.out-pswitch.rx3.PreClock          
+   9   DataSourceModule datasource0.PostClock             
+  10   DataSourceModule datasource1.PostClock             
+  11   DataSourceModule datasource2.PostClock             
+  12   DataSourceModule datasource3.PostClock             
+  13   Wire datasource0.out-pswitch.rx0.PostClock         
+  14   Wire datasource1.out-pswitch.rx1.PostClock         
+  15   Wire datasource2.out-pswitch.rx2.PostClock         
+  16   Wire datasource3.out-pswitch.rx3.PostClock         
+----------------------------------------------------------
+
+< Scheduled Clock Functions (pcie) >
+----------------------------------------------------------
+ No.   Clock Function                                     
+----------------------------------------------------------
+   1   PCIeSwitch pswitch.PreClock                        
+   2   Wire pswitch.tx0-datasource0.in.PreClock           
+   3   Wire pswitch.tx1-datasource1.in.PreClock           
+   4   Wire pswitch.tx2-datasource2.in.PreClock           
+   5   Wire pswitch.tx3-datasource3.in.PreClock           
+   6   PCIeSwitch pswitch.PostClock                       
+   7   Wire pswitch.tx0-datasource0.in.PostClock          
+   8   Wire pswitch.tx1-datasource1.in.PostClock          
+   9   Wire pswitch.tx2-datasource2.in.PostClock          
+  10   Wire pswitch.tx3-datasource3.in.PostClock          
+----------------------------------------------------------
+
+total 0 file script(s), 0 file register(s) found
+Checking testbench validity..
+0 design error(s) and 10 design warning(s)
+0 clock error(s)
+
+< Design summary >
+----------------------------------------------
+ Specification                          Value 
+----------------------------------------------
+ Number of modules                          5 
+ Number of devices                          5 
+ Clock frequency (MHz)         (main) 250.000015 
+                               (pcie) 8000.000488 
+ Total SRAM size (KB)                    TODO 
+ Total FF size (KB)                      TODO 
+----------------------------------------------
+
+Initializing clocks..
+Starting simulation..
+Simulating 0.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d2050 (to: 1, value: 0)
+Simulating 1.001 ns..
+Simulating 2.001 ns..
+Simulating 3.001 ns..
+Simulating 4.000 ns..
+DataSourceModule datasource1 sended PCIe message 0x14d2220 (to: 2, value: 1)
+PCIeSwitch pswitch forwarded 0x14d2050 to 1 (cur_idx: 0)
+Simulating 5.001 ns..
+Simulating 6.001 ns..
+Simulating 7.001 ns..
+Simulating 8.000 ns..
+DataSourceModule datasource1 received PCIe message 0x14d2050 (from: 0, value: 0)
+DataSourceModule datasource2 sended PCIe message 0x14d2100 (to: 3, value: 2)
+PCIeSwitch pswitch forwarded 0x14d2220 to 2 (cur_idx: 1)
+Simulating 9.001 ns..
+Simulating 10.001 ns..
+Simulating 11.001 ns..
+Simulating 12.000 ns..
+DataSourceModule datasource2 received PCIe message 0x14d2220 (from: 1, value: 1)
+DataSourceModule datasource3 sended PCIe message 0x14d23d0 (to: 0, value: 3)
+PCIeSwitch pswitch forwarded 0x14d2100 to 3 (cur_idx: 2)
+Simulating 13.001 ns..
+Simulating 14.001 ns..
+Simulating 15.001 ns..
+Simulating 16.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d25d0 (to: 1, value: 4)
+DataSourceModule datasource3 received PCIe message 0x14d2100 (from: 2, value: 2)
+PCIeSwitch pswitch forwarded 0x14d23d0 to 0 (cur_idx: 3)
+Simulating 17.001 ns..
+Simulating 18.001 ns..
+Simulating 19.001 ns..
+Simulating 20.000 ns..
+DataSourceModule datasource0 received PCIe message 0x14d23d0 (from: 3, value: 3)
+DataSourceModule datasource1 sended PCIe message 0x14d2610 (to: 2, value: 5)
+PCIeSwitch pswitch forwarded 0x14d25d0 to 1 (cur_idx: 0)
+Simulating 21.001 ns..
+Simulating 22.001 ns..
+Simulating 23.001 ns..
+Simulating 24.000 ns..
+DataSourceModule datasource1 received PCIe message 0x14d25d0 (from: 0, value: 4)
+DataSourceModule datasource2 sended PCIe message 0x14d2ad0 (to: 3, value: 6)
+PCIeSwitch pswitch forwarded 0x14d2610 to 2 (cur_idx: 1)
+Simulating 25.001 ns..
+Simulating 26.001 ns..
+Simulating 27.001 ns..
+Simulating 28.000 ns..
+DataSourceModule datasource2 received PCIe message 0x14d2610 (from: 1, value: 5)
+DataSourceModule datasource3 sended PCIe message 0x14d2b10 (to: 0, value: 7)
+PCIeSwitch pswitch forwarded 0x14d2ad0 to 3 (cur_idx: 2)
+Simulating 29.001 ns..
+Simulating 30.001 ns..
+Simulating 31.001 ns..
+Simulating 32.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d2b80 (to: 1, value: 8)
+DataSourceModule datasource3 received PCIe message 0x14d2ad0 (from: 2, value: 6)
+PCIeSwitch pswitch forwarded 0x14d2b10 to 0 (cur_idx: 3)
+Simulating 33.001 ns..
+Simulating 34.001 ns..
+Simulating 35.001 ns..
+Simulating 36.000 ns..
+DataSourceModule datasource0 received PCIe message 0x14d2b10 (from: 3, value: 7)
+DataSourceModule datasource1 sended PCIe message 0x14d2bf0 (to: 2, value: 9)
+PCIeSwitch pswitch forwarded 0x14d2b80 to 1 (cur_idx: 0)
+Simulating 37.001 ns..
+Simulating 38.001 ns..
+Simulating 39.001 ns..
+Simulating 40.000 ns..
+DataSourceModule datasource1 received PCIe message 0x14d2b80 (from: 0, value: 8)
+DataSourceModule datasource2 sended PCIe message 0x14d2c60 (to: 3, value: 10)
+PCIeSwitch pswitch forwarded 0x14d2bf0 to 2 (cur_idx: 1)
+Simulating 41.001 ns..
+Simulating 42.001 ns..
+Simulating 43.001 ns..
+Simulating 44.000 ns..
+DataSourceModule datasource2 received PCIe message 0x14d2bf0 (from: 1, value: 9)
+DataSourceModule datasource3 sended PCIe message 0x14d2cd0 (to: 0, value: 11)
+PCIeSwitch pswitch forwarded 0x14d2c60 to 3 (cur_idx: 2)
+Simulating 45.001 ns..
+Simulating 46.001 ns..
+Simulating 47.001 ns..
+Simulating 48.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d2d40 (to: 1, value: 12)
+DataSourceModule datasource3 received PCIe message 0x14d2c60 (from: 2, value: 10)
+PCIeSwitch pswitch forwarded 0x14d2cd0 to 0 (cur_idx: 3)
+Simulating 49.001 ns..
+Simulating 50.001 ns..
+Simulating 51.001 ns..
+Simulating 52.000 ns..
+DataSourceModule datasource0 received PCIe message 0x14d2cd0 (from: 3, value: 11)
+DataSourceModule datasource1 sended PCIe message 0x14d2db0 (to: 2, value: 13)
+PCIeSwitch pswitch forwarded 0x14d2d40 to 1 (cur_idx: 0)
+Simulating 53.001 ns..
+Simulating 54.001 ns..
+Simulating 55.001 ns..
+Simulating 56.000 ns..
+DataSourceModule datasource1 received PCIe message 0x14d2d40 (from: 0, value: 12)
+DataSourceModule datasource2 sended PCIe message 0x14d2e20 (to: 3, value: 14)
+PCIeSwitch pswitch forwarded 0x14d2db0 to 2 (cur_idx: 1)
+Simulating 57.001 ns..
+Simulating 58.001 ns..
+Simulating 59.001 ns..
+Simulating 60.000 ns..
+DataSourceModule datasource2 received PCIe message 0x14d2db0 (from: 1, value: 13)
+DataSourceModule datasource3 sended PCIe message 0x14d2e90 (to: 0, value: 15)
+PCIeSwitch pswitch forwarded 0x14d2e20 to 3 (cur_idx: 2)
+Simulating 61.001 ns..
+Simulating 62.001 ns..
+Simulating 63.001 ns..
+Simulating 64.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d2f00 (to: 1, value: 16)
+DataSourceModule datasource3 received PCIe message 0x14d2e20 (from: 2, value: 14)
+PCIeSwitch pswitch forwarded 0x14d2e90 to 0 (cur_idx: 3)
+Simulating 65.001 ns..
+Simulating 66.001 ns..
+Simulating 67.001 ns..
+Simulating 68.000 ns..
+DataSourceModule datasource0 received PCIe message 0x14d2e90 (from: 3, value: 15)
+DataSourceModule datasource1 sended PCIe message 0x14d2f70 (to: 2, value: 17)
+PCIeSwitch pswitch forwarded 0x14d2f00 to 1 (cur_idx: 0)
+Simulating 69.001 ns..
+Simulating 70.001 ns..
+Simulating 71.001 ns..
+Simulating 72.000 ns..
+DataSourceModule datasource1 received PCIe message 0x14d2f00 (from: 0, value: 16)
+DataSourceModule datasource2 sended PCIe message 0x14d2fe0 (to: 3, value: 18)
+PCIeSwitch pswitch forwarded 0x14d2f70 to 2 (cur_idx: 1)
+Simulating 73.001 ns..
+Simulating 74.001 ns..
+Simulating 75.001 ns..
+Simulating 76.000 ns..
+DataSourceModule datasource2 received PCIe message 0x14d2f70 (from: 1, value: 17)
+DataSourceModule datasource3 sended PCIe message 0x14d3050 (to: 0, value: 19)
+PCIeSwitch pswitch forwarded 0x14d2fe0 to 3 (cur_idx: 2)
+Simulating 77.001 ns..
+Simulating 78.001 ns..
+Simulating 79.001 ns..
+Simulating 80.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d30c0 (to: 1, value: 20)
+DataSourceModule datasource3 received PCIe message 0x14d2fe0 (from: 2, value: 18)
+PCIeSwitch pswitch forwarded 0x14d3050 to 0 (cur_idx: 3)
+Simulating 81.001 ns..
+Simulating 82.001 ns..
+Simulating 83.001 ns..
+Simulating 84.000 ns..
+DataSourceModule datasource0 received PCIe message 0x14d3050 (from: 3, value: 19)
+DataSourceModule datasource1 sended PCIe message 0x14d3130 (to: 2, value: 21)
+PCIeSwitch pswitch forwarded 0x14d30c0 to 1 (cur_idx: 0)
+Simulating 85.001 ns..
+Simulating 86.001 ns..
+Simulating 87.001 ns..
+Simulating 88.000 ns..
+DataSourceModule datasource1 received PCIe message 0x14d30c0 (from: 0, value: 20)
+DataSourceModule datasource2 sended PCIe message 0x14d31a0 (to: 3, value: 22)
+PCIeSwitch pswitch forwarded 0x14d3130 to 2 (cur_idx: 1)
+Simulating 89.001 ns..
+Simulating 90.001 ns..
+Simulating 91.001 ns..
+Simulating 92.000 ns..
+DataSourceModule datasource2 received PCIe message 0x14d3130 (from: 1, value: 21)
+DataSourceModule datasource3 sended PCIe message 0x14d3210 (to: 0, value: 23)
+PCIeSwitch pswitch forwarded 0x14d31a0 to 3 (cur_idx: 2)
+Simulating 93.001 ns..
+Simulating 94.001 ns..
+Simulating 95.001 ns..
+Simulating 96.000 ns..
+DataSourceModule datasource0 sended PCIe message 0x14d3280 (to: 1, value: 24)
+DataSourceModule datasource3 received PCIe message 0x14d31a0 (from: 2, value: 22)
+PCIeSwitch pswitch forwarded 0x14d3210 to 0 (cur_idx: 3)
+Simulating 97.001 ns..
+Simulating 98.001 ns..
+Simulating 99.001 ns..
+Simulating 100.000 ns..
+DataSourceModule datasource0 received PCIe message 0x14d3210 (from: 3, value: 23)
+DataSourceModule datasource1 sended PCIe message 0x14d32f0 (to: 2, value: 25)
+Simulation reached time limit (100.000 ns)
+Simulation finished at 100.001 ns
+
+< Simulation summary >
+----------------------------------------------
+ Result                                 Value 
+----------------------------------------------
+ Execution time (s)                  0.000300 
+ Total SRAM read access                  TODO 
+ Total SRAM write access                 TODO 
+ Overall activity (%)               20.000000 
+ Number of cycles                   (main) 26 
+                                   (pcie) 801 
+----------------------------------------------
+ Simulation time (s)                 0.000010 
+ Estimated energy (J)                 Unknown 
+ Estimated power (W)                  Unknown 
+----------------------------------------------
+
+< Activity and Events >
+------------------------------------------------------------------------------------------------------------------------
+ Component Name                                            Activity (%)  Energy (mJ)   Power (mW)  Events 
+------------------------------------------------------------------------------------------------------------------------
+ [Component] ExampleComponent top                                100.00      Unknown      Unknown   
+   (Path) Wire datasource0.out-pswitch.rx0                        26.92      Unknown      Unknown   
+   (Path) Wire pswitch.tx0-datasource0.in                          0.75      Unknown      Unknown   
+   (Path) Wire datasource1.out-pswitch.rx1                        26.92      Unknown      Unknown   
+   (Path) Wire pswitch.tx1-datasource1.in                          0.75      Unknown      Unknown   
+   (Path) Wire datasource2.out-pswitch.rx2                        23.08      Unknown      Unknown   
+   (Path) Wire pswitch.tx2-datasource2.in                          0.75      Unknown      Unknown   
+   (Path) Wire datasource3.out-pswitch.rx3                        23.08      Unknown      Unknown   
+   (Path) Wire pswitch.tx3-datasource3.in                          0.75      Unknown      Unknown   
+   [Module] DataSourceModule datasource0                         100.00     0.000006     0.006240   
+   [Module] DataSourceModule datasource1                         100.00     0.000006     0.006240   
+   [Module] DataSourceModule datasource2                         100.00     0.000006     0.006240   
+   [Module] DataSourceModule datasource3                         100.00     0.000006     0.006240   
+   [Module] PCIeSwitch pswitch                                   100.00      Unknown      Unknown   
+------------------------------------------------------------------------------------------------------------------------
+
+Done.

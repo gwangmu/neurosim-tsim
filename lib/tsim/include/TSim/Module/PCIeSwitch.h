@@ -9,14 +9,16 @@
 
 using namespace std;
 
+struct PCIeMessage;
+
 class PCIeSwitch: public Module
 {
   public:
-    PCIeSwitch (string iname, Component *parent,
+    PCIeSwitch (string iname, Component *parent, PCIeMessage *msgproto,
             uint32_t n_ports, uint32_t inque_size, uint32_t outque_size,
             uint32_t busid = 0);
 
-    virtual void IsValidConnection (Port *port, Endpoint *endpt);
+    virtual bool IsValidConnection (Port *port, Endpoint *endpt);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             const uint32_t *outque_size, Instruction *instr);
 

@@ -1,0 +1,9 @@
+#!TSim Simulation Spec
+
+CLOCK_PERIOD(main): 4
+CLOCK_PERIOD(pcie): 0.125
+
+UNIT_DYNAMIC_POWER(DataSourceModule): 300
+UNIT_STATIC_POWER(DataSourceModule): 300
+
+PARAMETER(param1): 10
