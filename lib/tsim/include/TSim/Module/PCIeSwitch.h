@@ -29,6 +29,7 @@ class PCIeSwitch: public Module
     uint32_t *PORT_RX;
     uint32_t *PORT_TX;
     uint32_t n_ports;
+    uint64_t rxvalid;
 
     // properties
     uint32_t outque_size;

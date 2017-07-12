@@ -91,8 +91,21 @@ void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs,
             if (likely (pciemsg->DEV_ID < n_ports))
             {
                 PRINT ("%s forwarded %p to %u (cur_idx: %u)", GetName().c_str(), pciemsg, pciemsg->DEV_ID, cur_idx);
-                pciemsg->MarkRecycle ();
-                outmsgs[PORT_TX[pciemsg->DEV_ID]] = pciemsg;
+                
+                if (pciemsg->DEV_ID != -1)
+                {
+                    pciemsg->Recycle ();
+                    outmsgs[PORT_TX[pciemsg->DEV_ID]] = pciemsg;
+                }
+                else
+                {
+                    for (auto i = 0; i < n_ports; i++)
+                    {
+                        PCIeMessage* msgclone = pciemsg->Clone ();
+                        msgclone->Recycle ();
+                        outmsgs[PORT_TX[i]] = msgclone;
+                    }
+                }
 
                 traffic_size_bits += pciemsg->BIT_WIDTH;
             }
@@ -106,38 +119,36 @@ void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs,
     
     operation ("select")
     {
-        bool selected = false;
+        next_idx = -1;
         for (auto i = cur_idx + 1; i < n_ports; i++)
         {
             if (inmsgs[PORT_RX[i]])
             {
-                selected = true;
                 next_idx = i;
                 break;
             }
         }
 
-        if (cur_idx != -1 && !selected)
+        if (cur_idx != -1 && next_idx == -1)
         {
             for (auto i = 0; i <= cur_idx; i++)
             {
                 if (inmsgs[PORT_RX[i]])
                 {
-                    selected = true;
                     next_idx = i;
                     break;
                 }
             }
-
-            if (!selected)
-                next_idx = -1;
         }
     }
 
-    operation ("unpop inputs")
+    if (next_idx != -1)
     {
-        for (auto i = 0; i < n_ports; i++)
-            if (i != cur_idx)
-                inmsgs[PORT_RX[i]] = nullptr;
+        operation ("unpop inputs")
+        {
+            for (auto i = 0; i < n_ports; i++)
+                if (i != cur_idx)
+                    inmsgs[PORT_RX[i]] = nullptr;
+        }
     }
 }

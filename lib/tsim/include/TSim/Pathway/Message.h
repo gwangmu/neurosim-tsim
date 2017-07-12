@@ -1,6 +1,7 @@
 #pragma once
 
 #include <TSim/Base/Metadata.h>
+#include <TSim/Utility/StaticBranchPred.h>
 #include <cinttypes>
 
 using namespace std;
@@ -44,9 +45,9 @@ public:
 /*>> Below this is for MESSAGE DISPOSAL <<*/
 public:
     // Only for Module
-    inline void MarkRecycle ()
+    inline void Recycle ()
     {
-        dispcount += 2;
+        dispcount = -1;         // INVINCIBLE
     }
 
     // Only for Pathway
@@ -61,7 +62,9 @@ public:
     // Only for Pathway and Module
     inline void Dispose () 
     {
-        dispcount--;
+        if (likely (dispcount != -1))
+            dispcount--;
+
         if (dispcount == 0)
             delete this;        // COMMIT SUICIDE!
     }

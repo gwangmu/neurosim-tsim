@@ -23,6 +23,8 @@ public:
         this->value = value;
     }
 
+    virtual PCIeMessage* Clone () { return new ExamplePCIeMessage(*this); }
+
     uint32_t from;
     uint32_t value;
 };

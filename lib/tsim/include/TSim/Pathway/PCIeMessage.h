@@ -30,6 +30,8 @@ public:
                     "PCIeMessage");
     }
 
+    virtual PCIeMessage* Clone () = 0;
+
 public:
     const uint32_t BUS_ID;
     const uint32_t DEV_ID;
