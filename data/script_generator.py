@@ -72,15 +72,16 @@ def generate_meta(last_addr):
     dram_data = []
 
     dram_idx = (last_addr / FLAGS.dram_size) + 1
-    if(dram_idx > FLAGS.propagator):
-        raise ValueError ("Small dram size")
 
     for n in range(FLAGS.neurons):
+        if(dram_idx > FLAGS.propagator):
+            raise ValueError ("Small dram size")
+       
         length = np.random.binomial(num_neurons, sparsity)
-        
         if ((last_addr + length) > dram_idx*FLAGS.dram_size):
             offset = (dram_idx * FLAGS.dram_size) - last_addr
-            print ("last addr %d, offset %d, len %d" %(last_addr, offset, length))
+            print ("(nidx: %d) last addr %d, offset %d, len %d" \
+                    %(n, last_addr, offset, length))
 
             last_addr += offset
             for o in range(offset):
@@ -108,6 +109,7 @@ def meta_generator():
     dram_info = []
     for i in range (FLAGS.chip):
         for j in range (FLAGS.core):
+            print ("chip %d core %d" %(i, j))
             f = open(FLAGS.path + filename('data/meta/meta',i,j), 'w')
             
 

@@ -68,7 +68,8 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
     if(sdq_msg)
     {
-        INFO_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
+        if(state[SDQ] != sdq_msg->value)
+            INFO_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
         state[SDQ] = sdq_msg->value;
     }
 
@@ -91,8 +92,9 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[PORT_curTS]);
     if(parity_msg)
     {
+        if(next_tsparity_ != parity_msg->value) 
+            INFO_PRINT ("[CoTS] Update TS parity to %lu", parity_msg->value);
         next_tsparity_ = parity_msg->value;
-        INFO_PRINT ("[CoTS] Update TS parity to %d", next_tsparity_);
     }
 
     if(cur_tsparity_ != next_tsparity_)

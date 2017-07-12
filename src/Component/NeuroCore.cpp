@@ -57,7 +57,7 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     Module *core_tsmgr = new CoreTSMgr ("core_tsmgr", this);
 
     Module *axon_queue = new AxonMetaQueue ("axon_meta_queue", this);
-    Module *axon_table = new AxonMetaTable ("axon_meta_table", this, 64);
+    Module *axon_table = new AxonMetaTable ("axon_meta_table", this, num_neurons);
 
     Module *accumulator = new Accumulator ("accumulator", this);
 
@@ -159,6 +159,8 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     deltaG_storage->Connect ("w_addr", deltaG_waddr->GetEndpoint (Endpoint::RHS)); // portcap
     deltaG_storage->Connect ("w_data", deltaG_wdata->GetEndpoint (Endpoint::RHS)); // portcap
     deltaG_storage->Connect ("TSparity", core_TSParity->GetEndpoint (Endpoint::RHS, 1)); // portcap
+    deltaG_nbc_rdata->GetEndpoint (Endpoint::RHS)->SetCapacity(3);
+    deltaG_acc_rdata->GetEndpoint (Endpoint::RHS)->SetCapacity(3);
 
     // Core Timestep Manager
     core_tsmgr->Connect ("NBC_end", nbc_end->GetEndpoint (Endpoint::RHS));
