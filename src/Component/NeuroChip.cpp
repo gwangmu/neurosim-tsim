@@ -46,6 +46,7 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     Module *axon_transmitter = new AxonTransmitter ("axon_transmitter", this);
     Module *syn_distributor = new SynDataDistrib ("syn_distributor", this, num_propagators);
     AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_cores + 1);
+    AndGate *ts_buf = new AndGate ("ts_buf", this, 1);
 
     /** Wires **/
     // create pathways
@@ -66,16 +67,21 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     }
   
     RRFaninWire *axon_data = new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_cores);
+    FanoutWire *cur_tsparity = new FanoutWire (this, conattr, Prototype<IntegerMessage>::Get(), num_cores);
 
     /** Connect **/
     axon_transmitter->Connect ("axon_in", axon_data->GetEndpoint (Endpoint::RHS));
     axon_transmitter->Connect ("idle", transmitter_idle->GetEndpoint (Endpoint::LHS));
     dynfin_and->Connect ("input" + to_string(num_cores), transmitter_idle->GetEndpoint (Endpoint::RHS));
 
+    ts_buf->Connect ("output", cur_tsparity->GetEndpoint (Endpoint::LHS));
+
     for (int i=0; i<num_cores; i++)
     {
         cores[i]->Connect ("DynFin", core_DynFin[i]->GetEndpoint (Endpoint::LHS));
         dynfin_and->Connect ("input" + to_string(i), core_DynFin[i]->GetEndpoint (Endpoint::RHS));
+
+        cores[i]->Connect ("CurTSParity", cur_tsparity->GetEndpoint(Endpoint::RHS, i));
 
         cores[i]->Connect ("AxonData", axon_data->GetEndpoint (Endpoint::LHS, i));
         axon_data->GetEndpoint(Endpoint::LHS, i)->SetCapacity (axon_meta_queue_size);
@@ -93,11 +99,9 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
         syn_distributor->Connect ("syn_ts_out" + to_string(j), syn_parity[j]->GetEndpoint (Endpoint::LHS));
     }
     
-    
-    
-    
-    for (int i=0; i<num_cores; i++)
-        ExportPort ("CurTSParity" + to_string(i), cores[i], "CurTSParity");
+    //for (int i=0; i<num_cores; i++)
+    //    ExportPort ("CurTSParity" + to_string(i), cores[i], "CurTSParity");
+    ExportPort ("CurTSParity", ts_buf, "input0");
 
     for (int i=0; i<num_propagators; i++)
     {

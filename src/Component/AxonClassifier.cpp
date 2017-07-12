@@ -25,7 +25,7 @@ AxonClassifier::AxonClassifier (string iname, Component *parent)
     IPORT_Dram = CreatePort ("dram", Module::PORT_INPUT,
             Prototype<DramMessage>::Get());
     IPORT_TSparity = CreatePort ("ts_parity", Module::PORT_INPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
 
     OPORT_Synapse = CreatePort ("syn_out", Module::PORT_OUTPUT,
             Prototype<SynapseMessage>::Get());
@@ -83,7 +83,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT ("[AEC] Axon entry classifier is idle");
     }
 
-    SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[IPORT_TSparity]);
+    IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[IPORT_TSparity]);
     if(parity_msg)
     {
         ts_parity = parity_msg->value;

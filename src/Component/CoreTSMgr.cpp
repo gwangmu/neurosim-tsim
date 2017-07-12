@@ -20,7 +20,7 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
     PORT_SDQ = CreatePort ("SDQ_empty", Module::PORT_INPUT,
             Prototype<IntegerMessage>::Get());
     PORT_curTS = CreatePort ("curTS", Module::PORT_INPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
 
     PORT_TSparity = CreatePort ("Tsparity", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
@@ -88,7 +88,7 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
 
     /*** Update TS parity ***/
-    SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[PORT_curTS]);
+    IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[PORT_curTS]);
     if(parity_msg)
     {
         next_tsparity_ = parity_msg->value;
