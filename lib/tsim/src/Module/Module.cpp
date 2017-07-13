@@ -288,6 +288,7 @@ void Module::PostClock (PERMIT(Simulator))
         
         operation ("pop used messages from RHS")
         {
+            UpdateInMsgValidCount ();
             for (auto i = 0; i < ninports; i++)
             {
                 if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
@@ -298,7 +299,6 @@ void Module::PostClock (PERMIT(Simulator))
                         nextinmsgs[i]->Dispose ();
                         nextinmsgs[i] = nullptr;
 
-                        UpdateInMsgValidCount ();
                         RefreshInMsgValidCount ();
                     }
                 }

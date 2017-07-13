@@ -50,7 +50,7 @@ private:
     inline void MarkBusyPipeline () { pbusy_state |= (1 << ((omsgidx + pdepth) & omsgidxmask)); }
     inline void CommitPipeline () { pbusy_state &= ~(1 << omsgidx); }
 
-    inline void RefreshInMsgValidCount () { inmsg_valid_count = pdepth; }
+    inline void RefreshInMsgValidCount () { inmsg_valid_count = (pdepth) ? pdepth : 1; }
     inline void UpdateInMsgValidCount () { if (inmsg_valid_count > 0) inmsg_valid_count--; }
 
     inline bool IsIdle () { return pbusy_state == 0 && inmsg_valid_count == 0; }

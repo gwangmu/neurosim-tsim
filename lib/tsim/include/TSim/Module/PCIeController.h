@@ -18,7 +18,7 @@ private:
     uint32_t PORT_TX;
     uint32_t PORT_TX_EXPORT;
     uint32_t PORT_RX;
-    uint32_t PORT_rx_import;
+    uint32_t PORT_RX_IMPORT;
 
 public:
     PCIeController (string iname, Component *parent, string clkname, PCIeMessage *msgproto)
@@ -26,7 +26,7 @@ public:
     {
         PORT_TX = CreatePort ("tx", Module::PORT_INPUT, msgproto);
         PORT_TX_EXPORT = CreatePort ("tx_export", Module::PORT_OUTPUT, msgproto);
-        PORT_rx_import = CreatePort ("rx_import", Module::PORT_INPUT, msgproto);
+        PORT_RX_IMPORT = CreatePort ("rx_import", Module::PORT_INPUT, msgproto);
         PORT_RX = CreatePort ("rx", Module::PORT_OUTPUT, msgproto);
 
         SetClock (clkname);
@@ -57,10 +57,10 @@ public:
             outmsgs[PORT_TX_EXPORT] = inmsgs[PORT_TX];
         }
 
-        if (inmsgs[PORT_rx_import])
+        if (inmsgs[PORT_RX_IMPORT])
         {
-            inmsgs[PORT_rx_import]->Recycle();
-            outmsgs[PORT_RX] = inmsgs[PORT_rx_import];
+            inmsgs[PORT_RX_IMPORT]->Recycle();
+            outmsgs[PORT_RX] = inmsgs[PORT_RX_IMPORT];
         }
     }
 };
