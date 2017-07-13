@@ -9,6 +9,7 @@
 #include <TSim/Register/FileRegister.h>
 #include <TSim/Script/FileScript.h>
 #include <TSim/Pathway/Pathway.h>
+#include <TSim/Pathway/Link.h>
 #include <TSim/Utility/AccessKey.h>
 #include <TSim/Utility/Logging.h>
 
@@ -223,7 +224,12 @@ bool Simulator::LoadTestbench ()
                 device->SetClockPeriod (cdomain.period, KEY(Simulator));
 
             for (Pathway *pathway : cdomain.pathways)
+            {
                 pathway->SetClockPeriod (cdomain.period, KEY(Simulator));
+
+                if (Link *link = dynamic_cast<Link *>(pathway))
+                    link->ApplyReferenceClockPeriod (cdomain.period);
+            }
         }
 
         PRINT ("total %zu clock domain(s) formed", cdomains.size());

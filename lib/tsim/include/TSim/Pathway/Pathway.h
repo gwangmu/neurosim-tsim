@@ -93,7 +93,10 @@ public:
     double GetConsumedEnergy ();
 
     uint32_t GetLatency () { return conn.conattr.latency; }
-    uint32_t GetBitWidth () { return conn.conattr.bitwidth; }
+    virtual uint32_t GetBitWidth () { return conn.conattr.bitwidth; }
+    uint32_t GetEffectiveBitWidth () { return conn.conattr.bitwidth; }
+
+    void SetEffectiveBitWidth (uint32_t bitwidth) { conn.conattr.bitwidth = bitwidth; }
 
     Endpoint& GetLHS (uint32_t idx) 
     { 
