@@ -133,8 +133,9 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
                 return;
             }
            
-            INFO_PRINT ("[DRAM] Update metadata (addr: %x, reqID: %d, tag: %d", 
+            INFO_PRINT ("[DRAM] Update metadata (addr: %x, reqID: %d, tag: %d)", 
                     read_addr, (int)reqID, tag);
+
             const DramRegisterWord *word =
                 static_cast<const DramRegisterWord *>(GetRegister()->GetWord (read_addr));
             uint64_t data = word->value;

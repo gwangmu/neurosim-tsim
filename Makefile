@@ -24,7 +24,7 @@ AR=ar
 MAKE=make 
 
 # compiler flags
-CXXFLAGS=--std=c++11 -O3 -ferror-limit=3 -DRAMULATOR $(if $(NDEBUG),-DNDEBUG) $(if $(NINFO),-DNINFO) 
+CXXFLAGS=--std=c++11 -O3 -ferror-limit=3 -DRAMULATOR $(if $(NDEBUG),-DNDEBUG) $(if $(NINFO),-DNINFO) -g 
 LDFLAGS=-O3
 ARFLAGS=-rc
 #################

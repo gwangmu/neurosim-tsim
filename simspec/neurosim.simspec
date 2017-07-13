@@ -137,11 +137,10 @@ REGISTER_DATAPATH(top.propagator2.axon_storage): data/dram/dram2.script
 REGISTER_DATAPATH(top.propagator3.axon_storage): data/dram/dram3.script
 
 # Clock
-CLOCK_PERIOD(main): 50
-CLOCK_PERIOD(dram): 25
+CLOCK_PERIOD(main): 4
+CLOCK_PERIOD(dram): 1
 
 # Parameters
-<<<<<<< HEAD
 PARAMETER(num_neurons): 64
 PARAMETER(num_cores): 8
 PARAMETER(num_chips): 8
@@ -149,13 +148,5 @@ PARAMETER(num_propagators): 4
 PARAMETER(dram_size): 90000
 PARAMETER(max_timestep): 12
 PARAMETER(pseudo): 1
-=======
-PARAMETER(num_neurons): 128
-PARAMETER(num_cores): 8
-PARAMETER(num_chips): 8
-PARAMETER(num_propagators): 4
-PARAMETER(dram_size): 524288
-PARAMETER(max_timestep): 12
->>>>>>> sunghwa
 
 # Unit power

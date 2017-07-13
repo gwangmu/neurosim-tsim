@@ -22,5 +22,5 @@ public:
 
 private:
     TSManager *ts_mgr;
-    DataSinkModule<AxonMessage, uint32_t> *datasink;
+    int max_timestep;
 };

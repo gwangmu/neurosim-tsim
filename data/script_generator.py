@@ -140,6 +140,8 @@ def meta_generator():
 
             f.close()
 
+    print "Required DRAM size", last_addr // FLAGS.propagator
+
     # dram_size = 1
     # while (dram_size < (len(dram_info) // FLAGS.propagator)):
     #     dram_size = dram_size * 2
@@ -152,7 +154,11 @@ def meta_generator():
         f.write("DATA:\n")
 
         if(FLAGS.pseudo):
+            is_end = False
             for it, addr_dict in enumerate(dram_info):
+                if(is_end):
+                    break
+
                 addr_list = addr_dict.keys()
                 addr_list.sort()
 
@@ -161,9 +167,11 @@ def meta_generator():
                         continue
                     elif (addr >= (i+1)*FLAGS.dram_size):
                         dram_info = dram_info[it:]
+                        is_end = True
                         break
                     else:
-                        f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, addr_dict[addr]))
+                        dram_addr = addr - i*FLAGS.dram_size
+                        f.write("\taddr=0x%04x, data=0x%016x\n" %(dram_addr, addr_dict[addr]))
         else:
             for addr in range(FLAGS.dram_size):
                 idx = i*FLAGS.dram_size + addr
@@ -197,8 +205,8 @@ def spec_generator():
                 %(i, i))
     
     f.write ("\n# Clock\n")
-    f.write ("CLOCK_PERIOD(main): 50\n")
-    f.write ("CLOCK_PERIOD(dram): 25\n")
+    f.write ("CLOCK_PERIOD(main): 4\n")
+    f.write ("CLOCK_PERIOD(dram): 1\n")
     
     f.write ("\n# Parameters\n")
     f.write ("PARAMETER(num_neurons): %d\n" %(FLAGS.neurons))
