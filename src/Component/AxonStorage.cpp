@@ -209,7 +209,7 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
     }
     io_counter = io_buf_size_;
 
-    INFO_PRINT ("[DRAM] Receive dram request (reqID: %u, addr: %u)", reqID, addr);
+    PRINT ("[DRAM] Response dram request (reqID: %u, addr: %u)", reqID, addr);
 }
 
 

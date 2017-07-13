@@ -29,21 +29,27 @@ private:
 
     // Parameters
     uint8_t num_streamer_;
-    uint8_t tag_counter_;
+    std::vector<uint8_t> tag_counter_;
 
     // Internal state
-    bool is_idle_;
+    //uint8_t is_idle_; // bitmap
+    std::vector<bool> is_idle_;
+    uint8_t ongoing_task_;
+
+    uint8_t stream_rr_; // counter
     struct StreamJob
     {
         StreamJob() :
-            base_addr(0), ax_len(0), read_addr(0) {}
+            base_addr(0), ax_len(0), read_addr(0), tag(0) {}
+        StreamJob(uint32_t base, uint16_t len, uint32_t read, uint8_t tag) :
+            base_addr(base), ax_len(len), read_addr(read), tag(tag) {}
 
         uint32_t base_addr;
         uint16_t ax_len;
         uint32_t read_addr;
         uint8_t tag;
     };
-    std::vector<StreamJob> ongoing_streaming_;
+    std::vector<StreamJob> streaming_task_;
         
     uint32_t base_addr_;
     uint16_t ax_len_;
