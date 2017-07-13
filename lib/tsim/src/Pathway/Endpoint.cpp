@@ -92,7 +92,7 @@ void Endpoint::Reserve ()
     if (unlikely (type == CAP))
         SIM_WARNING ("meaningless action reserving PORTCAP", GetName().c_str());
 
-    resv_count++;
+    resv_count += 4;
 
     if (unlikely (resv_count + msgque.size() > capacity))
         SYSTEM_ERROR ("queue size + resv_count exceeded capacity");

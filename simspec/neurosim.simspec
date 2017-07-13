@@ -141,11 +141,11 @@ CLOCK_PERIOD(main): 4
 CLOCK_PERIOD(dram): 1
 
 # Parameters
-PARAMETER(num_neurons): 64
+PARAMETER(num_neurons): 1024
 PARAMETER(num_cores): 8
 PARAMETER(num_chips): 8
 PARAMETER(num_propagators): 4
-PARAMETER(dram_size): 90000
+PARAMETER(dram_size): 21500000
 PARAMETER(max_timestep): 12
 PARAMETER(pseudo): 1
 
