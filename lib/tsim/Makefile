@@ -23,7 +23,7 @@ LD=clang++
 AR=ar
 
 # compiler flags
-CXXFLAGS=--std=c++11 -O3 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG) $(if $(NINFO), -DNINFO) -g
+CXXFLAGS=--std=c++11 -O3 -ferror-limit=3 $(if $(NDEBUG),-DNDEBUG) $(if $(NINFO), -DNINFO)
 LDFLAGS=-O3
 ARFLAGS=-rc
 #################

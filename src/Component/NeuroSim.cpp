@@ -73,8 +73,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     std::vector<RRFaninWire*> axon_data;
     for (int i=0; i<num_propagators; i++)
         axon_data.push_back (new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_chips + 1));
-    FanoutWire *cur_TSParity = new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), 
-            num_cores*num_chips + num_propagators);
+    FanoutWire *cur_TSParity = new FanoutWire (this, conattr, Prototype<IntegerMessage>::Get(), 
+            num_chips + num_propagators);
     
     std::vector<FanoutWire*> syn_data;
     std::vector<FanoutWire*> syn_parity;
@@ -107,11 +107,14 @@ NeuroSim::NeuroSim (string iname, Component *parent)
             axon_data[p]->GetEndpoint (Endpoint::LHS, i)->SetCapacity(1);
         }
 
-        for (int c=0; c<num_cores; c++)
-        {
-            neurochips[i]->Connect ("CurTSParity" + to_string(c), 
-                    cur_TSParity->GetEndpoint (Endpoint::RHS, i*num_cores + c));
-        }
+        // for (int c=0; c<num_cores; c++)
+        // {
+        //     neurochips[i]->Connect ("CurTSParity" + to_string(c), 
+        //             cur_TSParity->GetEndpoint (Endpoint::RHS, i*num_cores + c));
+        // }
+        
+        neurochips[i]->Connect ("CurTSParity", 
+                cur_TSParity->GetEndpoint (Endpoint::RHS, i));
 
         neurochips[i]->Connect ("DynFin", chip_dynfin[i]->GetEndpoint (Endpoint::LHS));
         dynfin_and->Connect ("input" + to_string(i), chip_dynfin[i]->GetEndpoint (Endpoint::RHS));
@@ -133,7 +136,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     for (int i=0; i<num_propagators; i++)
     {
         propagators[i]->Connect ("Axon", axon_data[i]->GetEndpoint (Endpoint::RHS));
-        propagators[i]->Connect ("PropTS", cur_TSParity->GetEndpoint (Endpoint::RHS, num_chips*num_cores + i));
+        propagators[i]->Connect ("PropTS", cur_TSParity->GetEndpoint (Endpoint::RHS, num_chips + i));
         
         propagators[i]->Connect ("Synapse", syn_data[i]->GetEndpoint (Endpoint::LHS));
         propagators[i]->Connect ("SynTS", syn_parity[i]->GetEndpoint (Endpoint::LHS));
