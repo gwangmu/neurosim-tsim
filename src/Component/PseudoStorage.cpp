@@ -206,6 +206,7 @@ bool PseudoStorage::send (uint8_t reqID, uint64_t addr)
 
     auto dram_complete = [reqID, addr, this] (ramulator::Request& r) {this->callback(reqID, addr);};
 
+    addr *= 8;
     ramulator::Request req = ramulator::Request(addr, req_type, dram_complete);
 
     if(dram_->send(req))
