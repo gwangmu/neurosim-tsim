@@ -13,8 +13,8 @@ struct PCIeMessage;
 
 class PCIeSwitch: public Module
 {
-  public:
-    PCIeSwitch (string iname, Component *parent, PCIeMessage *msgproto,
+public:
+    PCIeSwitch (string iname, Component *parent, string clkname, PCIeMessage *msgproto,
             uint32_t n_ports, uint32_t inque_size, uint32_t outque_size,
             uint32_t busid = 0);
 
@@ -24,12 +24,11 @@ class PCIeSwitch: public Module
 
     uint64_t GetAccumTrafficBytes () { return traffic_size_bits / 8; }
 
-  private:
+private:
     // ports
     uint32_t *PORT_RX;
     uint32_t *PORT_TX;
     uint32_t n_ports;
-    uint64_t rxvalid;
 
     // properties
     uint32_t outque_size;

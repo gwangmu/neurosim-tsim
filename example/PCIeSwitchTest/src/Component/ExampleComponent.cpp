@@ -1,8 +1,9 @@
-#include <TSim/Pathway/Wire.h>
+#include <TSim/Pathway/Link.h>
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Module/PCIeSwitch.h>
 
 #include <Message/ExamplePCIeMessage.h>
+#include <Component/PCIeTxComponent.h>
 #include <Component/ExampleComponent.h>
 #include <Component/DataSourceModule.h>
 
@@ -19,24 +20,24 @@ ExampleComponent::ExampleComponent (string iname, Component *parent)
     SetClock ("main");
 
     // add child modules/components
-    vector<Module *> sources;
+    vector<Component *> sources;
     for (auto i = 0; i < MAX_TEST_SOURCES; i++)
-        sources.push_back(new DataSourceModule ("datasource" + to_string(i), this, i));
+        sources.push_back(new PCIeTxComponent ("txcomp" + to_string(i), this, i));
 
-    PCIeSwitch *pswitch = new PCIeSwitch ("pswitch", this, 
+    PCIeSwitch *pswitch = new PCIeSwitch ("pswitch", this, "pcie",
             Prototype<ExamplePCIeMessage>::Get(), 4, 4, 4);
 
     // create/connect pathways
     for (auto i = 0; i < MAX_TEST_SOURCES; i++)
     {
-        Pathway::ConnectionAttr conattr (0, 16);        // NOTE: x16 lanes
+        Pathway::ConnectionAttr conattr (0, 12);    // NOTE: x12 lane
 
-        Wire *m2s_wire = new Wire (this, conattr, Prototype<ExamplePCIeMessage>::Get());
-        sources[i]->Connect ("out", m2s_wire->GetEndpoint (Endpoint::LHS));
+        Link *m2s_wire = new Link (this, conattr, 5, Prototype<ExamplePCIeMessage>::Get());
+        sources[i]->Connect ("tx_export", m2s_wire->GetEndpoint (Endpoint::LHS));
         pswitch->Connect ("rx" + to_string(i), m2s_wire->GetEndpoint (Endpoint::RHS));
 
-        Wire *s2m_wire = new Wire (this, conattr, Prototype<ExamplePCIeMessage>::Get());
+        Link *s2m_wire = new Link (this, conattr, 5, Prototype<ExamplePCIeMessage>::Get());
         pswitch->Connect ("tx" + to_string(i), s2m_wire->GetEndpoint (Endpoint::LHS));
-        sources[i]->Connect ("in", s2m_wire->GetEndpoint (Endpoint::RHS));
+        sources[i]->Connect ("rx_import", s2m_wire->GetEndpoint (Endpoint::RHS));
     }
 }

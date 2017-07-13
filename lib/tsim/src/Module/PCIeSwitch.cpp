@@ -1,6 +1,6 @@
 #include <TSim/Module/PCIeSwitch.h>
 #include <TSim/Pathway/PCIeMessage.h>
-
+#include <TSim/Pathway/Link.h>
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Utility/StaticBranchPred.h>
@@ -12,12 +12,12 @@
 using namespace std;
 
 // NOTE: GUESSING pipeline depth..
-PCIeSwitch::PCIeSwitch (string iname, Component *parent, PCIeMessage *msgproto,
+PCIeSwitch::PCIeSwitch (string iname, Component *parent, string clkname, PCIeMessage *msgproto,
         uint32_t n_ports, uint32_t inque_size, uint32_t outque_size,
         uint32_t busid)
     : Module ("PCIeSwitch", iname, parent, 10)
 {
-    SetClock ("pcie");
+    SetClock (clkname);
 
     this->n_ports = n_ports;
     if (n_ports == 0)
@@ -52,6 +52,11 @@ PCIeSwitch::PCIeSwitch (string iname, Component *parent, PCIeMessage *msgproto,
 bool PCIeSwitch::IsValidConnection (Port *port, Endpoint *endpt)
 {
     Module::IsValidConnection (port, endpt);
+
+    if (!dynamic_cast<Link *>(endpt->GetParent()))
+    {
+        DESIGN_FATAL ("must be connected with Link", GetName().c_str());
+    }
 
     if (port->iotype == Unit::PORT_INPUT)
     {
