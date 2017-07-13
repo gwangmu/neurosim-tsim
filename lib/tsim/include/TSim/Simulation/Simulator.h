@@ -124,7 +124,7 @@ private:
 
     // Simulation states
     uint64_t curtime;
-    uint32_t runtime;
+    double runtime;
 };
 
 

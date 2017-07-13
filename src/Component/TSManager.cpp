@@ -23,7 +23,7 @@ TSManager::TSManager (string iname, Component *parent, uint32_t num_boards)
             Prototype<SignalMessage>::Get());
     
     OPORT_TSParity = CreatePort ("ts_parity", Module::PORT_OUTPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
     OPORT_TSend = CreatePort ("tsend", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
 
@@ -98,7 +98,7 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
     {
         ts_parity = !ts_parity;
 
-        outmsgs[OPORT_TSParity] = new SignalMessage (-1, ts_parity);
+        outmsgs[OPORT_TSParity] = new IntegerMessage (ts_parity);
 
         end_counter = 0;
         is_finish = false;

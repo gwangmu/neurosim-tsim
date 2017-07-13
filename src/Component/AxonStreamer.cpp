@@ -27,6 +27,13 @@ AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size
 
     // DRAM Spec.
     read_bytes = io_buf_size; 
+
+    // Parameter
+    num_streamer_ = 1;
+    tag_counter_ = 0;
+
+    for (int i=0; i<num_streamer_; i++)
+        ongoing_streaming_.push_back(StreamJob());
 }
 
 void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, 
@@ -39,9 +46,12 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
         base_addr_ = axon_msg->value;
         ax_len_ = axon_msg->len;
         read_addr_ = base_addr_;
+        tag_ = tag_counter_;
+
         is_idle_ = false;        
         
         INFO_PRINT("[AS] Start DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
+        tag_counter_ += num_streamer_;
 
         outmsgs[OPORT_idle] = new IntegerMessage (0);
     }
@@ -51,8 +61,8 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
     if(!is_idle_ && (read_addr_ < base_addr_ + ax_len_))
     {
         INFO_PRINT ("[AS] Send read request");
-        outmsgs[OPORT_Addr] = new IndexMessage (0, read_addr_);
-        
+        outmsgs[OPORT_Addr] = new IndexMessage (0, read_addr_, tag_);
+       
         read_addr_ += read_bytes;
     }
     else if(!is_idle_)

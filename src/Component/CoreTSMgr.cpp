@@ -20,7 +20,7 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
     PORT_SDQ = CreatePort ("SDQ_empty", Module::PORT_INPUT,
             Prototype<IntegerMessage>::Get());
     PORT_curTS = CreatePort ("curTS", Module::PORT_INPUT,
-            Prototype<SignalMessage>::Get());
+            Prototype<IntegerMessage>::Get());
 
     PORT_TSparity = CreatePort ("Tsparity", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
@@ -68,7 +68,8 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
     if(sdq_msg)
     {
-        INFO_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
+        if(state[SDQ] != sdq_msg->value)
+            INFO_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
         state[SDQ] = sdq_msg->value;
     }
 
@@ -88,11 +89,12 @@ void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     }
 
     /*** Update TS parity ***/
-    SignalMessage *parity_msg = static_cast<SignalMessage*>(inmsgs[PORT_curTS]);
+    IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[PORT_curTS]);
     if(parity_msg)
     {
+        if(next_tsparity_ != parity_msg->value) 
+            INFO_PRINT ("[CoTS] Update TS parity to %lu", parity_msg->value);
         next_tsparity_ = parity_msg->value;
-        INFO_PRINT ("[CoTS] Update TS parity to %d", next_tsparity_);
     }
 
     if(cur_tsparity_ != next_tsparity_)

@@ -27,9 +27,26 @@ private:
     // DRAM parameters
     uint32_t read_bytes;
 
+    // Parameters
+    uint8_t num_streamer_;
+    uint8_t tag_counter_;
+
     // Internal state
     bool is_idle_;
+    struct StreamJob
+    {
+        StreamJob() :
+            base_addr(0), ax_len(0), read_addr(0) {}
+
+        uint32_t base_addr;
+        uint16_t ax_len;
+        uint32_t read_addr;
+        uint8_t tag;
+    };
+    std::vector<StreamJob> ongoing_streaming_;
+        
     uint32_t base_addr_;
     uint16_t ax_len_;
     uint32_t read_addr_;
+    uint8_t tag_;
 };

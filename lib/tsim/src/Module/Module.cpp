@@ -164,7 +164,8 @@ void Module::PreClock (PERMIT(Simulator))
                 if (!outport.endpt->IsSelectedLHSOfThisCycle ()
                         || outport.endpt->IsOverloaded ())
                 {
-                    INFO_PRINT("[FW] %s is stalled (capacity %d) (condition %d || %d)",
+                    INFO_PRINT("[FW] %s(%s) is stalled (capacity %d) (condition %d || %d)",
+                            GetFullName().c_str(),
                             outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity(),
                             !outport.endpt->IsSelectedLHSOfThisCycle (), outport.endpt->IsOverloaded()
                             );
@@ -278,7 +279,7 @@ void Module::PostClock (PERMIT(Simulator))
 
             for (auto i = 0; i < noutports; i++)
             {
-                if (nextoutmsgs[omsgidx_out])
+                if (nextoutmsgs[omsgidx_out][i])
                 {
                     MarkBusyPipeline ();
                     break;

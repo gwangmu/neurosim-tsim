@@ -638,7 +638,7 @@ bool Simulator::Simulate ()
 
             if (nexttstime <= curtime)
             {
-                PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
+                INFO_PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
                 nexttstime += opt.tsinterval;
             }
 
@@ -658,7 +658,9 @@ bool Simulator::Simulate ()
     }
 
     auto end = chrono::steady_clock::now ();
-    runtime = chrono::duration_cast<chrono::milliseconds>(end - start).count ();
+    chrono::duration<double> diff = end-start;
+    runtime = diff.count();
+    //runtime = chrono::duration_cast<chrono::milliseconds>(end - start).count ();
 
     PRINT ("Simulation finished at %.3lf ns", TO_SPEC_TIMEUNIT(curtime));
 
@@ -746,7 +748,7 @@ void Simulator::ReportSimulationSummary ()
     ROW ("Result", "Value");
     STROKE;
 
-    ROW ("Execution time (s)", to_string((double)runtime / 10E3).c_str());
+    ROW ("Execution time (s)", to_string(runtime).c_str());
     ROW ("Total SRAM read access", "TODO");
     ROW ("Total SRAM write access", "TODO");
 

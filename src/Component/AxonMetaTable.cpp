@@ -24,7 +24,7 @@ AxonMetaTable::AxonMetaTable (string iname, Component* parent,
     this->read_n = 0;
     this->write_n = 0;
 
-    Register::Attr regattr (col_size_, 15);
+    Register::Attr regattr (col_size_, row_size_);
     SetRegister (new MetaFileRegister (Register::SRAM, regattr));
 }
 

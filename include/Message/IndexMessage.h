@@ -19,12 +19,14 @@ public:
     // NOTE: must provide default constructor
     IndexMessage () : Message ("IndexMessage") {}
 
-    IndexMessage (uint32_t destrhsid, uint32_t idx)
+    IndexMessage (uint32_t destrhsid, uint32_t idx, uint8_t tag=0)
         : Message ("IndexMessage", destrhsid)
     {
         this->value = idx;
+        this->tag = tag;
     }
 
 public:
     uint32_t value;
+    uint8_t tag;
 };
