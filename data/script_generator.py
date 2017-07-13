@@ -70,14 +70,17 @@ def generate_meta(last_addr):
     
     meta_table = []
     dram_data = []
+    pseudo_dram = {}
 
     dram_idx = (last_addr / FLAGS.dram_size) + 1
     if(dram_idx > FLAGS.propagator):
         raise ValueError ("Small dram size")
 
     for n in range(FLAGS.neurons):
-        length = np.random.binomial(num_neurons, sparsity)
-        
+        off_board = 0
+        on_board = np.random.binomial(num_neurons, sparsity)
+        length = off_board + on_board
+
         if ((last_addr + length) > dram_idx*FLAGS.dram_size):
             offset = (dram_idx * FLAGS.dram_size) - last_addr
             print ("last addr %d, offset %d, len %d" %(last_addr, offset, length))
@@ -87,14 +90,21 @@ def generate_meta(last_addr):
                 dram_data.append(0)
 
             dram_idx += 1
-        
+            
+            if(dram_idx > FLAGS.propagator):
+                raise ValueError ("Small dram size")
+       
         meta_table.append((last_addr, length))
+        
+        pseudo_data = (off_board << 16) | length
+        pseudo_dram[last_addr] = pseudo_data
 
-        dram_data += generate_syn (length) 
+        if(not FLAGS.pseudo):
+            dram_data += generate_syn (length) 
 
         last_addr += length
 
-    return meta_table, last_addr, dram_data
+    return meta_table, last_addr, dram_data, pseudo_dram
 
      
 
@@ -115,8 +125,12 @@ def meta_generator():
             f.write("CLASSNAME: MetaFileRegister\n")
             f.write("DATA:\n")
             
-            meta, last_addr, dram = generate_meta(last_addr)
-            dram_info += dram
+            meta, last_addr, dram, pseudo_dram = generate_meta(last_addr)
+            
+            if(FLAGS.pseudo):
+                dram_info.append (pseudo_dram)
+            else:
+                dram_info += dram
 
             for idx, m in enumerate(meta):
                 addr, length = m
@@ -131,23 +145,32 @@ def meta_generator():
     #     dram_size = dram_size * 2
     # FLAGS.dram_size = dram_size
 
-    print ("Dram size: %d (require: %d)" %(FLAGS.dram_size, len(dram_info)//FLAGS.propagator))
-
-    if(len(dram_info) > FLAGS.dram_size*FLAGS.propagator):
-        raise ValueError ("dram_size error %d" %(len(dram_info)))
-
     for i in range(FLAGS.propagator):
         f = open(FLAGS.path + 'data/dram/dram' + str(i) + '.script', 'w')
         f.write("#!Tsim Script\n\n")
         f.write("CLASSNAME: DramFileRegister\n")
         f.write("DATA:\n")
 
-        for addr in range(FLAGS.dram_size):
-            idx = i*FLAGS.dram_size + addr
-            if(idx < len(dram_info)):
-                f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, dram_info[idx]))
-            else:
-                f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, 0))
+        if(FLAGS.pseudo):
+            for it, addr_dict in enumerate(dram_info):
+                addr_list = addr_dict.keys()
+                addr_list.sort()
+
+                for addr in addr_list:
+                    if (addr < i*FLAGS.dram_size):
+                        continue
+                    elif (addr >= (i+1)*FLAGS.dram_size):
+                        dram_info = dram_info[it:]
+                        break
+                    else:
+                        f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, addr_dict[addr]))
+        else:
+            for addr in range(FLAGS.dram_size):
+                idx = i*FLAGS.dram_size + addr
+                if(idx < len(dram_info)):
+                    f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, dram_info[idx]))
+                else:
+                    f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, 0))
 
         f.close() 
 
@@ -184,6 +207,7 @@ def spec_generator():
     f.write ("PARAMETER(num_propagators): %d\n" %(FLAGS.propagator))
     f.write ("PARAMETER(dram_size): %d\n" %(FLAGS.dram_size))
     f.write ("PARAMETER(max_timestep): %d\n" %(FLAGS.timestep))
+    f.write ("PARAMETER(pseudo): %d\n" %(FLAGS.pseudo))
 
     f.write ("\n# Unit power\n")
 
@@ -242,9 +266,11 @@ if __name__ == '__main__':
             type=str,
             default='./',
             help="Output file path")
-    
 
-
+    parser.add_argument("--pseudo",
+            type=bool,
+            default='true',
+            help="Use pseudo DRAM")
 
     FLAGS, unparsed = parser.parse_known_args()
 

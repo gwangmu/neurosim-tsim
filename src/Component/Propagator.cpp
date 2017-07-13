@@ -16,6 +16,7 @@
 #include <Component/AxonStreamer.h>
 #include <Component/AxonClassifier.h>
 #include <Component/AxonStorage.h>
+#include <Component/PseudoStorage.h>
 
 #include <Message/AxonMessage.h>
 #include <Message/SignalMessage.h>
@@ -27,6 +28,8 @@
 #include <vector>
 
 using namespace std;
+
+USING_TESTBENCH;
 
 Propagator::Propagator (string iname, Component *parent)
     : Component ("Propagator", iname, parent)
@@ -43,7 +46,13 @@ Propagator::Propagator (string iname, Component *parent)
     Module *axon_streamer = new AxonStreamer ("axon_streamer", this, dram_io_buf_size);
 
     Module *axon_classifier = new AxonClassifier ("axon_classifier", this);
-    Module *axon_storage = new AxonStorage ("axon_storage", this, dram_io_buf_size, dram_outque_size); 
+
+    Module *axon_storage;
+    bool pseudo = GET_PARAMETER(pseudo);
+    if(pseudo)
+        axon_storage = new PseudoStorage ("axon_storage", this, dram_io_buf_size, dram_outque_size); 
+    else
+        axon_storage = new AxonStorage ("axon_storage", this, dram_io_buf_size, dram_outque_size); 
 
     AndGate *prop_idle = new AndGate ("prop_idle", this, 4); 
 

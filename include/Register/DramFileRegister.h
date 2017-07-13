@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TSim/Register/DenseFileRegister.h>
+#include <TSim/Register/SparseFileRegister.h>
 #include <TSim/Utility/Prototype.h>
 #include <Register/DramRegisterWord.h>
 
@@ -11,11 +11,11 @@
 using namespace std;
 
 
-class DramFileRegister: public DenseFileRegister
+class DramFileRegister: public SparseFileRegister
 {
 public:
     DramFileRegister (Type type, Attr attr)
-        : DenseFileRegister ("DramFileRegister", type, attr, 
+        : SparseFileRegister ("DramFileRegister", type, attr, 
                 Prototype<DramRegisterWord>::Get()) {}
 
     virtual RegisterWord* ParseRawString (string rawline)
