@@ -34,7 +34,8 @@ private:
     uint32_t entry_cnt;
     bool is_idle_;
     uint32_t req_counter;
-    
+    bool clk_parity_;
+
     std::vector<DramMessage*> io_buffer; // For synch I/O clock and DRAM clock
     uint8_t io_counter;
 

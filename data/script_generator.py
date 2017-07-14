@@ -207,6 +207,7 @@ def spec_generator():
     f.write ("\n# Clock\n")
     f.write ("CLOCK_PERIOD(main): 4\n")
     f.write ("CLOCK_PERIOD(dram): 1\n")
+    f.write ("CLOCK_PERIOD(ddr): 0.5\n")
     
     f.write ("\n# Parameters\n")
     f.write ("PARAMETER(num_neurons): %d\n" %(FLAGS.neurons))

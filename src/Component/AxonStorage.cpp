@@ -18,7 +18,7 @@ USING_TESTBENCH;
 AxonStorage::AxonStorage (string iname, Component* parent, uint8_t io_buf_size, uint32_t dram_outque_size)
     : Module ("AxonStorage", iname, parent, 0)
 {
-    SetClock ("dram");
+    SetClock ("ddr");
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
             Prototype<IndexMessage>::Get());
@@ -29,7 +29,7 @@ AxonStorage::AxonStorage (string iname, Component* parent, uint8_t io_buf_size, 
 
     entry_cnt = 0;
     is_idle_ = false;
-
+    clk_parity_ = true;
 
     req_counter = 0;
 
@@ -86,38 +86,46 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[PORT_addr]);
 
-    if(raddr_msg)
+    if(clk_parity_)
     {
-        uint32_t read_addr = raddr_msg->value;
-
-        if(((entry_cnt + io_buf_size_ + *outque_size) > outque_size_) || (!send(read_addr)))
+        if(raddr_msg)
         {
-            INFO_PRINT("[DRAM] DRAM is full (entry %d/ outque %u)", entry_cnt, *outque_size); 
-            inmsgs[PORT_addr] = nullptr;
-        }
-        else
-        {
-            INFO_PRINT("[DRAM] Receive read request %d", entry_cnt);
-            outmsgs[PORT_data] = Message::RESERVE();
-            entry_cnt += io_buf_size_;
-        }
-    }
+            uint32_t read_addr = raddr_msg->value;
 
-    if(!is_idle_ && (entry_cnt==0) && 
-            (*outque_size==0) && io_counter == 0)
-    {
-        INFO_PRINT ("[DRAM] DRAM is idle");
-        is_idle_ = true;
-        outmsgs[PORT_idle] = new IntegerMessage (1);
-    }
-    else if(is_idle_ && (entry_cnt != 0))
-    {
-        INFO_PRINT ("[DRAM] DRAM is busy");
-        is_idle_ = false;
-        outmsgs[PORT_idle] = new IntegerMessage (0);
-    }
+            if(((entry_cnt + io_buf_size_ + *outque_size) > outque_size_) || (!send(read_addr)))
+            {
+                INFO_PRINT("[DRAM] DRAM is full (entry %d/ outque %u)", entry_cnt, *outque_size); 
+                inmsgs[PORT_addr] = nullptr;
+            }
+            else
+            {
+                INFO_PRINT("[DRAM] Receive read request %d", entry_cnt);
+                outmsgs[PORT_data] = Message::RESERVE();
+                entry_cnt += io_buf_size_;
+            }
+        }
+
+        if(!is_idle_ && (entry_cnt==0) && 
+                (*outque_size==0) && io_counter == 0)
+        {
+            INFO_PRINT ("[DRAM] DRAM is idle");
+            is_idle_ = true;
+            outmsgs[PORT_idle] = new IntegerMessage (1);
+        }
+        else if(is_idle_ && (entry_cnt != 0))
+        {
+            INFO_PRINT ("[DRAM] DRAM is busy");
+            is_idle_ = false;
+            outmsgs[PORT_idle] = new IntegerMessage (0);
+        }
     
-    dram_->tick();
+        dram_->tick();
+    }
+    else
+    {
+        raddr_msg = nullptr;
+    }
+   
     if(io_counter > 0)
     {
         int idx = (io_buf_size_ - io_counter);
@@ -137,6 +145,8 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
         io_counter--;
         entry_cnt--;
     }
+
+    clk_parity_ = !clk_parity_;
 }
 
 
@@ -209,7 +219,7 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
     }
     io_counter = io_buf_size_;
 
-    INFO_PRINT ("[DRAM] Receive dram request (reqID: %u, addr: %u)", reqID, addr);
+    PRINT ("[DRAM] Response dram request (reqID: %u, addr: %u)", reqID, addr);
 }
 
 
