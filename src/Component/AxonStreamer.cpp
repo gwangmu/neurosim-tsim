@@ -23,17 +23,21 @@ AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size
     OPORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
 
-    is_idle_ = false;
-
     // DRAM Spec.
     read_bytes = io_buf_size; 
 
     // Parameter
     num_streamer_ = 1;
-    tag_counter_ = 0;
 
     for (int i=0; i<num_streamer_; i++)
-        ongoing_streaming_.push_back(StreamJob());
+    {
+        streaming_task_.push_back(StreamJob());
+        is_idle_.push_back(false);
+        tag_counter_.push_back(i);
+    }
+
+    stream_rr_ = 0;
+    ongoing_task_ = 0;
 }
 
 void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, 
@@ -41,34 +45,53 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
 {
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Axon]);
 
-    if(is_idle_ && axon_msg)
+    bool streamer_idle = is_idle_[stream_rr_]; 
+
+    if(streamer_idle && axon_msg)
     {
-        base_addr_ = axon_msg->value;
-        ax_len_ = axon_msg->len;
-        read_addr_ = base_addr_;
-        tag_ = tag_counter_;
+        uint8_t tag = tag_counter_[stream_rr_]; 
+        streaming_task_[stream_rr_] = 
+            StreamJob (axon_msg->value, axon_msg->len,
+                    axon_msg->value, tag_counter_[stream_rr_]);
 
-        is_idle_ = false;        
+        is_idle_[stream_rr_] = false;
+
+        INFO_PRINT("[AS] Start DRAM streaming (addr: %lu, len: %u), stream_rr %d, task %d", 
+                axon_msg->value, axon_msg->len, stream_rr_, ongoing_task_);
         
-        INFO_PRINT("[AS] Start DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
-        tag_counter_ += num_streamer_;
+        tag_counter_[stream_rr_] += num_streamer_;
+    
+        if(ongoing_task_ == 0)
+            outmsgs[OPORT_idle] = new IntegerMessage (0);
 
-        outmsgs[OPORT_idle] = new IntegerMessage (0);
+        ongoing_task_++;
     }
-    else if(!is_idle_ && axon_msg)
+    else if(!streamer_idle && axon_msg)
         inmsgs[IPORT_Axon] = nullptr;
 
-    if(!is_idle_ && (read_addr_ < base_addr_ + ax_len_))
+    StreamJob job = streaming_task_[stream_rr_];
+    streamer_idle = is_idle_[stream_rr_]; 
+    
+    if(!streamer_idle && (job.read_addr < job.base_addr + job.ax_len))
     {
         INFO_PRINT ("[AS] Send read request");
-        outmsgs[OPORT_Addr] = new IndexMessage (0, read_addr_, tag_);
+        outmsgs[OPORT_Addr] = new IndexMessage (0, job.read_addr, job.tag);
        
-        read_addr_ += read_bytes;
+        streaming_task_[stream_rr_].read_addr += read_bytes;
     }
-    else if(!is_idle_)
+    else if(!streamer_idle)
     {
-        INFO_PRINT ("[AS] Finish DRAM streaming (addr: %u, len: %u)", base_addr_, ax_len_);
-        is_idle_ = true;
-        outmsgs[OPORT_idle] = new IntegerMessage (1);
+        INFO_PRINT ("[AS] Finish DRAM streaming (addr: %u, len: %u)", job.base_addr, job.ax_len);
+        
+        if(ongoing_task_ != 0)
+            ongoing_task_--;
+
+        if(ongoing_task_ == 0)
+            outmsgs[OPORT_idle] = new IntegerMessage (1);
+        
+        is_idle_[stream_rr_] = true;
     }
+
+
+    stream_rr_ = (stream_rr_ + 1) % num_streamer_;
 }
