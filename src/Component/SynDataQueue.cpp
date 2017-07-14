@@ -19,7 +19,7 @@ SynDataQueue::SynDataQueue (string iname, Component *parent,
         uint32_t max_queue_size)
     : Module ("SynDataQueue", iname, parent, 1)
 {
-    //SetClock ("dram");
+    SetClock ("dram");
 
     IPORT_Synapse = CreatePort ("syn", Module::PORT_INPUT,
             Prototype<SynapseMessage>::Get());

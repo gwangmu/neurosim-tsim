@@ -213,7 +213,8 @@ string Component::GetGraphVizBody (uint32_t level)
 
                 if (lhss.size() == 1 && rhss.size() == 1)
                 {
-                    ADDLINE (lhss[0] + " -> " + rhss[0] + " [label=\"" + label + "\"];");
+                    ADDLINE (lhss[0] + " -> " + rhss[0] + ";");
+                    // [label=\"" + label + "\"];");
                 }
                 else
                 {
@@ -222,7 +223,8 @@ string Component::GetGraphVizBody (uint32_t level)
                     for (auto i = 0; i < lhss.size(); i++)
                         ADDLINE (lhss[i] + " -> " + point);
                     for (auto i = 0; i < rhss.size(); i++)
-                        ADDLINE (point + " -> " + rhss[i] + " [arrowtail=inv, dir=both];");
+                        ADDLINE (point + " -> " + rhss[i] + ";");
+                        // [arrowtail=inv, dir=both];");
                 }
             }
         }

@@ -424,7 +424,8 @@ void Pathway::PostClock (PERMIT(Simulator))
         {
             Endpoint &ept = endpts.rhs[i];
 
-            if (ept.GetCapacity() != 0)
+            if (ept.GetCapacity() != 0 && 
+                    ept.GetMsgPrototype()->GetType() == Message::PLAIN)
                 SetNextReady (i, ept.GetCapacity () - ept.GetNumMessages () >
                         conn.conattr.latency);
         }

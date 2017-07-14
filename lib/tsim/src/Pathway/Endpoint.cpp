@@ -100,6 +100,13 @@ void Endpoint::Reserve ()
 
 bool Endpoint::Assign (Message *msg)
 {
+    if (!msg)
+    {
+        SIM_WARNING ("attempted to push null message (path: %s)", 
+                GetName().c_str(), GetParent()->GetName().c_str());
+        return false;
+    }
+
     if (unlikely (type == CAP))
     {
         if (msg)
@@ -110,6 +117,14 @@ bool Endpoint::Assign (Message *msg)
         }
         return true;
     }
+    
+    // NOTE: if TOGGLE type, clean up pending msg
+    if (msg->GetType() == Message::TOGGLE && !msgque.empty())
+    {
+        msgque.front()->Dispose ();
+        msgque.pop ();
+    }
+
 
     if (unlikely (capacity != 0 && msgque.size () == capacity))
     {
@@ -118,7 +133,8 @@ bool Endpoint::Assign (Message *msg)
     }
     else if (unlikely (capacity == 0 && msgque.size () >= 1))
     {
-        SYSTEM_ERROR ("capacity=0 endpoint cannot have elements more than one");
+        SYSTEM_ERROR ("capacity=0 endpoint cannot have elements more than one "
+                "(path: %s)", GetParent()->GetName().c_str());
         return false;
     }
     
@@ -126,6 +142,7 @@ bool Endpoint::Assign (Message *msg)
         SYSTEM_ERROR ("attempted to push null message");
 
     if (resv_count > 0) resv_count--;
+
     msgque.push (msg);
 
     DEBUG_PRINT ("assining message %p (%s - %s)",

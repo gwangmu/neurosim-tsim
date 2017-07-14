@@ -145,8 +145,8 @@ PARAMETER(num_neurons): 1024
 PARAMETER(num_cores): 8
 PARAMETER(num_chips): 8
 PARAMETER(num_propagators): 4
-PARAMETER(dram_size): 21500000
-PARAMETER(max_timestep): 12
+PARAMETER(dram_size): 22475814
+PARAMETER(max_timestep): 2
 PARAMETER(pseudo): 1
 
 # Unit power

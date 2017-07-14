@@ -5,7 +5,7 @@ if [ -z $1 ]; then
     exit
 fi
 
-EXT=png
+EXT=pdf
 IMGNAME=${1%%.dot}.$EXT
 
 dot -T$EXT $1 -n -o $IMGNAME

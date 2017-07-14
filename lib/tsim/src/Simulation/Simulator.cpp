@@ -61,12 +61,6 @@ bool Simulator::LoadTestbench ()
 {
     macrotask ("Loading '%s'..", tb->GetName().c_str());
 
-    task ("print graphviz design source")
-    {
-        if (opt.gvfilename != "")
-            PrintGraphVizSource (opt.gvfilename);
-    }
-
     task ("load simulation spec")
     {
         if (!tb->LoadSimulationSpec (specfilename, KEY(Simulator)))
@@ -141,6 +135,12 @@ bool Simulator::LoadTestbench ()
         PRINT ("total %u module(s), %u device(s) (with %u gate(s)), %u pathway(s) found",
                 nmodules, ndevices, ngates, npathways);
     }
+    task ("print graphviz design source")
+    {
+        if (opt.gvfilename != "")
+            PrintGraphVizSource (opt.gvfilename);
+    }
+
 
     task ("init this->cdomains")
     {
@@ -742,7 +742,7 @@ void Simulator::ReportSimulationSummary ()
 #define STROKE PRINT ("%s", string(46, '-').c_str())
 #define ROW(f, v) PRINT (" %-29s %14s ", f, v)
         
-    double simtime = (double)curtime / 10E9;
+    double simtime = TO_SPEC_TIMEUNIT(curtime) / 1000000000;
 
     STROKE;
     ROW ("Result", "Value");
@@ -781,7 +781,7 @@ void Simulator::ReportSimulationSummary ()
 
     STROKE;
 
-    ROW ("Simulation time (s)", to_string(simtime).c_str());
+    ROW ("Simulation time (ms)", to_string(simtime * 1000).c_str());
 
     double energy = tb->GetTopComponent(KEY(Simulator))->GetAggregateConsumedEnergy ();
     ROW ("Estimated energy (J)", (energy == -1 ? "Unknown" : to_string(energy).c_str()));

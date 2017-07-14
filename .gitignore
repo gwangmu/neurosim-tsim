@@ -16,3 +16,4 @@ makegv
 parse.py
 tmp/
 *script
+log
