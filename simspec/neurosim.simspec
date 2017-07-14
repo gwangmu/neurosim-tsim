@@ -139,6 +139,7 @@ REGISTER_DATAPATH(top.propagator3.axon_storage): data/dram/dram3.script
 # Clock
 CLOCK_PERIOD(main): 4
 CLOCK_PERIOD(dram): 1
+CLOCK_PERIOD(ddr): 0.5
 
 # Parameters
 PARAMETER(num_neurons): 32300

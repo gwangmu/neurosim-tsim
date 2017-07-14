@@ -36,7 +36,7 @@ Propagator::Propagator (string iname, Component *parent)
 {
     /** Parameters **/
     int dram_size = 4096;
-    int dram_io_buf_size = 4;
+    int dram_io_buf_size = 8;
     int dram_outque_size = 64 * dram_io_buf_size;
 
     /** Components **/

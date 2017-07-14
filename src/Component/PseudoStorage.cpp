@@ -20,7 +20,7 @@ USING_TESTBENCH;
 PseudoStorage::PseudoStorage (string iname, Component* parent, uint8_t io_buf_size, uint32_t dram_outque_size)
     : Module ("PseudoStorage", iname, parent, 0)
 {
-    SetClock ("dram");
+    SetClock ("ddr");
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
             Prototype<IndexMessage>::Get());
@@ -31,6 +31,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent, uint8_t io_buf_si
 
     entry_cnt = 0;
     is_idle_ = false;
+    clk_parity_ = true;
 
     req_counter = 0;
 
@@ -102,82 +103,90 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[PORT_addr]);
 
-    if(raddr_msg)
+    if(clk_parity_)
     {
-        // Output queue is full
-        if(((entry_cnt + io_buf_size_) > outque_size_))
-            inmsgs[PORT_addr] = nullptr;
-        
-        uint32_t read_addr = raddr_msg->value;
-        
-        // Check tag
-        uint8_t tag = raddr_msg->tag;
-        uint8_t reqID = reqID_table_[tag%num_streamer_];
-
-        // Get metadata
-        SynMeta synmeta = dram_state_[reqID];
-
-        // New streaming is coming 
-        if(synmeta.tag != tag) 
+        if(raddr_msg)
         {
-            // Update reqID table
-            reqID = req_counter;
-            reqID_table_[tag%num_streamer_] =reqID;
+            // Output queue is full
+            if(((entry_cnt + io_buf_size_) > outque_size_))
+                inmsgs[PORT_addr] = nullptr;
             
-            req_counter = (req_counter +1) % reqID_range;
+            uint32_t read_addr = raddr_msg->value;
+            
+            // Check tag
+            uint8_t tag = raddr_msg->tag;
+            uint8_t reqID = reqID_table_[tag%num_streamer_];
 
-            // Update dram state
-            if (unlikely(dram_state_[reqID].entry_cnt != 0))
+            // Get metadata
+            SynMeta synmeta = dram_state_[reqID];
+
+            // New streaming is coming 
+            if(synmeta.tag != tag) 
             {
-                SIM_ERROR ("Dram state is overwritten", GetFullName().c_str());
-                return;
+                // Update reqID table
+                reqID = req_counter;
+                reqID_table_[tag%num_streamer_] =reqID;
+                
+                req_counter = (req_counter +1) % reqID_range;
+
+                // Update dram state
+                if (unlikely(dram_state_[reqID].entry_cnt != 0))
+                {
+                    SIM_ERROR ("Dram state is overwritten", GetFullName().c_str());
+                    return;
+                }
+               
+                INFO_PRINT ("[DRAM] Update metadata (addr: %x, reqID: %d, tag: %d)", 
+                        read_addr, (int)reqID, tag);
+
+                const DramRegisterWord *word =
+                    static_cast<const DramRegisterWord *>(GetRegister()->GetWord (read_addr));
+                uint64_t data = word->value;
+
+                uint16_t off_ofs = (data >> 16) & (0xffff);
+                uint16_t on_ofs = (data) & (0xffff);
+
+                synmeta = SynMeta (tag, read_addr, off_ofs, on_ofs);
+                dram_state_[reqID] = synmeta;      
+                
             }
-           
-            INFO_PRINT ("[DRAM] Update metadata (addr: %x, reqID: %d, tag: %d)", 
-                    read_addr, (int)reqID, tag);
+            else
+            {
+                INFO_PRINT ("[DRAM] Receive request (addr %x, reqID: %d, tag: %d",
+                        read_addr, (int)reqID, tag);
+            }
 
-            const DramRegisterWord *word =
-                static_cast<const DramRegisterWord *>(GetRegister()->GetWord (read_addr));
-            uint64_t data = word->value;
-
-            uint16_t off_ofs = (data >> 16) & (0xffff);
-            uint16_t on_ofs = (data) & (0xffff);
-
-            synmeta = SynMeta (tag, read_addr, off_ofs, on_ofs);
-            dram_state_[reqID] = synmeta;      
-            
+            if(!send(reqID, read_addr))
+                inmsgs[PORT_addr] = nullptr;
+            else
+            {
+                INFO_PRINT("[DRAM] Receive read request %d", entry_cnt);
+                outmsgs[PORT_data] = Message::RESERVE();
+                entry_cnt += io_buf_size_;
+            }
         }
-        else
+
+        if(!is_idle_ && (entry_cnt==0) && 
+                (*outque_size==0) && io_counter == 0)
         {
-            INFO_PRINT ("[DRAM] Receive request (addr %x, reqID: %d, tag: %d",
-                    read_addr, (int)reqID, tag);
+            INFO_PRINT ("[DRAM] DRAM is idle");
+            is_idle_ = true;
+            outmsgs[PORT_idle] = new IntegerMessage (1);
         }
-
-        if(!send(reqID, read_addr))
-            inmsgs[PORT_addr] = nullptr;
-        else
+        else if(is_idle_ && (entry_cnt != 0))
         {
-            INFO_PRINT("[DRAM] Receive read request %d", entry_cnt);
-            outmsgs[PORT_data] = Message::RESERVE();
-            entry_cnt += io_buf_size_;
+            INFO_PRINT ("[DRAM] DRAM is busy");
+            is_idle_ = false;
+            outmsgs[PORT_idle] = new IntegerMessage (0);
         }
+        
+        dram_->tick();
+    }
+    else
+    {
+        raddr_msg = nullptr;
     }
 
-    if(!is_idle_ && (entry_cnt==0) && 
-            (*outque_size==0) && io_counter == 0)
-    {
-        INFO_PRINT ("[DRAM] DRAM is idle");
-        is_idle_ = true;
-        outmsgs[PORT_idle] = new IntegerMessage (1);
-    }
-    else if(is_idle_ && (entry_cnt != 0))
-    {
-        INFO_PRINT ("[DRAM] DRAM is busy");
-        is_idle_ = false;
-        outmsgs[PORT_idle] = new IntegerMessage (0);
-    }
-    
-    dram_->tick();
     if(io_counter > 0)
     {
         int idx = (io_buf_size_ - io_counter);
@@ -197,6 +206,8 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
         io_counter--;
         entry_cnt--;
     }
+
+    clk_parity_ = !clk_parity_;
 }
 
 
