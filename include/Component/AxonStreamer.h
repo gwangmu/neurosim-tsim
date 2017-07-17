@@ -5,6 +5,7 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
+#include <list>
 
 using namespace std;
 
@@ -36,7 +37,8 @@ private:
     std::vector<bool> is_idle_;
     uint8_t ongoing_task_;
 
-    uint8_t stream_rr_; // counter
+    std::list<uint8_t> free_list_; // counter
+    uint8_t stream_out_; // counter
     struct StreamJob
     {
         StreamJob() :

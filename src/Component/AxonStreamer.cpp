@@ -27,57 +27,75 @@ AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size
     read_bytes = io_buf_size; 
 
     // Parameter
-    num_streamer_ = 1;
+    num_streamer_ = 4;
 
     for (int i=0; i<num_streamer_; i++)
     {
         streaming_task_.push_back(StreamJob());
         is_idle_.push_back(false);
         tag_counter_.push_back(i);
+
+        free_list_.push_back(i);
     }
 
-    stream_rr_ = 0;
+    stream_out_ = 0;
     ongoing_task_ = 0;
 }
 
 void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, 
         const uint32_t *outque_size, Instruction *instr)
 {
+    // Process input
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Axon]);
 
-    bool streamer_idle = is_idle_[stream_rr_]; 
-
-    if(streamer_idle && axon_msg)
+    if(axon_msg && !free_list_.empty())
     {
-        uint8_t tag = tag_counter_[stream_rr_]; 
-        streaming_task_[stream_rr_] = 
-            StreamJob (axon_msg->value, axon_msg->len,
-                    axon_msg->value, tag_counter_[stream_rr_]);
+        int idx = free_list_.front();
+        free_list_.pop_front();
 
-        is_idle_[stream_rr_] = false;
+        uint8_t tag = tag_counter_[idx]; 
+        streaming_task_[idx] = 
+            StreamJob (axon_msg->value, axon_msg->len,
+                    axon_msg->value, tag_counter_[idx]);
+
+        is_idle_[idx] = false;
 
         INFO_PRINT("[AS] Start DRAM streaming (addr: %lu, len: %u), stream_rr %d, task %d", 
-                axon_msg->value, axon_msg->len, stream_rr_, ongoing_task_);
+                axon_msg->value, axon_msg->len, idx, ongoing_task_);
         
-        tag_counter_[stream_rr_] += num_streamer_;
+        tag_counter_[idx] += num_streamer_;
     
         if(ongoing_task_ == 0)
             outmsgs[OPORT_idle] = new IntegerMessage (0);
 
         ongoing_task_++;
     }
-    else if(!streamer_idle && axon_msg)
+    else if(axon_msg && free_list_.empty())
         inmsgs[IPORT_Axon] = nullptr;
 
-    StreamJob job = streaming_task_[stream_rr_];
-    streamer_idle = is_idle_[stream_rr_]; 
+    // Process output
+    for (int i=0; i<num_streamer_; i++)
+    {
+        int idx = (stream_out_ + i) % num_streamer_;
+        if(!is_idle_[idx])
+        {
+            stream_out_ = idx;
+            break;
+        }
+        
+        if(i == num_streamer_ - 1)
+            return;
+    }
+    
+    StreamJob job = streaming_task_[stream_out_];
+    bool streamer_idle = is_idle_[stream_out_]; 
     
     if(!streamer_idle && (job.read_addr < job.base_addr + job.ax_len))
     {
         INFO_PRINT ("[AS] Send read request");
         outmsgs[OPORT_Addr] = new IndexMessage (0, job.read_addr, job.tag);
        
-        streaming_task_[stream_rr_].read_addr += read_bytes;
+        streaming_task_[stream_out_].read_addr += read_bytes;
     }
     else if(!streamer_idle)
     {
@@ -89,9 +107,15 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
         if(ongoing_task_ == 0)
             outmsgs[OPORT_idle] = new IntegerMessage (1);
         
-        is_idle_[stream_rr_] = true;
+        is_idle_[stream_out_] = true;
+
+        free_list_.push_back(stream_out_);
+    }
+    else
+    {
+        SIM_ERROR ("Unreached code", GetFullName().c_str());
     }
 
 
-    stream_rr_ = (stream_rr_ + 1) % num_streamer_;
+    stream_out_ = (stream_out_ + 1) % num_streamer_;
 }
