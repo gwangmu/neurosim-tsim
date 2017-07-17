@@ -38,6 +38,7 @@ private:
     uint8_t ongoing_task_;
 
     std::list<uint8_t> free_list_; // counter
+    std::vector<uint8_t> work_list_; // counter
     uint8_t stream_out_; // counter
     struct StreamJob
     {

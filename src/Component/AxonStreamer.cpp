@@ -52,6 +52,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
     {
         int idx = free_list_.front();
         free_list_.pop_front();
+        work_list_.push_back(idx);
 
         uint8_t tag = tag_counter_[idx]; 
         streaming_task_[idx] = 
@@ -73,29 +74,25 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
     else if(axon_msg && free_list_.empty())
         inmsgs[IPORT_Axon] = nullptr;
 
-    // Process output
-    for (int i=0; i<num_streamer_; i++)
+   
+    if(work_list_.empty())
     {
-        int idx = (stream_out_ + i) % num_streamer_;
-        if(!is_idle_[idx])
-        {
-            stream_out_ = idx;
-            break;
-        }
-        
-        if(i == num_streamer_ - 1)
-            return;
+        outmsgs[OPORT_idle] = new IntegerMessage (1);
+        return;
     }
-    
-    StreamJob job = streaming_task_[stream_out_];
-    bool streamer_idle = is_idle_[stream_out_]; 
+
+    stream_out_ %= work_list_.size();
+    uint8_t out_idx = work_list_[stream_out_];
+
+    StreamJob job = streaming_task_[out_idx];
+    bool streamer_idle = is_idle_[out_idx]; 
     
     if(!streamer_idle && (job.read_addr < job.base_addr + job.ax_len))
     {
         INFO_PRINT ("[AS] Send read request");
         outmsgs[OPORT_Addr] = new IndexMessage (0, job.read_addr, job.tag);
        
-        streaming_task_[stream_out_].read_addr += read_bytes;
+        streaming_task_[out_idx].read_addr += read_bytes;
     }
     else if(!streamer_idle)
     {
@@ -107,9 +104,10 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
         if(ongoing_task_ == 0)
             outmsgs[OPORT_idle] = new IntegerMessage (1);
         
-        is_idle_[stream_out_] = true;
+        is_idle_[out_idx] = true;
 
-        free_list_.push_back(stream_out_);
+        free_list_.push_back(out_idx);
+        work_list_.erase (work_list_.begin() + stream_out_);
     }
     else
     {
@@ -117,5 +115,5 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs,
     }
 
 
-    stream_out_ = (stream_out_ + 1) % num_streamer_;
+    stream_out_++;
 }
