@@ -86,8 +86,11 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
     IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[IPORT_TSparity]);
     if(parity_msg)
     {
-        ts_parity = parity_msg->value;
-        INFO_PRINT ("[AEC] Update TS parity");
+        if(parity_msg->value != ts_parity)
+        {
+            ts_parity = parity_msg->value;
+            INFO_PRINT ("[AEC] Update TS parity");
+        }
     }
 
 

@@ -17,7 +17,8 @@
 
 USING_TESTBENCH;
 
-PseudoStorage::PseudoStorage (string iname, Component* parent, uint8_t io_buf_size, uint32_t dram_outque_size)
+PseudoStorage::PseudoStorage (string iname, Component* parent, 
+        uint8_t io_buf_size, uint32_t dram_outque_size)
     : Module ("PseudoStorage", iname, parent, 0)
 {
     SetClock ("ddr");
@@ -107,6 +108,8 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
     {
         if(raddr_msg)
         {
+            INFO_PRINT ("[DRAM] Receive dram request");
+
             // Output queue is full
             if(((entry_cnt + io_buf_size_) > outque_size_))
                 inmsgs[PORT_addr] = nullptr;
@@ -184,7 +187,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
     }
     else
     {
-        raddr_msg = nullptr;
+        inmsgs[PORT_addr] = nullptr;
     }
 
     if(io_counter > 0)
