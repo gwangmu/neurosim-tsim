@@ -34,7 +34,7 @@ AxonTransmitter::AxonTransmitter (string iname, Component *parent)
     }
 
     is_idle_ = false;
-
+    idle_delay_ = 0;
 }
 
 void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs, 
@@ -56,11 +56,16 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs,
             is_idle_ = false;
             outmsgs[OPORT_idle] = new IntegerMessage (0);
         }
+        idle_delay_ = 3; // FIXME Delay between chip and propagator
     }
     else if(!is_idle_ && *outque_size==0)
     {
-        INFO_PRINT ("[AT] Axon metadata transmitter is idle");
-        is_idle_ = true;
-        outmsgs[OPORT_idle] = new IntegerMessage (1);
+        if(idle_delay_ == 0)
+        {
+            INFO_PRINT ("[AT] Axon metadata transmitter is idle");
+            is_idle_ = true;
+            outmsgs[OPORT_idle] = new IntegerMessage (1);
+        }
+        idle_delay_--;
     }
 }

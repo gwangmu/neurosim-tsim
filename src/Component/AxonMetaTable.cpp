@@ -39,13 +39,15 @@ void AxonMetaTable::Operation (Message **inmsgs, Message **outmsgs,
     {
         uint32_t read_addr = raddr_msg->value;
 
-        const MetaRegisterWord *word = static_cast<const MetaRegisterWord *>(GetRegister()->GetWord (read_addr));
+        const MetaRegisterWord *word = 
+            static_cast<const MetaRegisterWord *>(GetRegister()->GetWord (read_addr));
         uint64_t metadata = word->value;
 
         uint64_t dram_addr = metadata >> 16;
         uint16_t len = metadata & 0xffff; 
 
-        INFO_PRINT("[AMT] Receive read request (idx: %u), and send message (addr: %lu, len %d)",
+        INFO_PRINT("[AMT] Receive read request (idx: %u), \
+                and send message (addr: %lu, len %d)",
                 read_addr, dram_addr, len);
         
         outmsgs[RPORT_data] = new AxonMessage (0, dram_addr, len);

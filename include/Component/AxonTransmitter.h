@@ -27,6 +27,7 @@ private:
     uint32_t OPORT_idle;
 
     bool is_idle_;
+    uint8_t idle_delay_;
     uint32_t num_propagator;
     uint32_t dram_size;
 };

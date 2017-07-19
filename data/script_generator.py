@@ -182,22 +182,27 @@ def meta_generator():
 
         f.close() 
 
-def spec_generator():
-    f = open("simspec/neurosim.simspec", 'w')
+def spec_generator(fast=0):
+    f = open("simspec/neurosim" + str(fast)  + ".simspec", 'w')
 
     f.write ("#!Tsim Simulation Spec\n\n")
+
+    spike_tgt = 'core_dyn_unit' if fast==1 else 'neuron_block'
+    meta_tgt = 'core_dyn_unit' if fast==1 else 'axon_meta_table'
 
     f.write ("# External file\n")
     for i in range(FLAGS.chip):
         for j in range(FLAGS.core):
-            f.write("FILESCRIPT_PATH(top.chip%d.core%d.neuron_block): data/spikes/spike%d_%d.script\n" \
-                    %(i, j, i, j))
+            f.write("FILESCRIPT_PATH(top.chip%d.core%d." %(i,j) \
+                    + spike_tgt + \
+                    "): data/spikes/spike%d_%d.script\n" %(i, j))
 
     f.write ("\n")
     for i in range(FLAGS.chip):
         for j in range(FLAGS.core):
-            f.write("REGISTER_DATAPATH(top.chip%d.core%d.axon_meta_table): data/meta/meta%d_%d.script\n" \
-                    %(i, j, i, j))
+            f.write("REGISTER_DATAPATH(top.chip%d.core%d." %(i, j) \
+                    + meta_tgt + \
+                    "): data/meta/meta%d_%d.script\n" %(i, j))
 
     f.write ("\n")
     for i in range(FLAGS.propagator):
@@ -217,6 +222,7 @@ def spec_generator():
     f.write ("PARAMETER(dram_size): %d\n" %(FLAGS.dram_size))
     f.write ("PARAMETER(max_timestep): %d\n" %(FLAGS.timestep))
     f.write ("PARAMETER(pseudo): %d\n" %(FLAGS.pseudo))
+    f.write ("PARAMETER(fast): %d\n" %(fast))
 
     f.write ("\n# Unit power\n")
 
@@ -227,7 +233,8 @@ def main():
     spike_generator()
     meta_generator()
 
-    spec_generator()
+    spec_generator(0)
+    spec_generator(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -277,8 +284,8 @@ if __name__ == '__main__':
             help="Output file path")
 
     parser.add_argument("--pseudo",
-            type=bool,
-            default='true',
+            type=bool, 
+            default='True',
             help="Use pseudo DRAM")
 
     FLAGS, unparsed = parser.parse_known_args()

@@ -50,7 +50,8 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
     
         if(spike)
         {
-            INFO_PRINT ("[AMQ] Receive spike (idx: %d, queue size: %u)", idx, *outque_size);
+            INFO_PRINT ("[AMQ] Receive spike (idx: %d, queue size: %u)", 
+                    idx, *outque_size);
             outmsgs[OPORT_SRAM] = new IndexMessage (0, idx);
             ongoing_jobs++;
             

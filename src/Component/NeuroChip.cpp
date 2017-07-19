@@ -13,6 +13,7 @@
 #include <Component/DataEndpt.h>
 
 #include <Component/NeuroCore.h>
+#include <Component/FastCore.h>
 #include <Component/SynDataDistrib.h>
 #include <Component/AxonTransmitter.h>
 
@@ -31,17 +32,25 @@
 
 using namespace std;
 
+USING_TESTBENCH;
+
 NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_propagators)
     : Component ("NeuroChip", iname, parent)
 {
     /** Parameters **/
     int axon_meta_queue_size = 1; 
-        
+    int fast = GET_PARAMETER (fast);
+
+
     /** Components **/
     std::vector<Component*> cores;
     for (int i=0; i<num_cores; i++)
-        cores.push_back (new NeuroCore ("core" + to_string(i) , this, num_propagators));
-
+    {
+        if(fast == 1)
+            cores.push_back (new FastCore ("core" + to_string(i) , this, num_propagators));
+        else if(fast == 0)
+            cores.push_back (new NeuroCore ("core" + to_string(i) , this, num_propagators));
+    }
     /** Modules **/
     Module *axon_transmitter = new AxonTransmitter ("axon_transmitter", this);
     Module *syn_distributor = new SynDataDistrib ("syn_distributor", this, num_propagators);
@@ -72,7 +81,9 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     /** Connect **/
     axon_transmitter->Connect ("axon_in", axon_data->GetEndpoint (Endpoint::RHS));
     axon_transmitter->Connect ("idle", transmitter_idle->GetEndpoint (Endpoint::LHS));
-    dynfin_and->Connect ("input" + to_string(num_cores), transmitter_idle->GetEndpoint (Endpoint::RHS));
+    dynfin_and->Connect 
+        ("input" + to_string(num_cores), 
+         transmitter_idle->GetEndpoint (Endpoint::RHS));
 
     ts_buf->Connect ("output", cur_tsparity->GetEndpoint (Endpoint::LHS));
 

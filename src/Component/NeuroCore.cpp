@@ -150,6 +150,8 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     state_sram->Connect ("r_data", state_sram_rdata->GetEndpoint (Endpoint::LHS)); 
     state_sram->Connect ("w_addr", state_waddr->GetEndpoint (Endpoint::RHS));
     state_sram->Connect ("w_data", state_wdata->GetEndpoint (Endpoint::RHS));
+    state_wdata->GetEndpoint (Endpoint::RHS) ->SetCapacity (10);
+    state_waddr->GetEndpoint (Endpoint::RHS) ->SetCapacity (10);
 
     // Delta G SRAM
     deltaG_storage->Connect ("nr_addr", nbc_dsram_raddr->GetEndpoint (Endpoint::RHS)); 
