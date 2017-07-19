@@ -182,13 +182,13 @@ def meta_generator():
 
         f.close() 
 
-def spec_generator():
-    f = open("simspec/neurosim.simspec", 'w')
+def spec_generator(fast=0):
+    f = open("simspec/neurosim" + str(fast)  + ".simspec", 'w')
 
     f.write ("#!Tsim Simulation Spec\n\n")
 
-    spike_tgt = 'core_dyn_unit' if FLAGS.fast==1 else 'neuron_block'
-    meta_tgt = 'core_dyn_unit' if FLAGS.fast==1 else 'axon_meta_table'
+    spike_tgt = 'core_dyn_unit' if fast==1 else 'neuron_block'
+    meta_tgt = 'core_dyn_unit' if fast==1 else 'axon_meta_table'
 
     f.write ("# External file\n")
     for i in range(FLAGS.chip):
@@ -222,7 +222,7 @@ def spec_generator():
     f.write ("PARAMETER(dram_size): %d\n" %(FLAGS.dram_size))
     f.write ("PARAMETER(max_timestep): %d\n" %(FLAGS.timestep))
     f.write ("PARAMETER(pseudo): %d\n" %(FLAGS.pseudo))
-    f.write ("PARAMETER(fast): %d\n" %(FLAGS.fast))
+    f.write ("PARAMETER(fast): %d\n" %(fast))
 
     f.write ("\n# Unit power\n")
 
@@ -233,7 +233,8 @@ def main():
     spike_generator()
     meta_generator()
 
-    spec_generator()
+    spec_generator(0)
+    spec_generator(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -286,10 +287,6 @@ if __name__ == '__main__':
             type=bool, 
             default='True',
             help="Use pseudo DRAM")
-    parser.add_argument("--fast",
-            type=int, 
-            default=0,
-            help="Fast simulation mode")
 
     FLAGS, unparsed = parser.parse_known_args()
 
