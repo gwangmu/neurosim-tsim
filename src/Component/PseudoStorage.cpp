@@ -35,6 +35,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     clk_parity_ = true;
 
     req_counter = 0;
+    idx_counter_ = 0;
 
     /* Initialize parameters */
     dram_size_ = GET_PARAMETER (dram_size);
@@ -267,7 +268,8 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
         {
             intra_board = false;
             val32 = 20170713;
-            val16 = 1529;
+            val16 = idx_counter_++;
+            
 
             destrhsid = rand() % num_chips_;
             target_idx = rand() % num_cores_;
