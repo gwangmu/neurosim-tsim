@@ -13,15 +13,18 @@ public:
     // NOTE: must provide default constructor
     SynapseMessage () : Message ("SynapseMessage") {}
 
-    SynapseMessage (uint32_t destrhsid, uint32_t weight, uint16_t idx)
+    SynapseMessage (uint32_t destrhsid, uint32_t weight, uint16_t idx,
+            bool TSparity=false)
         : Message ("SynapseMessage", destrhsid)
     {
         this->weight = weight;
         this->idx = idx;
+        this->TSparity = TSparity;
     }
 
 public:
     uint32_t weight;
     uint16_t idx;
+    bool TSparity;
 };
 

@@ -34,26 +34,32 @@ using namespace std;
 
 USING_TESTBENCH;
 
-NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_propagators)
+NeuroChip::NeuroChip (string iname, Component *parent, 
+        int num_cores, int num_propagators)
     : Component ("NeuroChip", iname, parent)
 {
     /** Parameters **/
-    int axon_meta_queue_size = 1; 
+    int axon_meta_queue_size = 16; 
     int fast = GET_PARAMETER (fast);
-
+    int syn_data_queue_size = 64;
 
     /** Components **/
     std::vector<Component*> cores;
     for (int i=0; i<num_cores; i++)
     {
         if(fast == 1)
-            cores.push_back (new FastCore ("core" + to_string(i) , this, num_propagators));
+            cores.push_back (
+                    new FastCore ("core" + to_string(i) , 
+                                  this, num_propagators));
         else if(fast == 0)
-            cores.push_back (new NeuroCore ("core" + to_string(i) , this, num_propagators));
+            cores.push_back (
+                    new NeuroCore ("core" + to_string(i) , 
+                                   this, num_propagators));
     }
     /** Modules **/
     Module *axon_transmitter = new AxonTransmitter ("axon_transmitter", this);
-    Module *syn_distributor = new SynDataDistrib ("syn_distributor", this, num_propagators);
+    Module *syn_distributor = 
+            new SynDataDistrib ("syn_distributor", this, num_propagators);
     AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_cores + 1);
     AndGate *ts_buf = new AndGate ("ts_buf", this, 1);
 
@@ -64,23 +70,36 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
     // Wires
     std::vector<Wire*> core_DynFin;
     for (int i =0; i<num_cores; i++)
-        core_DynFin.push_back (new Wire (this, conattr, Prototype<IntegerMessage>::Get()));
-    Wire* transmitter_idle = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+        core_DynFin.push_back (
+                new Wire (this, conattr, 
+                          Prototype<IntegerMessage>::Get()));
+    Wire* transmitter_idle = 
+        new Wire (this, conattr, Prototype<IntegerMessage>::Get());
 
     std::vector<FanoutWire*> syn_data;
     std::vector<FanoutWire*> syn_parity;
     for (int i=0; i<num_propagators; i++)
     {
-        syn_data.push_back (new FanoutWire (this, conattr, Prototype<SynapseMessage>::Get(), num_cores));
-        syn_parity.push_back (new FanoutWire (this, conattr, Prototype<SignalMessage>::Get(), num_cores));
+        syn_data.push_back (
+                new FanoutWire (this, conattr, 
+                                Prototype<SynapseMessage>::Get(), num_cores));
+        syn_parity.push_back (
+                new FanoutWire (this, conattr, 
+                                Prototype<SignalMessage>::Get(), num_cores));
     }
   
-    RRFaninWire *axon_data = new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_cores);
-    FanoutWire *cur_tsparity = new FanoutWire (this, conattr, Prototype<IntegerMessage>::Get(), num_cores);
+    RRFaninWire *axon_data = 
+        new RRFaninWire (this, conattr, 
+                        Prototype<AxonMessage>::Get(), num_cores);
+    FanoutWire *cur_tsparity = 
+        new FanoutWire (this, conattr, 
+                        Prototype<IntegerMessage>::Get(), num_cores);
 
     /** Connect **/
-    axon_transmitter->Connect ("axon_in", axon_data->GetEndpoint (Endpoint::RHS));
-    axon_transmitter->Connect ("idle", transmitter_idle->GetEndpoint (Endpoint::LHS));
+    axon_transmitter->Connect ("axon_in", 
+                                axon_data->GetEndpoint (Endpoint::RHS));
+    axon_transmitter->Connect ("idle", 
+                                transmitter_idle->GetEndpoint (Endpoint::LHS));
     dynfin_and->Connect 
         ("input" + to_string(num_cores), 
          transmitter_idle->GetEndpoint (Endpoint::RHS));
@@ -89,25 +108,39 @@ NeuroChip::NeuroChip (string iname, Component *parent, int num_cores, int num_pr
 
     for (int i=0; i<num_cores; i++)
     {
-        cores[i]->Connect ("DynFin", core_DynFin[i]->GetEndpoint (Endpoint::LHS));
-        dynfin_and->Connect ("input" + to_string(i), core_DynFin[i]->GetEndpoint (Endpoint::RHS));
+        cores[i]->Connect ("DynFin", 
+                            core_DynFin[i]->GetEndpoint (Endpoint::LHS));
+        dynfin_and->Connect ("input" + to_string(i), 
+                            core_DynFin[i]->GetEndpoint (Endpoint::RHS));
 
-        cores[i]->Connect ("CurTSParity", cur_tsparity->GetEndpoint(Endpoint::RHS, i));
+        cores[i]->Connect ("CurTSParity", 
+                            cur_tsparity->GetEndpoint(Endpoint::RHS, i));
 
-        cores[i]->Connect ("AxonData", axon_data->GetEndpoint (Endpoint::LHS, i));
-        axon_data->GetEndpoint(Endpoint::LHS, i)->SetCapacity (axon_meta_queue_size);
+        cores[i]->Connect ("AxonData", 
+                            axon_data->GetEndpoint (Endpoint::LHS, i));
+        axon_data->GetEndpoint(
+                Endpoint::LHS, i)->SetCapacity (axon_meta_queue_size);
             
         for (int j=0; j<num_propagators; j++)
         {
-            cores[i]->Connect ("SynData" + to_string(j), syn_data[j]->GetEndpoint (Endpoint::RHS, i));
-            cores[i]->Connect ("SynTS" + to_string(j), syn_parity[j]->GetEndpoint (Endpoint::RHS, i));
+            cores[i]->Connect ("SynData" + to_string(j), 
+                                syn_data[j]->GetEndpoint (Endpoint::RHS, i));
+            cores[i]->Connect ("SynTS" + to_string(j), 
+                                syn_parity[j]->GetEndpoint (Endpoint::RHS, i));
+
+           syn_data[j]->GetEndpoint (Endpoint::RHS, i)->
+                            SetCapacity (syn_data_queue_size);
+           syn_parity[j]->GetEndpoint (Endpoint::RHS, i)->
+                            SetCapacity (syn_data_queue_size);
         }
     }
     
     for (int j=0; j<num_propagators; j++)
     {
-        syn_distributor->Connect ("syn_out" + to_string(j), syn_data[j]->GetEndpoint (Endpoint::LHS));
-        syn_distributor->Connect ("syn_ts_out" + to_string(j), syn_parity[j]->GetEndpoint (Endpoint::LHS));
+        syn_distributor->Connect ("syn_out" + to_string(j), 
+                                  syn_data[j]->GetEndpoint (Endpoint::LHS));
+        syn_distributor->Connect ("syn_ts_out" + to_string(j), 
+                                  syn_parity[j]->GetEndpoint (Endpoint::LHS));
     }
     
     //for (int i=0; i<num_cores; i++)

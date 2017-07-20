@@ -72,41 +72,13 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
 
                 outmsgs[OPORT_Empty] = new IntegerMessage (0);
             }
-            
-            // if(internal_queue_.empty())
-            // {
-            //     INFO_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
-            //     outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
-            // }
-            // else
-            // {
-            //     // INFO_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
-            //     //         coreTS, synTS);
-
-            //     // SynData sd;
-            //     // sd.weight = weight;
-            //     // sd.idx = idx;
-
-            //     // internal_queue_.push_back(sd);
-            // }
         }
         else
         {
-            // if(unlikely((internal_queue_.size() + *outque_size) >= max_queue_size_))
-            // {
-            //     SIM_ERROR ("Synapse Data Queue is exceeded", GetFullName().c_str());
-            //     return;
-            // }
-
-            // SynData sd;
-            // sd.weight = weight;
-            // sd.idx = idx;
-
-            // internal_queue_.push_back(sd);
-            
             INFO_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
                      coreTS, synTS);
-            syn_msg = nullptr; 
+            inmsgs[IPORT_Synapse] = nullptr; 
+            inmsgs[IPORT_SynapseTS] = nullptr; 
         }
 
     }

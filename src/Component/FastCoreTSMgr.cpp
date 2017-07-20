@@ -11,10 +11,10 @@ FastCoreTSMgr::FastCoreTSMgr (string iname, Component* parent)
 {
     PORT_DynEnd = CreatePort ("dyn_end", Module::PORT_INPUT,
             Prototype<SignalMessage>::Get());
-    PORT_Acc = CreatePort ("Acc_idle", Module::PORT_INPUT,
+    PORT_AccIdle = CreatePort ("acc_idle", Module::PORT_INPUT,
             Prototype<SignalMessage>::Get());
-    PORT_SDQ = CreatePort ("SDQ_empty", Module::PORT_INPUT,
-            Prototype<IntegerMessage>::Get());
+    PORT_SynEmpty = CreatePort ("syn_empty", Module::PORT_INPUT,
+            Prototype<SignalMessage>::Get());
     PORT_curTS = CreatePort ("curTS", Module::PORT_INPUT,
             Prototype<IntegerMessage>::Get());
 
@@ -23,12 +23,12 @@ FastCoreTSMgr::FastCoreTSMgr (string iname, Component* parent)
     PORT_DynFin = CreatePort ("DynFin", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
 
-    for (int i=0; i<3; i++)
-        state[i] = true;
+    dyn_end_ = true;
+    acc_idle_ = true;
+    syn_empty_ = true;
 
     cur_tsparity_ = -1;
     next_tsparity_ = -1;
-    is_dynfin = true;
 }
 
 void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, 
@@ -36,8 +36,10 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 {
     /************* Check core components  ****************/
     SignalMessage *end_msg = static_cast<SignalMessage*>(inmsgs[PORT_DynEnd]);
-    SignalMessage *acc_msg = static_cast<SignalMessage*>(inmsgs[PORT_Acc]);
-    IntegerMessage *sdq_msg = static_cast<IntegerMessage*>(inmsgs[PORT_SDQ]);
+    SignalMessage *idle_msg = 
+        static_cast<SignalMessage*>(inmsgs[PORT_AccIdle]);
+    SignalMessage *empty_msg = 
+        static_cast<SignalMessage*>(inmsgs[PORT_SynEmpty]);
 
     INFO_PRINT ("[CoTS] Operation %p", end_msg);
 
@@ -47,31 +49,28 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
         
         /*** Check state of dynamics modules  ***/
         bool dynfin = end_msg->value;
-        if(!is_dynfin && dynfin)
+        if(!dyn_end_ && dynfin)
         {
             INFO_PRINT ("[CoTS] Dynamics finished");
             outmsgs[PORT_DynFin] = new IntegerMessage (1);
-            is_dynfin = true;
-            state[DYN] = true;
+            dyn_end_ = true;
         }
-        else if (is_dynfin && !dynfin)
+        else if (dyn_end_ && !dynfin)
         {
             outmsgs[PORT_DynFin] = new IntegerMessage (0);
-            is_dynfin = false;
-            state[DYN] = false;
+            dyn_end_ = false;
         }
     
     }
-    if(acc_msg)
+    if(idle_msg)
     {
-        INFO_PRINT ("[CoTS] Accumulator is end? %d", acc_msg->value);
-        state[Acc] = acc_msg->value;
+        INFO_PRINT ("[CoTS] Accumulator is end? %d", idle_msg->value);
+        acc_idle_ = idle_msg->value;
     }
-    if(sdq_msg)
+    if(empty_msg)
     {
-        if(state[SDQ] != sdq_msg->value)
-            INFO_PRINT ("[CoTS] Synapse data queue is end? %lu", sdq_msg->value);
-        state[SDQ] = sdq_msg->value;
+        INFO_PRINT ("[CoTS] Synapse data queue is empty %d", empty_msg->value);
+        syn_empty_ = empty_msg->value;
     }
 
     /*** Update TS parity ***/
@@ -85,9 +84,7 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     if(cur_tsparity_ != next_tsparity_)
     {
-        bool all_finish = true;
-        for (int i=0; i<3; i++)
-            all_finish = all_finish && state[i];
+        bool all_finish = dyn_end_ && acc_idle_ && syn_empty_;
 
         if (all_finish)
         {
@@ -96,7 +93,7 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 
             // Initiate Neuron Block Controller, change its state
             INFO_PRINT ("[CoTS] Update Core TS parity to %d", cur_tsparity_);
-            state[DYN] = false;
+            dyn_end_ = false;
         }
     }
 }

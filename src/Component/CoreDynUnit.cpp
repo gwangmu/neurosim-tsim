@@ -19,7 +19,8 @@
 
 using namespace std;
 
-CoreDynUnit::CoreDynUnit (string iname, Component *parent, uint32_t num_neurons, uint32_t depth)
+CoreDynUnit::CoreDynUnit (string iname, Component *parent, 
+        uint32_t num_neurons, uint32_t depth)
     : Module ("CoreDynUnitModule", iname, parent, depth)
 {
     PORT_coreTS = CreatePort ("coreTS", Module::PORT_INPUT, 
