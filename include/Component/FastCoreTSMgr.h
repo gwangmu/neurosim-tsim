@@ -22,7 +22,7 @@ private:
 
     /* Port IDs */
     // Read port  
-    uint32_t PORT_DynEnd, PORT_AccIdle, PORT_SynEmpty;
+    uint32_t PORT_DynEnd, PORT_AccIdle;
     uint32_t PORT_curTS;
 
     // Write port

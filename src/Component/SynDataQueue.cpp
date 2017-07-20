@@ -44,7 +44,12 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
     SignalMessage *coreTS_msg = static_cast<SignalMessage*>(inmsgs[IPORT_CoreTS]);
     SignalMessage *synTS_msg = static_cast<SignalMessage*>(inmsgs[IPORT_SynapseTS]);
 
-    if(syn_msg && synTS_msg)
+    if(*outque_size > 2)
+    {
+        inmsgs[IPORT_Synapse] = nullptr;
+        inmsgs[IPORT_SynapseTS] = nullptr;
+    }
+    else if(syn_msg && synTS_msg)
     {
         uint32_t weight = syn_msg->weight;
         uint16_t idx = syn_msg->idx;

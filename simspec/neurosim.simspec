@@ -18,7 +18,7 @@ PARAMETER(num_cores): 1
 PARAMETER(num_chips): 1
 PARAMETER(num_propagators): 1
 PARAMETER(dram_size): 256
-PARAMETER(max_timestep): 5
+PARAMETER(max_timestep): 20
 PARAMETER(pseudo): 1
 PARAMETER(fast): 0
 

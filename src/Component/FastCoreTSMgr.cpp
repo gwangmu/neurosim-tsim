@@ -13,8 +13,6 @@ FastCoreTSMgr::FastCoreTSMgr (string iname, Component* parent)
             Prototype<SignalMessage>::Get());
     PORT_AccIdle = CreatePort ("acc_idle", Module::PORT_INPUT,
             Prototype<SignalMessage>::Get());
-    PORT_SynEmpty = CreatePort ("syn_empty", Module::PORT_INPUT,
-            Prototype<SignalMessage>::Get());
     PORT_curTS = CreatePort ("curTS", Module::PORT_INPUT,
             Prototype<IntegerMessage>::Get());
 
@@ -25,7 +23,6 @@ FastCoreTSMgr::FastCoreTSMgr (string iname, Component* parent)
 
     dyn_end_ = true;
     acc_idle_ = true;
-    syn_empty_ = true;
 
     cur_tsparity_ = -1;
     next_tsparity_ = -1;
@@ -38,10 +35,6 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
     SignalMessage *end_msg = static_cast<SignalMessage*>(inmsgs[PORT_DynEnd]);
     SignalMessage *idle_msg = 
         static_cast<SignalMessage*>(inmsgs[PORT_AccIdle]);
-    SignalMessage *empty_msg = 
-        static_cast<SignalMessage*>(inmsgs[PORT_SynEmpty]);
-
-    INFO_PRINT ("[CoTS] Operation %p", end_msg);
 
     if(end_msg)
     {
@@ -67,11 +60,6 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT ("[CoTS] Accumulator is end? %d", idle_msg->value);
         acc_idle_ = idle_msg->value;
     }
-    if(empty_msg)
-    {
-        INFO_PRINT ("[CoTS] Synapse data queue is empty %d", empty_msg->value);
-        syn_empty_ = empty_msg->value;
-    }
 
     /*** Update TS parity ***/
     IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[PORT_curTS]);
@@ -84,7 +72,7 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     if(cur_tsparity_ != next_tsparity_)
     {
-        bool all_finish = dyn_end_ && acc_idle_ && syn_empty_;
+        bool all_finish = dyn_end_ && acc_idle_;
 
         if (all_finish)
         {
@@ -94,6 +82,7 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs,
             // Initiate Neuron Block Controller, change its state
             INFO_PRINT ("[CoTS] Update Core TS parity to %d", cur_tsparity_);
             dyn_end_ = false;
+            outmsgs[PORT_DynFin] = new IntegerMessage (0);
         }
     }
 }

@@ -19,7 +19,7 @@ FastSynQueue::FastSynQueue (
         string iname, Component *parent, uint32_t num_propagators)
     : Module ("FastSynQueueModule", iname, parent, 1)
 {
-    SetClock("dram");
+    //SetClock("dram");
     PORT_coreTS = CreatePort ("coreTS", Module::PORT_INPUT, 
             Prototype<SignalMessage>::Get());
     PORT_empty = CreatePort ("empty", Module::PORT_OUTPUT, 
