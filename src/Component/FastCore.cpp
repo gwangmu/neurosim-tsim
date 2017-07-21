@@ -46,9 +46,13 @@ FastCore::FastCore (string iname, Component *parent, int num_propagators)
     pipeline_depth += 6;
     Module *dyn_unit =
         new CoreDynUnit ("core_dyn_unit", this, num_neurons, pipeline_depth);
+    Module *syn_queue =
+        new FastSynQueue ("syn_queue", this, num_propagators);
     Module *acc_unit =
-        new CoreAccUnit ("core_acc_unit", this, num_propagators);
+        new CoreAccUnit ("core_acc_unit", this);
     Module *core_tsmgr = new FastCoreTSMgr ("core_tsmgr", this);
+
+    AndGate *syn_buf = new AndGate ("empty_buf", this, 1);
 
     /**************************************************************************/
     /** Wires **/
@@ -57,6 +61,14 @@ FastCore::FastCore (string iname, Component *parent, int num_propagators)
     
     // Dynamics unit 
     Wire *dyn_end = new Wire (this, conattr, Prototype<SignalMessage>::Get());
+
+    // Synapse queue
+    Wire *syn_empty = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+    RRFaninWire *synapse_info = 
+        new RRFaninWire (this, conattr, 
+                        Prototype<SynapseMessage>::Get(), num_propagators);
+    Wire *empty_buf = new Wire (this, conattr,
+            Prototype<IntegerMessage>::Get());
 
     // Accumulator
     Wire *acc_idle = new Wire (this, conattr, Prototype<SignalMessage>::Get());
@@ -72,14 +84,28 @@ FastCore::FastCore (string iname, Component *parent, int num_propagators)
                        core_TSParity->GetEndpoint (Endpoint::RHS, 0)); 
     dyn_unit->Connect ("dynfin", dyn_end->GetEndpoint (Endpoint::LHS)); 
     
-    // Core accumulation unit
-    acc_unit->Connect ("coreTS", 
+    // Synapse data queue
+    syn_queue->Connect ("coreTS", 
                        core_TSParity->GetEndpoint (Endpoint::RHS, 1)); 
+    syn_queue->Connect ("empty", syn_empty->GetEndpoint (Endpoint::LHS));
+    syn_buf->Connect("input0", syn_empty->GetEndpoint (Endpoint::RHS));
+    syn_buf->Connect("output", empty_buf->GetEndpoint (Endpoint::LHS));
+
+    for(int i=0; i<num_propagators; i++)
+    {
+        syn_queue->Connect ("acc" + to_string(i), 
+                            synapse_info->GetEndpoint (Endpoint::LHS, i));
+        synapse_info->GetEndpoint (Endpoint::LHS, i)->SetCapacity(4);
+    }
+
+    // Core accumulation unit
     acc_unit->Connect ("accfin", acc_idle->GetEndpoint (Endpoint::LHS)); 
+    acc_unit->Connect ("syn", synapse_info->GetEndpoint (Endpoint::RHS));
 
     // Core Timestep Manager
     core_tsmgr->Connect ("dyn_end", dyn_end->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("acc_idle", acc_idle->GetEndpoint (Endpoint::RHS));
+    core_tsmgr->Connect ("syn_empty", empty_buf->GetEndpoint (Endpoint::RHS));
     core_tsmgr->Connect ("Tsparity", 
                          core_TSParity->GetEndpoint (Endpoint::LHS));
    
@@ -92,8 +118,8 @@ FastCore::FastCore (string iname, Component *parent, int num_propagators)
     
     for(int i=0; i<num_propagators; i++)
     {
-        ExportPort ("SynData" + to_string(i), acc_unit, "syn" + to_string(i));
-        ExportPort ("SynTS" + to_string(i), acc_unit, "synTS" + to_string(i));
+        ExportPort ("SynData" + to_string(i), syn_queue, "syn" + to_string(i));
+        ExportPort ("SynTS" + to_string(i), syn_queue, "synTS" + to_string(i));
     }
 }
 

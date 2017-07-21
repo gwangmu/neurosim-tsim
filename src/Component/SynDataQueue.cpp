@@ -100,15 +100,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT("[SDQ] Update TS parity (%d)", coreTS);
     }
 
-    // if ((coreTS == synTS) && !internal_queue_.empty())
-    // {
-    //     SynData sd = internal_queue_.front();
-    //     internal_queue_.pop_front();
-
-    //     outmsgs[OPORT_Acc] = new SynapseMessage (0, sd.weight, sd.idx); 
-    // }
-
-    if(!is_empty && *outque_size == 0)
+    if(!is_empty && outque_size[OPORT_Acc] == 0)
     {
         if(outmsgs[OPORT_Acc] == nullptr)
         {

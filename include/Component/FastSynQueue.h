@@ -21,9 +21,9 @@ class FastSynQueue: public Module
   private:
     /* Port IDs */
     uint32_t PORT_coreTS, PORT_empty;
-    uint32_t PORT_acc;
     std::vector<uint32_t> PORT_syns;
     std::vector<uint32_t> PORT_synTS;
+    std::vector<uint32_t> PORT_acc;
 
     /* Parameters */
     uint32_t num_propagators_;
@@ -33,8 +33,10 @@ class FastSynQueue: public Module
     
     uint32_t pipeline_depth_;
     uint16_t acc_task_;
+   
+    std::vector<bool> queue_state_;
     bool is_empty_, sent_accfin_;
 
-    bool coreTS_, synTS_;
-    uint8_t syn_rr_;
+    bool coreTS_;
+    std::vector<bool> synTS_;
 };
