@@ -1,11 +1,18 @@
 #!Tsim Simulation Spec
 
 # External file
-FILESCRIPT_PATH(top.chip0.core0.neuron_block): data/spikes/spike0_0.script
+FILESCRIPT_PATH(top.chip0.core0.core_dyn_unit): data/spikes/spike0_0.script
+FILESCRIPT_PATH(top.chip0.core1.core_dyn_unit): data/spikes/spike0_1.script
+FILESCRIPT_PATH(top.chip1.core0.core_dyn_unit): data/spikes/spike1_0.script
+FILESCRIPT_PATH(top.chip1.core1.core_dyn_unit): data/spikes/spike1_1.script
 
-REGISTER_DATAPATH(top.chip0.core0.axon_meta_table): data/meta/meta0_0.script
+REGISTER_DATAPATH(top.chip0.core0.core_dyn_unit): data/meta/meta0_0.script
+REGISTER_DATAPATH(top.chip0.core1.core_dyn_unit): data/meta/meta0_1.script
+REGISTER_DATAPATH(top.chip1.core0.core_dyn_unit): data/meta/meta1_0.script
+REGISTER_DATAPATH(top.chip1.core1.core_dyn_unit): data/meta/meta1_1.script
 
 REGISTER_DATAPATH(top.propagator0.axon_storage): data/dram/dram0.script
+REGISTER_DATAPATH(top.propagator1.axon_storage): data/dram/dram1.script
 
 # Clock
 CLOCK_PERIOD(main): 4
@@ -13,13 +20,13 @@ CLOCK_PERIOD(dram): 1
 CLOCK_PERIOD(ddr): 0.5
 
 # Parameters
-PARAMETER(num_neurons): 16
-PARAMETER(num_cores): 1
-PARAMETER(num_chips): 1
-PARAMETER(num_propagators): 1
-PARAMETER(dram_size): 256
-PARAMETER(max_timestep): 20
+PARAMETER(num_neurons): 100
+PARAMETER(num_cores): 2
+PARAMETER(num_chips): 2
+PARAMETER(num_propagators): 2
+PARAMETER(dram_size): 8192
+PARAMETER(max_timestep): 10
 PARAMETER(pseudo): 1
-PARAMETER(fast): 0
+PARAMETER(fast): 1
 
 # Unit power

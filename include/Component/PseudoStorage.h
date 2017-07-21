@@ -78,4 +78,7 @@ private:
     // Internal function
     bool send(uint8_t reqID, uint64_t addr);
     void callback(uint32_t reqID, uint32_t addr);
+
+    // For debug
+    uint16_t idx_counter_;
 };

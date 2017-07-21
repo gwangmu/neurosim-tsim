@@ -68,7 +68,9 @@ void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs,
     SynapseMessage *syn_msg;
     SignalMessage *synTS_msg, *ts_msg;
     bool queue_empty = true;
-    
+   
+    INFO_PRINT ("[Acc] Operation (rr: %d) %p %p", 
+            syn_rr_, inmsgs[PORT_synTS[0]], inmsgs[PORT_synTS[1]]);
     for(int i=0; i<num_propagators_; i++)
     {
         ts_msg = static_cast<SignalMessage*>(inmsgs[PORT_synTS[i]]);
@@ -94,7 +96,7 @@ void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs,
     acc_state_ = (acc_state_ << 1) & acc_mask_;
     if(syn_msg)
     {
-        INFO_PRINT("[Acc] Receive synapse data");
+        INFO_PRINT("[Acc] Receive synapse data (rr: %d)", syn_rr_);
         if(unlikely((synTS_ != coreTS_ && synTS_msg->value != synTS_)))
         {
             INFO_PRINT ("[Acc] Fail. coreTS: %d, synTS: %d, msgTS: %d", 
@@ -107,7 +109,7 @@ void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs,
         synTS_ = synTS_msg->value;
         if(synTS_ == coreTS_)
         {
-            INFO_PRINT ("[Acc] Send synapse data (idx: %d)", 0);
+            INFO_PRINT ("[Acc] Request deltaG (idx: %d)", syn_msg->idx);
             if(sent_accfin_)
             {
                 INFO_PRINT ("[Acc] Acc Unit is busy");
@@ -134,6 +136,8 @@ void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs,
             sent_accfin_ = true;
         }
     }
+
+    syn_rr_ = (syn_rr_ + 1) % num_propagators_;  
 }
 
 
