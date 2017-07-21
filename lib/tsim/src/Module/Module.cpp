@@ -175,7 +175,9 @@ void Module::PreClock (PERMIT(Simulator))
             }
             else if (outport.endpt->IsFull ())
             {
-                INFO_PRINT("[FW] %s is full (stall)", GetFullName().c_str());
+                INFO_PRINT("[FW] %s(%s) is full (stall)", 
+                        GetFullName().c_str(), 
+                        outport.endpt->GetConnectedPortName().c_str());
                 stalled = true;
                 ecount.oport_full[p]++;
                 break;

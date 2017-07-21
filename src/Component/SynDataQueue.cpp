@@ -44,7 +44,12 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
     SignalMessage *coreTS_msg = static_cast<SignalMessage*>(inmsgs[IPORT_CoreTS]);
     SignalMessage *synTS_msg = static_cast<SignalMessage*>(inmsgs[IPORT_SynapseTS]);
 
-    if(syn_msg && synTS_msg)
+    if(*outque_size > 2)
+    {
+        inmsgs[IPORT_Synapse] = nullptr;
+        inmsgs[IPORT_SynapseTS] = nullptr;
+    }
+    else if(syn_msg && synTS_msg)
     {
         uint32_t weight = syn_msg->weight;
         uint16_t idx = syn_msg->idx;
@@ -72,41 +77,13 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
 
                 outmsgs[OPORT_Empty] = new IntegerMessage (0);
             }
-            
-            // if(internal_queue_.empty())
-            // {
-            //     INFO_PRINT ("[SDQ] Send synapse data (idx: %d)", idx);
-            //     outmsgs[OPORT_Acc] = new SynapseMessage (0, weight, idx);
-            // }
-            // else
-            // {
-            //     // INFO_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
-            //     //         coreTS, synTS);
-
-            //     // SynData sd;
-            //     // sd.weight = weight;
-            //     // sd.idx = idx;
-
-            //     // internal_queue_.push_back(sd);
-            // }
         }
         else
         {
-            // if(unlikely((internal_queue_.size() + *outque_size) >= max_queue_size_))
-            // {
-            //     SIM_ERROR ("Synapse Data Queue is exceeded", GetFullName().c_str());
-            //     return;
-            // }
-
-            // SynData sd;
-            // sd.weight = weight;
-            // sd.idx = idx;
-
-            // internal_queue_.push_back(sd);
-            
             INFO_PRINT ("[SDQ] Store in internal queue (core %d, syn %d)",
                      coreTS, synTS);
-            syn_msg = nullptr; 
+            inmsgs[IPORT_Synapse] = nullptr; 
+            inmsgs[IPORT_SynapseTS] = nullptr; 
         }
 
     }
@@ -123,15 +100,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT("[SDQ] Update TS parity (%d)", coreTS);
     }
 
-    // if ((coreTS == synTS) && !internal_queue_.empty())
-    // {
-    //     SynData sd = internal_queue_.front();
-    //     internal_queue_.pop_front();
-
-    //     outmsgs[OPORT_Acc] = new SynapseMessage (0, sd.weight, sd.idx); 
-    // }
-
-    if(!is_empty && *outque_size == 0)
+    if(!is_empty && outque_size[OPORT_Acc] == 0)
     {
         if(outmsgs[OPORT_Acc] == nullptr)
         {

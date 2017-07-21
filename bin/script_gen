@@ -6,3 +6,5 @@ python data/script_generator.py \
 
 cp simspec/neurosim0.simspec simspec/neurosim.simspec
 cat simspec/neurosim.simspec
+
+# bin/script_gen 16384 550000000
