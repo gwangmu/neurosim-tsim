@@ -8,20 +8,18 @@
 #include <TSim/Device/AndGate.h>
 #include <TSim/Pathway/IntegerMessage.h>
 
-#include <Component/DataSourceModule.h>
-#include <Component/DataSinkModule.h>
-#include <Component/DataEndpt.h>
-
 #include <Component/AxonMetaRecv.h>
 #include <Component/AxonStreamer.h>
 #include <Component/AxonClassifier.h>
 #include <Component/AxonStorage.h>
 #include <Component/PseudoStorage.h>
+#include <Component/DelayModule.h>
 
 #include <Message/AxonMessage.h>
 #include <Message/SignalMessage.h>
 #include <Message/IndexMessage.h>
 #include <Message/DramMessage.h>
+#include <Message/DelayMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -39,39 +37,55 @@ Propagator::Propagator (string iname, Component *parent)
     int dram_io_buf_size = 8;
     int dram_outque_size = 64 * dram_io_buf_size;
 
+    int delay_storage_size = 2048;
+
     /** Components **/
+    Component *delay_module = new DelayModule ("delay_module", this);
    
     /** Modules **/
     Module *axon_receiver = new AxonMetaRecv ("axon_meta_receiver", this);
-    Module *axon_streamer = new AxonStreamer ("axon_streamer", this, dram_io_buf_size);
+    Module *axon_streamer = 
+        new AxonStreamer ("axon_streamer", this, dram_io_buf_size);
 
     Module *axon_classifier = new AxonClassifier ("axon_classifier", this);
 
     Module *axon_storage;
     bool pseudo = GET_PARAMETER(pseudo);
     if(pseudo)
-        axon_storage = new PseudoStorage ("axon_storage", this, dram_io_buf_size, dram_outque_size); 
+    {
+        axon_storage = 
+            new PseudoStorage ("axon_storage", this, 
+                               dram_io_buf_size, dram_outque_size); 
+    }
     else
-        axon_storage = new AxonStorage ("axon_storage", this, dram_io_buf_size, dram_outque_size); 
+    {
+        axon_storage = 
+            new AxonStorage ("axon_storage", this, 
+                             dram_io_buf_size, dram_outque_size);
+    }
 
+    
     AndGate *prop_idle = new AndGate ("prop_idle", this, 4); 
 
     /** Module & Wires **/
     // create pathways
     Pathway::ConnectionAttr conattr (0, 32);
 
-    INFO_PRINT ("[Prop] AEC %p", axon_classifier);
-
-
     // Wires
     Wire *axon_data = new Wire (this, conattr, Prototype<AxonMessage>::Get());
     Wire *dram_addr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
     Wire *dram_data = new Wire (this, conattr, Prototype<DramMessage>::Get());
 
-    Wire *recv_idle = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
-    Wire *class_idle = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
-    Wire *stream_idle = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
-    Wire *dram_idle = new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+    Wire *delay_out = new Wire (this, conattr, Prototype<DelayMessage>::Get());
+        
+    Wire *recv_idle = 
+        new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+    Wire *class_idle = 
+        new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+    Wire *stream_idle = 
+        new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+    Wire *dram_idle = 
+        new Wire (this, conattr, Prototype<IntegerMessage>::Get());
         
     /** Connect **/
     axon_receiver->Connect ("axon_out", axon_data->GetEndpoint (Endpoint::LHS));
@@ -83,6 +97,11 @@ Propagator::Propagator (string iname, Component *parent)
     axon_storage->Connect ("r_data", dram_data->GetEndpoint (Endpoint::LHS));
     axon_classifier->Connect ("dram", dram_data->GetEndpoint (Endpoint::RHS));
     dram_data->GetEndpoint (Endpoint::LHS)->SetCapacity (dram_outque_size);
+
+    axon_classifier->Connect ("delay_out", 
+                              delay_out->GetEndpoint (Endpoint::LHS));
+    delay_module->Connect ("Input", 
+                           delay_out->GetEndpoint (Endpoint::RHS));
 
     axon_receiver->Connect ("idle", recv_idle->GetEndpoint (Endpoint::LHS)); 
     axon_classifier->Connect ("idle", class_idle->GetEndpoint (Endpoint::LHS)); 
@@ -96,6 +115,9 @@ Propagator::Propagator (string iname, Component *parent)
 
     ExportPort ("Axon", axon_receiver, "axon_in"); 
     ExportPort ("PropTS", axon_classifier, "ts_parity");
+    
+    ExportPort ("DelayTS", delay_module, "TSParity"); 
+    ExportPort ("DelayAxon", delay_module, "Output");
 
     ExportPort ("Synapse", axon_classifier, "syn_out");
     ExportPort ("SynTS", axon_classifier, "ts_out");

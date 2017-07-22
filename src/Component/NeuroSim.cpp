@@ -72,9 +72,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     // Wires
     std::vector<RRFaninWire*> axon_data;
     for (int i=0; i<num_propagators; i++)
-        axon_data.push_back (new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_chips + 1));
+        axon_data.push_back (new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), num_chips + 2));
     FanoutWire *cur_TSParity = new FanoutWire (this, conattr, Prototype<IntegerMessage>::Get(), 
-            num_chips + num_propagators);
+            num_chips + (2*num_propagators));
     
     std::vector<FanoutWire*> syn_data;
     std::vector<FanoutWire*> syn_parity;
@@ -103,7 +103,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     {
         for (int p=0; p<num_propagators; p++)
         {
-            neurochips[i]->Connect ("Axon" + to_string(p), axon_data[p]->GetEndpoint (Endpoint::LHS, i));
+            neurochips[i]->Connect ("Axon" + to_string(p), 
+                                  axon_data[p]->GetEndpoint (Endpoint::LHS, i));
             axon_data[p]->GetEndpoint (Endpoint::LHS, i)->SetCapacity(2);
         }
 
@@ -136,8 +137,17 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     for (int i=0; i<num_propagators; i++)
     {
         propagators[i]->Connect ("Axon", axon_data[i]->GetEndpoint (Endpoint::RHS));
-        propagators[i]->Connect ("PropTS", cur_TSParity->GetEndpoint (Endpoint::RHS, num_chips + i));
-        
+        propagators[i]->Connect ("PropTS", 
+                                cur_TSParity->GetEndpoint (Endpoint::RHS, 
+                                                          num_chips + (2*i)));
+        propagators[i]->Connect ("DelayTS", 
+                                cur_TSParity->GetEndpoint (Endpoint::RHS, 
+                                                          num_chips + (2*i+1)));
+        propagators[i]->Connect ("DelayAxon", 
+                                 axon_data[i]->GetEndpoint (Endpoint::LHS, 
+                                                           num_chips)); 
+
+
         propagators[i]->Connect ("Synapse", syn_data[i]->GetEndpoint (Endpoint::LHS));
         propagators[i]->Connect ("SynTS", syn_parity[i]->GetEndpoint (Endpoint::LHS));
         propagators[i]->Connect ("Index", syn_cidx[i]->GetEndpoint (Endpoint::LHS));
@@ -154,7 +164,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
         syn_cidx[i]->GetEndpoint (Endpoint::LHS)->SetCapacity (axon_entry_queue_size);
 
         idle_and->Connect ("input" + to_string(i), prop_idle[i]->GetEndpoint (Endpoint::RHS)); 
-        controller->Connect ("AxonOut", axon_data[i]->GetEndpoint (Endpoint::LHS, num_chips));
+        controller->Connect ("AxonOut", 
+                            axon_data[i]->GetEndpoint 
+                                            (Endpoint::LHS, num_chips + 1));
 
         for (int c=0; c<num_chips; c++)
         {

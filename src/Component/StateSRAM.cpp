@@ -9,18 +9,23 @@
 
 StateSRAM::StateSRAM (string iname, Component* parent,
         uint32_t row_size, uint32_t col_size)
-    : SRAMModule ("StateSRAM", iname, parent, row_size, col_size)
+    : Module ("StateSRAM", iname, parent, 1)
 {
+    this->row_size_ = row_size;
+    this->col_size_ = col_size;
 
-     RPORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
-             Prototype<IndexMessage>::Get());
-     RPORT_data = CreatePort ("r_data", Module::PORT_OUTPUT,
-             Prototype<StateMessage>::Get());
+    read_n = 0;
+    write_n = 0;
+    
+    RPORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
+            Prototype<IndexMessage>::Get());
+    RPORT_data = CreatePort ("r_data", Module::PORT_OUTPUT,
+            Prototype<StateMessage>::Get());
 
-     WPORT_addr = CreatePort ("w_addr", Module::PORT_INPUT,
-             Prototype<IndexMessage>::Get());
-     WPORT_data = CreatePort ("w_data", Module::PORT_INPUT,
-             Prototype<StateMessage>::Get());
+    WPORT_addr = CreatePort ("w_addr", Module::PORT_INPUT,
+            Prototype<IndexMessage>::Get());
+    WPORT_data = CreatePort ("w_data", Module::PORT_INPUT,
+            Prototype<StateMessage>::Get());
 
 }
 

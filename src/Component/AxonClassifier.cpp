@@ -10,6 +10,7 @@
 #include <Message/SynapseMessage.h>
 #include <Message/AxonMessage.h>
 #include <Message/SelectMessage.h>
+#include <Message/DelayMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -34,6 +35,8 @@ AxonClassifier::AxonClassifier (string iname, Component *parent)
     
     OPORT_Axon = CreatePort ("axon_out", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
+    OPORT_Delay = CreatePort ("delay_out", Module::PORT_OUTPUT,
+            Prototype<DelayMessage>::Get());
     OPORT_BoardID = CreatePort ("board_id", Module::PORT_OUTPUT,
             Prototype<SelectMessage>::Get());
     OPORT_Sel = CreatePort ("tar_idx", Module::PORT_OUTPUT,

@@ -23,6 +23,7 @@ private:
 
     // Output port
     uint32_t OPORT_Synapse, OPORT_TSparity, OPORT_Axon, OPORT_Sel;
+    uint32_t OPORT_Delay;
     uint32_t OPORT_BoardID;
     uint32_t OPORT_idle;
 
