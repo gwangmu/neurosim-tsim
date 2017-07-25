@@ -3,7 +3,9 @@
 #define SET_CLOCK_PERIOD(clk,period) clkperiods[clk] = period
 #define SET_UNIT_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
 #define SET_UNIT_STATIC_POWER(mod,pow) modstapow[mod] = pow
-#define SET_PATHWAY_DIS_POWER(path,pow) pathdispow[path] = pow
+#define SET_COMPONENT_DIS_POWER(comp,pow) compdispow[comp] = pow
+#define SET_REGISTER_READ_ENERGY(mod,pow) regrdenergy[mod] = pow
+#define SET_REGISTER_WRITE_ENERGY(mod,pow) regwrenergy[mod] = pow
 #define SET_PARAMETER(pname,param) modparams[pname] = param
 
 #include <TSim/Simulation/Testbench.h>
@@ -99,10 +101,20 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_UNIT_STATIC_POWER (toked[1], stoi (toked[2]));
                 DEBUG_PRINT ("unit stapower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
-            else if (toked[0] == "PATHWAY_DIS_POWER")    
+            else if (toked[0] == "COMPONENT_DIS_POWER")    
             {
-                SET_PATHWAY_DIS_POWER (toked[1], stoi (toked[2]));
-                DEBUG_PRINT ("path dispower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+                SET_COMPONENT_DIS_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("component dispower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
+            else if (toked[0] == "REGISTER_READ_ENERGY")    
+            {
+                SET_REGISTER_READ_ENERGY (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("register rdenergy (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
+            else if (toked[0] == "REGISTER_WRITE_ENERGY")    
+            {
+                SET_REGISTER_WRITE_ENERGY (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("register wrenergy (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
             else if (toked[0] == "PARAMETER")
             {
@@ -186,10 +198,24 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype, string pname)
         else
             return -1;
     }
-    else if (ptype == Testbench::PATHWAY_DIS_POWER)
+    else if (ptype == Testbench::COMPONENT_DIS_POWER)
     {
-        if (pathdispow.count (pname))
-            return pathdispow[pname];
+        if (compdispow.count (pname))
+            return compdispow[pname];
+        else
+            return -1;
+    }
+    else if (ptype == Testbench::REGISTER_READ_ENERGY)
+    {
+        if (regrdenergy.count (pname))
+            return regrdenergy[pname];
+        else
+            return -1;
+    }
+    else if (ptype == Testbench::REGISTER_WRITE_ENERGY)
+    {
+        if (regwrenergy.count (pname))
+            return regwrenergy[pname];
         else
             return -1;
     }

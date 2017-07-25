@@ -130,11 +130,17 @@ bool Simulator::LoadTestbench ()
                 else
                     queComps.push (comp);
             }
+
+            nextcomp->SetDissipationPower 
+                (tb->GetUIntParam (Testbench::COMPONENT_DIS_POWER, 
+                                   nextcomp->GetClassName()),
+                 KEY(Simulator));
         }
 
         PRINT ("total %u module(s), %u device(s) (with %u gate(s)), %u pathway(s) found",
                 nmodules, ndevices, ngates, npathways);
     }
+
     task ("print graphviz design source")
     {
         if (opt.gvfilename != "")
@@ -164,6 +170,15 @@ bool Simulator::LoadTestbench ()
                 (tb->GetUIntParam (Testbench::UNIT_STATIC_POWER, 
                                    module->GetClassName()),
                  KEY(Simulator));
+
+            if (module->GetRegister())
+            {
+                Register *reg = module->GetRegister();
+                reg->SetReadEnergy (tb->GetUIntParam (Testbench::REGISTER_READ_ENERGY,
+                            module->GetFullNameWOClass()));
+                reg->SetWriteEnergy (tb->GetUIntParam (Testbench::REGISTER_WRITE_ENERGY,
+                            module->GetFullNameWOClass()));
+            }
         }
 
         for (Device *device : devices)
@@ -203,11 +218,6 @@ bool Simulator::LoadTestbench ()
                 mapCDoms[nclock].name = nclock;
                 mapCDoms[nclock].pathways.push_back (pathway);
             }
-
-            pathway->SetDissipationPower 
-                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetClassName()),
-                 KEY(Simulator));
         }
         
         for (auto &centry : mapCDoms)
@@ -726,7 +736,16 @@ void Simulator::ReportDesignSummary ()
         ROW (fieldname, ("(" + cdom.name + ") " + to_string (freq)).c_str());
     }
 
-    ROW ("Total SRAM size (KB)", "TODO");
+    uint32_t aggsize = 0;
+    for (auto i = 0; i < cdomains.size(); i++)
+    {
+        ClockDomain &cdom = cdomains[i];
+        for (Module *module : cdom.modules)
+            if (module->GetRegister())
+                aggsize += module->GetRegister()->GetByteCapacity();
+    }
+
+    ROW ("Total SRAM size (KB)", to_string((double)aggsize / 1024).c_str());
     ROW ("Total FF size (KB)", "TODO");
 
     STROKE;
@@ -749,8 +768,24 @@ void Simulator::ReportSimulationSummary ()
     STROKE;
 
     ROW ("Execution time (s)", to_string(runtime).c_str());
-    ROW ("Total SRAM read access", "TODO");
-    ROW ("Total SRAM write access", "TODO");
+
+    uint32_t aggreads = 0;
+    uint32_t aggwrites = 0;
+    for (auto i = 0; i < cdomains.size(); i++)
+    {
+        ClockDomain &cdom = cdomains[i];
+        for (Module *module : cdom.modules)
+        {
+            if (module->GetRegister())
+            {
+                aggreads += module->GetRegister()->GetReadCount();
+                aggwrites += module->GetRegister()->GetWriteCount();
+            }
+        }
+    }
+
+    ROW ("Total SRAM read access", to_string(aggreads).c_str());
+    ROW ("Total SRAM write access", to_string(aggwrites).c_str());
 
     Component::CycleClass<double> cclass = 
         tb->GetTopComponent(KEY(Simulator))->GetAggregateCycleClass();
@@ -786,7 +821,7 @@ void Simulator::ReportSimulationSummary ()
     double energy = tb->GetTopComponent(KEY(Simulator))->GetAggregateConsumedEnergy ();
     ROW ("Estimated energy (J)", (energy == -1 ? "Unknown" : to_string(energy).c_str()));
 
-    double power = energy / (curtime * 10E-9);
+    double power = energy / (curtime * 1E-9);
     ROW ("Estimated power (W)", (energy == -1 ? "Unknown" : to_string(power).c_str()));
 
     STROKE;
@@ -865,7 +900,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
         double avgactive = (double)cclass.active / (cclass.active + cclass.idle) * 100;
         double oenergy = unit->GetConsumedEnergy (); 
         double energy = oenergy * 1000;
-        double power = energy / (curtime * 10E-9);
+        double power = energy / (curtime * 1E-9);
 
         ROW (indented_name.c_str(), avgactive, 
                 (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
@@ -879,6 +914,27 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
                         string (level + 2, ' ').c_str(),
                         unit->GetOutPortName(p).c_str(), 
                         ecount.oport_full[p]);
+        }
+
+        if (Module *module = dynamic_cast<Module *>(unit))
+        {
+            if (Register *reg = module->GetRegister())
+            {
+                uint32_t rdcount, wrcount;
+                rdcount = reg->GetReadCount();
+                wrcount = reg->GetWriteCount();
+
+                string str;
+                if (rdcount)
+                    str += "reg_read (" + to_string(rdcount) + " time(s))";
+                if (wrcount)
+                    str += ", reg_write (" + to_string(wrcount) + " time(s))";
+
+                if (str != "")
+                    PRINT ("%s  - %s", 
+                            string (level + 2, ' ').c_str(),
+                            str.c_str());
+            }
         }
     }
     else
@@ -906,7 +962,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
             (aggcclass.active + aggcclass.idle) * 100;
         double oenergy = comp->GetAggregateConsumedEnergy (); 
         double energy = oenergy * 1000;
-        double power = energy / (curtime * 10E-9);
+        double power = energy / (curtime * 1E-9);
 
         ROW (indented_name.c_str(), avgactive,
                 (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
@@ -937,7 +993,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 
             double oenergy = pathway->GetConsumedEnergy (); 
             double energy = oenergy * 1000;
-            double power = energy / (curtime * 10E-9);
+            double power = energy / (curtime * 1E-9);
 
             ROW (indented_name.c_str(), avgpactive,
                     (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),

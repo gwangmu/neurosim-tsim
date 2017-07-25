@@ -78,7 +78,6 @@ Pathway::Pathway (const char *clsname, Component *parent,
     stabilize_cycle = 0;
 
     clkperiod = -1;
-    dispower = -1;
 }
 
 
@@ -250,10 +249,12 @@ double Pathway::GetConsumedEnergy ()
         SYSTEM_ERROR ("zero module clock period (module: %s)",
                 GetName().c_str());
 
-    if (dispower == -1)
+    double pow = parent->GetDisPowerPerPathway();
+
+    if (pow == -1)
         return -1;
     else
-        return (clkperiod * 10E-9 * dispower * 10E-9 * cclass.propagating);
+        return (clkperiod * 1E-9 * pow * 1E-9 * cclass.propagating);
 }
 
 
@@ -283,12 +284,6 @@ bool Pathway::IsControlPathway ()
 IssueCount Pathway::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
-
-    if (dispower == -1)
-    {
-        //DESIGN_WARNING ("no dissipation power info", GetName().c_str());
-        icount.warning++;
-    }
 
     if (clkperiod == -1)
     {

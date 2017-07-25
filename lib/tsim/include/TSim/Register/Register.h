@@ -36,10 +36,26 @@ public:
 
     Module* GetParent () { return parent; }
     void SetParent (Module *module, PERMIT(Module)) { parent = module; }
+    uint64_t GetByteCapacity () { return attr.addrsize * attr.wordsize / 8; }
+    uint32_t GetReadCount () { return rdcount; }
+    uint32_t GetWriteCount () { return wrcount; }
+
+    /* Called by 'Simulator' */
+    void SetReadEnergy (uint32_t rdenergy) { this->rdenergy = rdenergy; }
+    void SetWriteEnergy (uint32_t wrenergy) { this->wrenergy = wrenergy; }
+    uint32_t GetReadEnergy () { return rdenergy; }
+    uint32_t GetWriteEnergy () { return wrenergy; }
+
+    uint32_t GetAccumReadEnergy ();
+    uint32_t GetAccumWriteEnergy ();
 
     // TODO: need to be optimized
     virtual const RegisterWord* GetWord (uint64_t addr) = 0;
     virtual bool SetWord (uint64_t addr, RegisterWord *word) = 0;
+
+    /* Called by derived 'Register' */
+    void IncrReadCount () { rdcount++; }
+    void IncrWriteCount () { wrcount++; }
 
 private:
     Module *parent;
@@ -47,5 +63,10 @@ private:
     Type type;
     Attr attr;
     RegisterWord *wproto;
+
+    uint32_t rdenergy;
+    uint32_t wrenergy;
+    uint32_t rdcount;
+    uint32_t wrcount;
 };
 

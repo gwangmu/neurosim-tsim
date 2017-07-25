@@ -46,6 +46,7 @@ public:
     /* Universal */
     Unit (const char* clsname, string iname, Component *parent);
 
+    virtual Component* GetComponent (string name) { return nullptr; }
     virtual Unit* GetUnit (string name);
     virtual uint32_t GetNumChildModules () final { return 1; }
 
@@ -56,7 +57,7 @@ public:
     void SetStaticPower (uint32_t pow, PERMIT(Simulator)) { stapower = pow; }
     uint32_t GetDynamicPower () { return dynpower; }
     uint32_t GetStaticPower () { return stapower; }
-    double GetConsumedEnergy ();
+    virtual double GetConsumedEnergy ();
 
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();

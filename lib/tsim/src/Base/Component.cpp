@@ -24,6 +24,7 @@ Component::Component (const char *clsname, string name, Component *parent)
         parent->AddChild (this);
 
     this->clockname = "";
+    this->dispower = -1;
 }
 
 
@@ -44,6 +45,77 @@ set<string> Component::GetClockSet ()
         clockset.insert (GetClock());
 
     return clockset;
+}
+
+uint32_t Component::GetDisPower ()
+{
+    return dispower;
+}
+
+double Component::GetDirectDisPower ()
+{
+    if (parent)
+        return parent->CalcDirectDisPowerShare (this);
+    else
+    {
+        uint32_t direct_dispower;
+        uint32_t edges = pathways.size();
+
+        if (dispower == -1) return -1;
+        direct_dispower = dispower;
+
+        for (Component *comp : children)
+        {
+            if (comp->GetDisPower() != -1)
+                direct_dispower -= comp->GetDisPower();
+            else
+                edges += comp->GetNumDescendantPathways();
+        }
+
+        if (!edges)
+            SYSTEM_ERROR ("component cannot have zero (direct) pathways "
+                    "(comp: %s)", GetFullName().c_str());
+
+        return ((double)direct_dispower / edges * pathways.size());
+    }
+}
+
+
+double Component::CalcDirectDisPowerShare (Component *child)
+{
+    uint32_t direct_dispower;
+    uint32_t edges = pathways.size();
+
+    if (!parent && dispower == -1) return -1;
+
+    if (dispower != -1)
+        direct_dispower = dispower;
+    else
+        direct_dispower = parent->CalcDirectDisPowerShare (this);
+
+    for (Component *comp : children)
+    {
+        if (comp->GetDisPower() != -1)
+            direct_dispower -= comp->GetDisPower();
+        else
+            edges += comp->GetNumDescendantPathways();
+    }
+
+    if (!edges)
+        SYSTEM_ERROR ("component cannot have zero (direct) pathways "
+                "(comp: %s)", GetFullName().c_str());
+
+    return ((double)direct_dispower / edges * child->pathways.size());
+}
+
+double Component::GetDisPowerPerPathway ()
+{
+    double ddispow = GetDirectDisPower ();
+    
+    if (ddispow == -1)
+        return -1;
+    else
+        return GetDirectDisPower() / pathways.size();
 }
 
 
@@ -74,6 +146,20 @@ uint32_t Component::GetNumChildModules ()
 }
 
 
+Component* Component::GetComponent (string name)
+{
+    if (GetInstanceName() == name)
+        return this;
+    else
+    {
+        for (Component *child : children)
+            if (Component *ret = child->GetComponent (name))
+                return ret;
+    }
+
+    return nullptr;
+}
+
 Unit* Component::GetUnit (string name)
 {
     Unit *tar = nullptr;
@@ -84,6 +170,13 @@ Unit* Component::GetUnit (string name)
     }
 
     return tar;
+}
+
+
+void Component::SetDissipationPower (uint32_t pow, PERMIT(Simulator))
+{
+    dispower = pow;
+    DEBUG_PRINT ("%s dispower = %u", GetClassName(), pow);
 }
 
 Component::CycleClass<double> Component::GetAggregateCycleClass ()
@@ -255,6 +348,16 @@ bool Component::AddChildPathway (Pathway *pathway, PERMIT(Pathway))
 }
 
 
+uint32_t Component::GetNumDescendantPathways ()
+{
+    uint32_t npaths = pathways.size();
+    for (Component *comp: children)
+        npaths += comp->GetNumDescendantPathways ();
+
+    return npaths;
+}
+
+
 IssueCount Component::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
@@ -277,6 +380,20 @@ IssueCount Component::Validate (PERMIT(Simulator))
         IssueCount subicount = pathway->Validate (TRANSFER_KEY(Simulator));
         icount.error += subicount.error;
         icount.warning += subicount.warning;
+    }
+
+    if (GetDisPower() == -1 && (parent && parent->CalcDirectDisPowerShare (this) == -1))
+    {
+        DESIGN_WARNING ("component has no dissipation power", GetFullName().c_str());
+        icount.warning++;
+    }
+
+    if (parent && parent->GetDisPower() != -1 && 
+            parent->GetDisPower() < dispower)
+    {
+        DESIGN_FATAL ("child component cannot have larger dispower than parent",
+                GetFullName().c_str());
+        icount.error++;
     }
 
     return icount;

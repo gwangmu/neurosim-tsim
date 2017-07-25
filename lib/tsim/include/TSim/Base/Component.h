@@ -48,14 +48,20 @@ public:
     /* Universal */
     Component (const char* clsname, string iname, Component *parent);
 
-    virtual string GetClock ();
-    virtual set<string> GetClockSet ();
     string GetFullName ();
     string GetFullNameWOClass ();
     Component* GetParent () { return parent; }
     virtual uint32_t GetNumChildModules ();
 
+    virtual string GetClock ();
+    virtual set<string> GetClockSet ();
+    uint32_t GetDisPower ();
+    double GetDirectDisPower ();
+
+    virtual Component* GetComponent (string name);
     virtual Unit* GetUnit (string name);
+
+    void SetDissipationPower (uint32_t pow, PERMIT(Simulator));
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();
     virtual double GetAggregateConsumedEnergy ();
@@ -79,6 +85,7 @@ public:
 
     vector<Pathway *>::iterator PathwayBegin () { return pathways.begin (); }
     vector<Pathway *>::iterator PathwayEnd () { return pathways.end (); }
+    uint32_t GetNumDescendantPathways ();
 
     virtual string GetGraphVizBody (uint32_t level);
 
@@ -87,8 +94,12 @@ public:
     /* Called by parent 'Component' */
     virtual bool Connect (string portname, Endpoint *endpt);
 
+    /* Called by child 'Component' */
+    double CalcDirectDisPowerShare (Component *child);
+
     /* Called by 'Pathway' */
     bool AddChildPathway (Pathway *pathway, PERMIT(Pathway));
+    double GetDisPowerPerPathway ();
 
 protected:
     /* Called by parent 'Component' */
@@ -108,4 +119,5 @@ private:
     vector<Pathway *> pathways;
 
     string clockname;
+    uint32_t dispower;
 };

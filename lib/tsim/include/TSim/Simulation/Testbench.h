@@ -39,7 +39,9 @@ public:
         CLOCK_PERIOD,
         UNIT_DYNAMIC_POWER,
         UNIT_STATIC_POWER,
-        PATHWAY_DIS_POWER,
+        COMPONENT_DIS_POWER,
+        REGISTER_READ_ENERGY,
+        REGISTER_WRITE_ENERGY,
         PARAMETER
     };
 
@@ -67,6 +69,8 @@ protected:
     map<string, uint32_t> clkperiods;
     map<string, uint32_t> moddynpow;
     map<string, uint32_t> modstapow;
-    map<string, uint32_t> pathdispow;
+    map<string, uint32_t> compdispow;
+    map<string, uint32_t> regwrenergy;
+    map<string, uint32_t> regrdenergy;
     map<string, uint32_t> modparams;
 };
