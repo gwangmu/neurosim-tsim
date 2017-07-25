@@ -40,8 +40,8 @@ public:
         UNIT_DYNAMIC_POWER,
         UNIT_STATIC_POWER,
         COMPONENT_DIS_POWER,
-        REGISTER_READ_POWER,
-        REGISTER_WRITE_POWER,
+        REGISTER_READ_ENERGY,
+        REGISTER_WRITE_ENERGY,
         PARAMETER
     };
 
@@ -70,7 +70,7 @@ protected:
     map<string, uint32_t> moddynpow;
     map<string, uint32_t> modstapow;
     map<string, uint32_t> compdispow;
-    map<string, uint32_t> regwrpow;
-    map<string, uint32_t> regrdpow;
+    map<string, uint32_t> regwrenergy;
+    map<string, uint32_t> regrdenergy;
     map<string, uint32_t> modparams;
 };

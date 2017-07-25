@@ -25,6 +25,8 @@ public:
     inline Script* GetScript () { return script; }
     inline Register* GetRegister () { return reg; }
 
+    virtual double GetConsumedEnergy ();
+
     /* Called by 'Simulator' */
     virtual IssueCount Validate (PERMIT(Simulator));
     virtual void PreClock (PERMIT(Simulator)) final;

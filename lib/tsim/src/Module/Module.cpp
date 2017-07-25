@@ -91,6 +91,22 @@ bool Module::SetRegister (Register *reg)
     return true;
 }
 
+double Module::GetConsumedEnergy ()
+{
+    double energy = Unit::GetConsumedEnergy();
+
+    if (energy == -1) return -1;
+
+    if (reg)
+    {
+        if (reg->GetReadEnergy() != -1)
+            energy += reg->GetAccumReadEnergy() * 1E-9;
+        if (reg->GetWriteEnergy() != -1)
+            energy += reg->GetAccumWriteEnergy() * 1E-9;
+    }
+    
+    return energy;
+}
 
 /* functions for 'Simulator' */
 IssueCount Module::Validate (PERMIT(Simulator))

@@ -254,7 +254,7 @@ double Pathway::GetConsumedEnergy ()
     if (pow == -1)
         return -1;
     else
-        return (clkperiod * 10E-9 * pow * 10E-9 * cclass.propagating);
+        return (clkperiod * 1E-9 * pow * 1E-9 * cclass.propagating);
 }
 
 

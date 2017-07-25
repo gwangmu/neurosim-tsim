@@ -16,5 +16,19 @@ Register::Register (const char *clsname, Type type, Attr attr, RegisterWord *wpr
     this->type = type;
     this->wproto = wproto;
     this->parent = nullptr;
+
+    rdenergy = wrenergy = -1;
+    rdcount = wrcount = 0;
 }
 
+uint32_t Register::GetAccumReadEnergy ()
+{
+    if (rdenergy == -1) return -1;
+    else return (rdenergy * rdcount);
+}
+
+uint32_t Register::GetAccumWriteEnergy ()
+{
+    if (wrenergy == -1) return -1;
+    else return (wrenergy * wrcount);
+}

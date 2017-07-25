@@ -109,9 +109,9 @@ double Unit::GetConsumedEnergy ()
     if (dynpower == -1 || stapower == -1)
         return -1;
     else
-        return (clkperiod * 10E-9 * 
-                (stapower * 10E-9 * (cclass.active + cclass.idle) +
-                 dynpower * 10E-9 * cclass.active));
+        return (clkperiod * 1E-9 * 
+                (stapower * 1E-9 * (cclass.active + cclass.idle) +
+                 dynpower * 1E-9 * cclass.active));
 }
 
 

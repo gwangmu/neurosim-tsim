@@ -18,6 +18,8 @@ SparseFileRegister::SparseFileRegister (const char *clsname, Type type,
 
 const RegisterWord* SparseFileRegister::GetWord (uint64_t addr)
 {
+    IncrReadCount();
+
     if (unlikely (addr > GetAttr().addrsize))
         SIM_FATAL ("accessing out-of-bound address (addr: 0x%lu)", 
                 GetName().c_str(), addr);
@@ -29,7 +31,10 @@ const RegisterWord* SparseFileRegister::GetWord (uint64_t addr)
 
 bool SparseFileRegister::SetWord (uint64_t addr, RegisterWord *word)
 {
-    if (unlikely (addr > GetAttr().addrsize))
+    IncrWriteCount();
+
+    if (addr == -1) return true;
+    else if (unlikely (addr > GetAttr().addrsize))
     {
         SIM_FATAL ("writing out-of-bound address (addr: 0x%lu", 
                 GetName().c_str(), addr);

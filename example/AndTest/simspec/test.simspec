@@ -4,10 +4,19 @@
 FILESCRIPT_PATH(top.datasource@): example/AndTest/data/fscr@.script
 REGISTER_DATAPATH(top.datasink): example/AndTest/data/reg1.regdata
 
+REGISTER_READ_ENERGY(top.datasource0): 30
+REGISTER_WRITE_ENERGY(top.datasource0): 40
+REGISTER_READ_ENERGY(top.datasource1): 30
+REGISTER_WRITE_ENERGY(top.datasource1): 40
+REGISTER_READ_ENERGY(top.datasink): 30
+REGISTER_WRITE_ENERGY(top.datasink): 40
+
 CLOCK_PERIOD(main): 500
 
 UNIT_DYNAMIC_POWER(DataSourceModule): 300
 UNIT_STATIC_POWER(DataSourceModule): 300
+UNIT_DYNAMIC_POWER(DataSinkModule): 300
+UNIT_STATIC_POWER(DataSinkModule): 300
 
 #COMPONENT_DIS_POWER(ExampleComponent): 600
 
