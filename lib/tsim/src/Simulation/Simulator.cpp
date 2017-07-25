@@ -130,11 +130,17 @@ bool Simulator::LoadTestbench ()
                 else
                     queComps.push (comp);
             }
+
+            nextcomp->SetDissipationPower 
+                (tb->GetUIntParam (Testbench::COMPONENT_DIS_POWER, 
+                                   nextcomp->GetClassName()),
+                 KEY(Simulator));
         }
 
         PRINT ("total %u module(s), %u device(s) (with %u gate(s)), %u pathway(s) found",
                 nmodules, ndevices, ngates, npathways);
     }
+
     task ("print graphviz design source")
     {
         if (opt.gvfilename != "")
@@ -203,11 +209,6 @@ bool Simulator::LoadTestbench ()
                 mapCDoms[nclock].name = nclock;
                 mapCDoms[nclock].pathways.push_back (pathway);
             }
-
-            pathway->SetDissipationPower 
-                (tb->GetUIntParam (Testbench::PATHWAY_DIS_POWER, 
-                                   pathway->GetClassName()),
-                 KEY(Simulator));
         }
         
         for (auto &centry : mapCDoms)

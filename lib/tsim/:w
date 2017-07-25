@@ -52,36 +52,7 @@ uint32_t Component::GetDisPower ()
     return dispower;
 }
 
-double Component::GetDirectDisPower ()
-{
-    if (parent)
-        return parent->CalcDirectDisPowerShare (this);
-    else
-    {
-        uint32_t direct_dispower;
-        uint32_t edges = pathways.size();
-
-        if (dispower == -1) return -1;
-        direct_dispower = dispower;
-
-        for (Component *comp : children)
-        {
-            if (comp->GetDisPower() != -1)
-                direct_dispower -= comp->GetDisPower();
-            else
-                edges += comp->GetNumDescendantPathways();
-        }
-
-        if (!edges)
-            SYSTEM_ERROR ("component cannot have zero (direct) pathways "
-                    "(comp: %s)", GetFullName().c_str());
-
-        return ((double)direct_dispower / edges * pathways.size());
-    }
-}
-
-
-double Component::CalcDirectDisPowerShare (Component *child)
+uint32_t Component::CalcDirectDisPowerShare (Component *child)
 {
     uint32_t direct_dispower;
     uint32_t edges = pathways.size();
@@ -105,17 +76,7 @@ double Component::CalcDirectDisPowerShare (Component *child)
         SYSTEM_ERROR ("component cannot have zero (direct) pathways "
                 "(comp: %s)", GetFullName().c_str());
 
-    return ((double)direct_dispower / edges * child->pathways.size());
-}
 
-double Component::GetDisPowerPerPathway ()
-{
-    double ddispow = GetDirectDisPower ();
-    
-    if (ddispow == -1)
-        return -1;
-    else
-        return GetDirectDisPower() / pathways.size();
 }
 
 
@@ -176,7 +137,6 @@ Unit* Component::GetUnit (string name)
 void Component::SetDissipationPower (uint32_t pow, PERMIT(Simulator))
 {
     dispower = pow;
-    DEBUG_PRINT ("%s dispower = %u", GetClassName(), pow);
 }
 
 Component::CycleClass<double> Component::GetAggregateCycleClass ()
@@ -345,16 +305,6 @@ bool Component::AddChildPathway (Pathway *pathway, PERMIT(Pathway))
     pathways.push_back (pathway);
 
     return true;
-}
-
-
-uint32_t Component::GetNumDescendantPathways ()
-{
-    uint32_t npaths = pathways.size();
-    for (Component *comp: children)
-        npaths += comp->GetNumDescendantPathways ();
-
-    return npaths;
 }
 
 

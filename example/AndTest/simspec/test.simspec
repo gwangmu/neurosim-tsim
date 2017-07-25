@@ -9,4 +9,6 @@ CLOCK_PERIOD(main): 500
 UNIT_DYNAMIC_POWER(DataSourceModule): 300
 UNIT_STATIC_POWER(DataSourceModule): 300
 
+#COMPONENT_DIS_POWER(ExampleComponent): 600
+
 PARAMETER(param1): 10

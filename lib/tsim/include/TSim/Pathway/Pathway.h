@@ -88,8 +88,6 @@ public:
 
     void SetClockPeriod (uint32_t period, PERMIT(Simulator)) { clkperiod = period; }
 
-    void SetDissipationPower (uint32_t pow, PERMIT(Simulator)) { dispower = pow; }
-    uint32_t GetDissipationPower () { return dispower; }
     double GetConsumedEnergy ();
 
     uint32_t GetLatency () { return conn.conattr.latency; }
@@ -172,7 +170,6 @@ private:
 
     // property
     uint32_t clkperiod;
-    uint32_t dispower;
 
     // connection
     Connection conn;

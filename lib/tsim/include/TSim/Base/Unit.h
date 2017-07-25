@@ -46,6 +46,7 @@ public:
     /* Universal */
     Unit (const char* clsname, string iname, Component *parent);
 
+    virtual Component* GetComponent (string name) { return nullptr; }
     virtual Unit* GetUnit (string name);
     virtual uint32_t GetNumChildModules () final { return 1; }
 
