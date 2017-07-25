@@ -77,7 +77,9 @@ def generate_meta(last_addr):
     for n in range(FLAGS.neurons):
         off_board = 0
         on_board = np.random.binomial(num_neurons, sparsity)
-        length = off_board + on_board
+        length = off_board + on_board + FLAGS.delay # 1 for delay
+
+        #length = (length // FLAGS.delay) * FLAGS.delay
 
         if ((last_addr + length) > dram_idx*FLAGS.dram_size):
             offset = (dram_idx * FLAGS.dram_size) - last_addr
@@ -93,15 +95,27 @@ def generate_meta(last_addr):
             if(dram_idx > FLAGS.propagator):
                 raise ValueError ("Small dram size")
        
-        meta_table.append((last_addr, length))
-        
-        pseudo_data = (off_board << 16) | length
-        pseudo_dram[last_addr] = pseudo_data
+        delay_len = []
+        acc_len = 0
+        for d in range(FLAGS.delay):
+            d_len = float(length) * (float(d+1)/float(FLAGS.delay))
+            d_len = int(d_len + 0.5) - acc_len
+            acc_len += d_len
 
-        if(not FLAGS.pseudo):
-            dram_data += generate_syn (length) 
+            delay_len.append(d_len)
+        delay_len.append(0)
 
-        last_addr += length
+        meta_table.append((last_addr, delay_len[0]))
+        for d in range(FLAGS.delay):
+            d_len = delay_len[d]
+            
+            pseudo_data = (delay_len[d+1] << 32)  | (off_board << 16) | d_len
+            pseudo_dram[last_addr] = pseudo_data
+
+            if(not FLAGS.pseudo):
+                dram_data += generate_syn (d_len) 
+
+            last_addr += d_len
 
     return meta_table, last_addr, dram_data, pseudo_dram
 
@@ -149,9 +163,15 @@ def meta_generator():
 
     for i in range(FLAGS.propagator):
         f = open(FLAGS.path + 'data/dram/dram' + str(i) + '.script', 'w')
+        fd = open(FLAGS.path + 'data/delay/delay' + str(i) + '.script', 'w')
+        
         f.write("#!Tsim Script\n\n")
         f.write("CLASSNAME: DramFileRegister\n")
         f.write("DATA:\n")
+        
+        fd.write("#!Tsim Script\n\n")
+        fd.write("CLASSNAME: DelayFileRegister\n")
+        fd.write("DATA:\n")
 
         if(FLAGS.pseudo):
             is_end = False
@@ -181,6 +201,7 @@ def meta_generator():
                     f.write("\taddr=0x%04x, data=0x%016x\n" %(addr, 0))
 
         f.close() 
+        fd.close()
 
 def spec_generator(fast=0):
     f = open("simspec/neurosim" + str(fast)  + ".simspec", 'w')
@@ -207,6 +228,8 @@ def spec_generator(fast=0):
     f.write ("\n")
     for i in range(FLAGS.propagator):
         f.write("REGISTER_DATAPATH(top.propagator%d.axon_storage): data/dram/dram%d.script\n" \
+                %(i, i))
+        f.write("REGISTER_DATAPATH(top.propagator%d.delay_module.delay_storage): data/delay/delay%d.script\n" \
                 %(i, i))
     
     f.write ("\n# Clock\n")
@@ -287,6 +310,11 @@ if __name__ == '__main__':
             type=bool, 
             default='True',
             help="Use pseudo DRAM")
+
+    parser.add_argument("--delay",
+            type=int,
+            default=4,
+            help="Maximum delay value")
 
     FLAGS, unparsed = parser.parse_known_args()
 

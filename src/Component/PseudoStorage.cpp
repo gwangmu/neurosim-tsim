@@ -147,10 +147,12 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
                     static_cast<const DramRegisterWord *>(GetRegister()->GetWord (read_addr));
                 uint64_t data = word->value;
 
+                uint16_t next_len = (data >> 32) & (0xffff);
                 uint16_t off_ofs = (data >> 16) & (0xffff);
                 uint16_t on_ofs = (data) & (0xffff);
 
-                synmeta = SynMeta (tag, read_addr, off_ofs, on_ofs);
+                synmeta = SynMeta (tag, read_addr, off_ofs, 
+                                  on_ofs, next_len);
                 dram_state_[reqID] = synmeta;      
                 
             }
@@ -219,14 +221,17 @@ bool PseudoStorage::send (uint8_t reqID, uint64_t addr)
 {
     ramulator::Request::Type req_type = ramulator::Request::Type::READ;
 
-    auto dram_complete = [reqID, addr, this] (ramulator::Request& r) {this->callback(reqID, addr);};
+    auto dram_complete = 
+        [reqID, addr, this] (ramulator::Request& r) 
+            {this->callback(reqID, addr);};
 
     addr *= 8;
     ramulator::Request req = ramulator::Request(addr, req_type, dram_complete);
 
     if(dram_->send(req))
     {
-        INFO_PRINT ("[DRAM] Response to request (ID: %u, addr: %x)", reqID, addr);
+        INFO_PRINT ("[DRAM] Response to request (ID: %u, addr: %lx)", 
+                reqID, addr);
         return true;
     }
     else
@@ -247,6 +252,7 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
     for (int i=0; i<io_buf_size_; i++)
     {
         bool intra_board;
+        bool is_delay = false;
         uint64_t val32;
         uint32_t destrhsid;
         uint8_t target_idx; 
@@ -263,6 +269,18 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
         {
             INFO_PRINT ("[DRAM] Empty data");
             continue;
+        }
+        else if (offset + i == (synmeta.on_board_ofs-1))
+        {
+            // Delay information
+            is_delay = true;
+            intra_board = false;
+            
+            val32 = addr + synmeta.on_board_ofs;
+            val16 = synmeta.next_len;
+            target_idx = 1; 
+            
+            dram_state_[reqID].entry_cnt--;
         }
         else
         {
@@ -281,8 +299,17 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
 
         if(io_buffer[i] == nullptr)
         {
+            DramMessage::Type type;
+
+            if(intra_board)
+                type = DramMessage::REMOTE;
+            else if(is_delay)
+                type = DramMessage::DELAY;
+            else
+                type = DramMessage::SYNAPSE;
+
             io_buffer[i] = new DramMessage (destrhsid, val32, val16,
-                    intra_board, target_idx);
+                    type, target_idx);
         }
         else
         {

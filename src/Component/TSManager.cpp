@@ -32,11 +32,14 @@ TSManager::TSManager (string iname, Component *parent, uint32_t num_boards)
     ts_parity = false;
     is_finish = true;
     is_start = true;
+    is_end = false;
 
     this->num_boards = num_boards;
     this->end_counter = 0;
 
     this->cur_timestep = 0;
+
+    ts_buf_ = 3;
 }
 
 void TSManager::Operation (Message **inmsgs, Message **outmsgs, 
@@ -85,11 +88,19 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT ("[TSM] Get remote TS end signal");
     }
 
-    if (is_finish && is_start)
+    if (is_finish && is_start && !is_end)
     {
-        INFO_PRINT ("[TSM] The chip is finished");
-        outmsgs[OPORT_TSend] = new SignalMessage (-1, true);
-        end_counter++;
+        if(ts_buf_)
+            ts_buf_--;
+        else
+        {
+            INFO_PRINT ("[TSM] The board is finished");
+            outmsgs[OPORT_TSend] = new SignalMessage (-1, true);
+            end_counter++;
+
+            ts_buf_ = 3;
+            is_end = true;
+        }
     }
     else if (!is_finish && !is_start && !dyn_fin)
         is_start = true;
@@ -104,10 +115,10 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs,
         is_finish = false;
         cur_timestep++;
         is_start = false;
+        is_end = false;
 
         SIM_DEBUG ("[TSM] Current Timestep %d", cur_timestep);
         INFO_PRINT ("[TSM] Current Timestep %d", cur_timestep);
         INFO_PRINT ("[TSM] Update Timestep parity %d to %d", !ts_parity, ts_parity);
-
     }
 }

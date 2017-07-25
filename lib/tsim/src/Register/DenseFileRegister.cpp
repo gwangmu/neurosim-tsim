@@ -23,8 +23,8 @@ DenseFileRegister::DenseFileRegister (const char *clsname, Type type,
 const RegisterWord* DenseFileRegister::GetWord (uint64_t addr)
 {
     if (unlikely (addr > words.size ()))
-        SIM_FATAL ("accessing out-of-bound address (addr: 0x%lu)", 
-                GetName().c_str(), addr);
+        SIM_FATAL ("accessing out-of-bound address (addr: 0x%lu/%lu)", 
+                GetName().c_str(), addr, words.size());
 
     return words[addr];
 }
@@ -33,8 +33,8 @@ bool DenseFileRegister::SetWord (uint64_t addr, RegisterWord *word)
 {
     if (unlikely (addr > words.size ()))
     {
-        SIM_FATAL ("writing out-of-bound address (addr: 0x%lu)", 
-                GetName().c_str(), addr);
+        SIM_FATAL ("writing out-of-bound address (addr: 0x%lu/%lu)", 
+                GetName().c_str(), addr, words.size());
         return false;
     }
 

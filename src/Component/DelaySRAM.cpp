@@ -1,5 +1,8 @@
 #include <Component/DelaySRAM.h>
 
+#include <Register/DelayFileRegister.h>
+#include <Register/DelayRegisterWord.h>
+
 #include <Message/IndexMessage.h>
 #include <Message/DeltaGMessage.h>
 #include <Message/DelayMetaMessage.h>
@@ -27,6 +30,8 @@ DelaySRAM::DelaySRAM (string iname, Component* parent,
     WPORT_data = CreatePort ("wdata", Module::PORT_INPUT,
             Prototype<DelayMetaMessage>::Get());
 
+    Register::Attr regattr (col_size_, row_size_);
+    SetRegister (new DelayFileRegister (Register::SRAM, regattr));
 }
 
 
@@ -39,6 +44,7 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs,
     if(raddr_msg)
     {
         uint32_t read_addr = raddr_msg->value;
+        
         if(read_addr == 0)
         {
             SIM_FATAL ("Delay SRAM doesn't have address zero",
@@ -46,14 +52,28 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs,
             return;
         }
 
-        uint64_t next_addr = 1;
-        uint16_t addr_sub = 2;
-        uint16_t val16 = 3;
+        const DelayRegisterWord *word =
+            static_cast<const DelayRegisterWord*>
+                (GetRegister()->GetWord(read_addr));
+        if(word)
+        {
+            uint64_t next_addr = word->next_addr;
+            uint16_t addr_sub = word->addr_sub;
+            uint16_t val16 = word->val16;
 
-        outmsgs[RPORT_data] = new DelayMetaMessage (0, next_addr,
+            outmsgs[RPORT_data] = new DelayMetaMessage (0, next_addr,
                                                     addr_sub, val16);
 
-        INFO_PRINT("[DMSRAM] Receive read request, and send message");
+            INFO_PRINT ("[DeSRAM] read address %x - %lu %u %u", 
+                            read_addr, next_addr, addr_sub, val16);
+        }
+        else
+        {
+            outmsgs[RPORT_data] = new DelayMetaMessage (0, 0, 0, 0);
+            INFO_PRINT ("[DeSRAM] read null data (address %x)",
+                        read_addr);
+        }
+        
     }
 
 
@@ -63,8 +83,18 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs,
 
     if(waddr_msg && wdata_msg)
     {
-        INFO_PRINT("[DMSRAM] Receive write request");
         uint32_t write_addr = waddr_msg->value;
+        
+        INFO_PRINT("[DeSRAM] Receive write request (%u - %lu %u %u)",
+                    write_addr,
+                    wdata_msg->next_addr, 
+                    wdata_msg->addr_sub,
+                    wdata_msg->val16);
+        
+        GetRegister()->SetWord (write_addr, 
+                            new DelayRegisterWord (wdata_msg->next_addr,
+                                                   wdata_msg->addr_sub,
+                                                   wdata_msg->val16));
     }
     else if (unlikely (waddr_msg || wdata_msg))
     {

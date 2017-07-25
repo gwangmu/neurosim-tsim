@@ -54,13 +54,18 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
 
     if(dram_msg)
     {
-        bool is_board = dram_msg->intra_board;
-
-        if(is_board)
+        if(dram_msg->type == DramMessage::REMOTE)
         {
             outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16);
             outmsgs[OPORT_BoardID] = new SelectMessage (0, dram_msg->target_idx); 
             INFO_PRINT ("[AEC] Send routing information to controller");
+        }
+        else if(dram_msg->type == DramMessage::DELAY)
+        {
+            INFO_PRINT ("[AEC] Send delay information");
+            outmsgs[OPORT_Delay] = new DelayMessage (0, dram_msg->val32,
+                                                     dram_msg->val16, 
+                                                     dram_msg->target_idx);
         }
         else
         {

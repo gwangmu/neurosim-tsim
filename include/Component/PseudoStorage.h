@@ -31,11 +31,14 @@ private:
     {
         SynMeta () : 
             tag(-1), base_addr(0), 
-            off_board_ofs(0), on_board_ofs(0), entry_cnt(0) {}
+            off_board_ofs(0), on_board_ofs(0), entry_cnt(0),
+            next_len(0) {}
         
-        SynMeta (uint8_t tag, uint64_t base_addr, uint16_t off_ofs, uint16_t on_ofs) :
+        SynMeta (uint8_t tag, uint64_t base_addr, 
+                uint16_t off_ofs, uint16_t on_ofs, uint16_t next_len) :
             tag(tag), base_addr(base_addr),
-            off_board_ofs (off_ofs), on_board_ofs(on_ofs) 
+            off_board_ofs (off_ofs), on_board_ofs(on_ofs),
+            next_len (next_len)
         {
             entry_cnt = on_board_ofs;            
         }
@@ -45,6 +48,7 @@ private:
         uint16_t off_board_ofs; // Routing information
         uint16_t on_board_ofs;  // Synapse information
         uint16_t entry_cnt;
+        uint16_t next_len;
     };
     
     uint32_t PORT_addr, PORT_data;
