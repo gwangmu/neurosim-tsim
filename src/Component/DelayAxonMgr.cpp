@@ -97,8 +97,8 @@ void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            INFO_PRINT ("[DAM] INSERT state (delay %d, addr %u, len %d)",
-                         in_delay_, in_axaddr_, in_len_);
+            INFO_PRINT ("[DAM] INSERT state (delay %d, addr %lx(%lx), len %d)",
+                         in_delay_, in_axaddr_, input_msg->value, in_len_);
             state_ = INSERT;
         }
     }
@@ -398,8 +398,8 @@ int16_t DelayAxonMgr::Insert (Message **inmsgs, Message **outmsgs,
 
         if(meta_msg)
         {
-            INFO_PRINT ("[DAM] Insert-1 %u %u %u", addr_ptr_,
-                                                   in_axaddr_, in_len_);
+            INFO_PRINT ("[DAM] Insert-1 %x %lx %u", 
+                    addr_ptr_, in_axaddr_, in_len_);
             
             // Update FLA
             regFLA_ = meta_msg->next_addr;
@@ -451,7 +451,9 @@ int16_t DelayAxonMgr::Fetch (Message **inmsgs, Message **outmsgs,
 
         if(meta_msg)
         {
-            INFO_PRINT ("[DAM] Fetch-1 (new DALA %lu)", meta_msg->next_addr);
+            INFO_PRINT ("[DAM] Fetch-1 (DALA %x, addr %lx, len %d)", 
+                    meta_msg->next_addr, meta_msg->addr_sub,
+                    meta_msg->val16);
             
             // New FL elem.
             outmsgs[PORT_waddr] = new IndexMessage (0, readDALA_);

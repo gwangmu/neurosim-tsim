@@ -62,7 +62,8 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
         }
         else if(dram_msg->type == DramMessage::DELAY)
         {
-            INFO_PRINT ("[AEC] Send delay information");
+            INFO_PRINT ("[AEC] Send delay information %lx %x %u",
+                    dram_msg->val32, dram_msg->val16, dram_msg->target_idx);
             outmsgs[OPORT_Delay] = new DelayMessage (0, dram_msg->val32,
                                                      dram_msg->val16, 
                                                      dram_msg->target_idx);

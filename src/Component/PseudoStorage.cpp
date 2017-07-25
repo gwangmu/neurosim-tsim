@@ -136,7 +136,8 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
                 // Update dram state
                 if (unlikely(dram_state_[reqID].entry_cnt != 0))
                 {
-                    SIM_ERROR ("Dram state is overwritten", GetFullName().c_str());
+                    SIM_ERROR ("Dram state is overwritten", 
+                            GetFullName().c_str());
                     return;
                 }
                
@@ -144,7 +145,15 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
                         read_addr, (int)reqID, tag);
 
                 const DramRegisterWord *word =
-                    static_cast<const DramRegisterWord *>(GetRegister()->GetWord (read_addr));
+                    static_cast<const DramRegisterWord *>
+                        (GetRegister()->GetWord (read_addr));
+                if(!word)
+                {
+                    SIM_FATAL ("Data isn't existed (addr: %x)", 
+                            GetFullName().c_str(), read_addr);
+        
+                }
+
                 uint64_t data = word->value;
 
                 uint16_t next_len = (data >> 32) & (0xffff);
@@ -276,11 +285,15 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
             is_delay = true;
             intra_board = false;
             
-            val32 = addr + synmeta.on_board_ofs;
+            val32 = synmeta.base_addr + synmeta.on_board_ofs;
             val16 = synmeta.next_len;
             target_idx = 1; 
             
             dram_state_[reqID].entry_cnt--;
+            
+            INFO_PRINT("[DRAM] Read Delay information (addr %x-%x, %d)",
+                    synmeta.base_addr, addr, synmeta.on_board_ofs);
+            
         }
         else
         {

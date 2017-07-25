@@ -38,6 +38,7 @@ Propagator::Propagator (string iname, Component *parent)
     int dram_outque_size = 64 * dram_io_buf_size;
 
     int delay_storage_size = 2048;
+    int delay_input_queue_sz = 64;
 
     /** Components **/
     Component *delay_module = new DelayModule ("delay_module", this);
@@ -104,6 +105,7 @@ Propagator::Propagator (string iname, Component *parent)
                               delay_out->GetEndpoint (Endpoint::LHS));
     delay_module->Connect ("Input", 
                            delay_out->GetEndpoint (Endpoint::RHS));
+    delay_out->GetEndpoint (Endpoint::RHS)->SetCapacity (delay_input_queue_sz);
 
     axon_receiver->Connect ("idle", recv_idle->GetEndpoint (Endpoint::LHS)); 
     axon_classifier->Connect ("idle", class_idle->GetEndpoint (Endpoint::LHS)); 

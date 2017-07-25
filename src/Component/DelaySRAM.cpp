@@ -57,14 +57,14 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs,
                 (GetRegister()->GetWord(read_addr));
         if(word)
         {
-            uint64_t next_addr = word->next_addr;
-            uint16_t addr_sub = word->addr_sub;
+            uint32_t next_addr = word->next_addr;
+            uint64_t addr_sub = word->addr_sub;
             uint16_t val16 = word->val16;
 
             outmsgs[RPORT_data] = new DelayMetaMessage (0, next_addr,
                                                     addr_sub, val16);
 
-            INFO_PRINT ("[DeSRAM] read address %x - %lu %u %u", 
+            INFO_PRINT ("[DeSRAM] read address %x - %x %u %u", 
                             read_addr, next_addr, addr_sub, val16);
         }
         else
@@ -85,7 +85,7 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs,
     {
         uint32_t write_addr = waddr_msg->value;
         
-        INFO_PRINT("[DeSRAM] Receive write request (%u - %lu %u %u)",
+        INFO_PRINT("[DeSRAM] Receive write request (%x - %x %x %u)",
                     write_addr,
                     wdata_msg->next_addr, 
                     wdata_msg->addr_sub,

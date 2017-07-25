@@ -54,7 +54,8 @@ private:
         
         uint16_t delay; // relative delay
     };
-    uint16_t in_delay_, in_len_, in_axaddr_;
+    uint16_t in_delay_, in_len_;
+    uint64_t in_axaddr_;
     
     uint16_t delay_buf_;
     uint16_t addr_ptr_, prehead_ptr_;

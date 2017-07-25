@@ -24,7 +24,7 @@ public:
     }
 
 public:
-    uint64_t next_addr;
-    uint16_t addr_sub; // AxAddr (DALE), List head (PLE)
+    uint32_t next_addr;
+    uint64_t addr_sub; // AxAddr (DALE), List head (PLE)
     uint16_t val16;
 };
