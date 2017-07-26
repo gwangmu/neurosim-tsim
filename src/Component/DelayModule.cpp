@@ -27,14 +27,14 @@ DelayModule::DelayModule (string iname, Component *parent)
     : Component ("DelayModule", iname, parent)
 {
     /** Parameters **/
-    int delay_storage_size = 2048;
+    int delay_storage_size = 1048576;
 
     /** Components **/
    
     /** Modules **/
     Module *delay_mgr = new DelayAxonMgr ("delay_axon_mgr", this); 
-    Module *delay_storage = new DelaySRAM ("delay_stroage", this,
-                                           128, delay_storage_size);
+    Module *delay_storage = new DelaySRAM ("delay_storage", this,
+                                           delay_storage_size, 128);
 
     /** Module & Wires **/
     // create pathways
@@ -62,6 +62,7 @@ DelayModule::DelayModule (string iname, Component *parent)
     ExportPort ("Input", delay_mgr, "delay_input");
     ExportPort ("Output", delay_mgr, "axon_output");
     ExportPort ("TSParity", delay_mgr, "curTS");
+    ExportPort ("Idle", delay_mgr, "idle");
 }
 
 

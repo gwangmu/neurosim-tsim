@@ -209,8 +209,14 @@ void AxonStorage::callback (uint32_t reqID, uint32_t addr)
         //        intra_board, target_idx);
         if(io_buffer[i] == nullptr)
         {
+            DramMessage::Type type;
+            if(intra_board)
+                type = DramMessage::REMOTE;
+            else
+                type = DramMessage::SYNAPSE;
+            
             io_buffer[i] = new DramMessage (destrhsid, val32, val16,
-                    intra_board, target_idx);
+                    type, target_idx);
         }
         else
         {

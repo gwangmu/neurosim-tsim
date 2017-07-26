@@ -38,6 +38,7 @@ Propagator::Propagator (string iname, Component *parent)
     int dram_outque_size = 64 * dram_io_buf_size;
 
     int delay_storage_size = 2048;
+    int delay_input_queue_sz = 64;
 
     /** Components **/
     Component *delay_module = new DelayModule ("delay_module", this);
@@ -65,7 +66,7 @@ Propagator::Propagator (string iname, Component *parent)
     }
 
     
-    AndGate *prop_idle = new AndGate ("prop_idle", this, 4); 
+    AndGate *prop_idle = new AndGate ("prop_idle", this, 5); 
 
     /** Module & Wires **/
     // create pathways
@@ -86,6 +87,8 @@ Propagator::Propagator (string iname, Component *parent)
         new Wire (this, conattr, Prototype<IntegerMessage>::Get());
     Wire *dram_idle = 
         new Wire (this, conattr, Prototype<IntegerMessage>::Get());
+    Wire *delay_idle = 
+        new Wire (this, conattr, Prototype<IntegerMessage>::Get());
         
     /** Connect **/
     axon_receiver->Connect ("axon_out", axon_data->GetEndpoint (Endpoint::LHS));
@@ -102,16 +105,20 @@ Propagator::Propagator (string iname, Component *parent)
                               delay_out->GetEndpoint (Endpoint::LHS));
     delay_module->Connect ("Input", 
                            delay_out->GetEndpoint (Endpoint::RHS));
+    delay_out->GetEndpoint (Endpoint::RHS)->SetCapacity (delay_input_queue_sz);
 
     axon_receiver->Connect ("idle", recv_idle->GetEndpoint (Endpoint::LHS)); 
     axon_classifier->Connect ("idle", class_idle->GetEndpoint (Endpoint::LHS)); 
     axon_streamer->Connect ("idle", stream_idle->GetEndpoint (Endpoint::LHS));
     axon_storage->Connect ("idle", dram_idle->GetEndpoint (Endpoint::LHS));
+    delay_module->Connect ("Idle", 
+                           delay_idle->GetEndpoint (Endpoint::LHS));
 
     prop_idle->Connect ("input0", recv_idle->GetEndpoint (Endpoint::RHS));
     prop_idle->Connect ("input1", class_idle->GetEndpoint (Endpoint::RHS));
     prop_idle->Connect ("input2", stream_idle->GetEndpoint (Endpoint::RHS));
     prop_idle->Connect ("input3", dram_idle->GetEndpoint (Endpoint::RHS));
+    prop_idle->Connect ("input4", delay_idle->GetEndpoint (Endpoint::RHS));
 
     ExportPort ("Axon", axon_receiver, "axon_in"); 
     ExportPort ("PropTS", axon_classifier, "ts_parity");

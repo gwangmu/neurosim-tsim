@@ -95,7 +95,8 @@ void Endpoint::Reserve ()
     resv_count += 4;
 
     if (unlikely (resv_count + msgque.size() > capacity))
-        SYSTEM_ERROR ("queue size + resv_count exceeded capacity");
+        SYSTEM_ERROR ("[%s] queue size + resv_count exceeded capacity",
+                this->GetConnectedUnit()->GetName().c_str());
 }
 
 bool Endpoint::Assign (Message *msg)

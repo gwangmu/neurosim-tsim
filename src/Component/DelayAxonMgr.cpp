@@ -19,6 +19,8 @@ DelayAxonMgr::DelayAxonMgr (string iname, Component* parent)
             Prototype<IntegerMessage>::Get());
     PORT_output = CreatePort ("axon_output", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
+    PORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
+            Prototype<IntegerMessage>::Get());
 
     PORT_raddr = CreatePort ("raddr", Module::PORT_OUTPUT,
             Prototype<IndexMessage>::Get());
@@ -34,11 +36,12 @@ DelayAxonMgr::DelayAxonMgr (string iname, Component* parent)
     state_counter_ = 0;
     ts_parity_ = false;
     fetch_fin_ = true;
+    is_idle_ = false;
 
     reg_size_ = 64;
     for (int i=0; i<reg_size_; i++)
         internal_reg_.push_back (0);
-    regFLA_ = 0;
+    regFLA_ = 1;
     regPLA_ = 0;
     reg_head_ = 0;
 
@@ -72,6 +75,8 @@ void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs,
 
         inmsgs[PORT_input] = nullptr;
 
+        fetch_fin_ = false;
+
         INFO_PRINT ("[DAM] PROMOTE state");
         state_ = PROMOTE;
     }  
@@ -92,7 +97,8 @@ void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            INFO_PRINT ("[DAM] INSERT state");
+            INFO_PRINT ("[DAM] INSERT state (delay %d, addr %lx(%lx), len %d)",
+                         in_delay_, in_axaddr_, input_msg->value, in_len_);
             state_ = INSERT;
         }
     }
@@ -100,307 +106,378 @@ void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs,
     {
         INFO_PRINT ("[DAM] FETCH state");
         state_ = FETCH;
-
+    }
+    
+    if(state_ == IDLE && fetch_fin_)
+    {
+        if(!is_idle_)
+        {
+            INFO_PRINT ("[DAM] Delay Axon manager is idle %d",
+                    is_idle_);
+            outmsgs[PORT_idle] = new IntegerMessage (1);
+            is_idle_ = true;
+        }
+    }
+    else if(state_ != IDLE || !fetch_fin_)
+    {
+        if(is_idle_)
+        {
+            INFO_PRINT ("[DAM] Delay Axon manager is busy");
+            outmsgs[PORT_idle] = new IntegerMessage (0);
+            is_idle_ = false;
+        }
     }
 
     if(state_ == PROMOTE)
     {
-        if(state_counter_ == 0)
-        {
-            INFO_PRINT ("[DAM] Delay axon mgr is PROMOTE state");
-            // Read PLA and FLA, send read request to metadata storage
-            readFLA_ = regFLA_;
-            readPLA_ = regPLA_;
-
-            if(readPLA_ == 0)
-            {
-                state_ = IDLE;
-                state_counter_ = 0;
-            }
-            else
-            {
-                outmsgs[PORT_raddr] = new IndexMessage (0, readPLA_);
-                state_counter_++;
-            }
-
-        }
-        else if(state_counter_ == 1)
-        {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                uint16_t relative_delay = meta_msg->val16;
-                if(relative_delay == 1)
-                {
-                    // Update last DALA (Delayed Axon List Address)
-                    uint32_t last_dala = meta_msg->addr_sub;
-                    internal_reg_[reg_head_] = last_dala;
-
-                    // Update new free page
-                    outmsgs[PORT_waddr] = 
-                        new IndexMessage (0, readPLA_);
-                    outmsgs[PORT_wdata] = 
-                        new DelayMetaMessage(0, readFLA_, 0, 0);
-
-                    // Update PLA and FLA
-                    regFLA_ = readPLA_;
-                    regPLA_ = meta_msg->next_addr;
-                }
-                else
-                {
-                    // Decrement relative delay
-                    outmsgs[PORT_waddr] = new IndexMessage (0, readPLA_);
-                    outmsgs[PORT_wdata] = 
-                        new DelayMetaMessage (0, meta_msg->next_addr,
-                                meta_msg->addr_sub, 
-                                relative_delay-1);
-                }
-
-                state_ = IDLE;
-                state_counter_ = 0;
-                reg_head_++;
-            }
-        }
+        state_counter_ = Promote (inmsgs, outmsgs, state_counter_);
     }
     else if(state_ == RETRIEVE)
     {
-        // TODO Case: Update PLA
-        if(state_counter_ == 0)
-        {
-            // Read PLA and FLA, send read request to metadata storage
-            readFLA_ = regFLA_;
-            readPLA_ = regPLA_;
-
-            outmsgs[PORT_raddr] = new IndexMessage (0, readPLA_);
-
-            state_counter_++;
-        }
-        else if(state_counter_ == 1)
-        {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                delay_buf_ += meta_msg->val16;  
-
-                if(delay_buf_ >= in_delay_)
-                {
-                    // Pass to insert state
-                    state_ = INSERT;
-                    state_counter_ = 1;
-
-                    // Read free page
-                    readFLA_ = regFLA_;
-                    outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
-
-                    prehead_ptr_ = addr_ptr_;
-                    addr_ptr_ = (delay_buf_ == in_delay_)? 
-                                             meta_msg->addr_sub : 0;
-                    delay_buf_ = reg_size_;
-                }
-                else
-                {
-                    addr_ptr_ = meta_msg->next_addr;
-                    outmsgs[PORT_raddr] = new IndexMessage (0, addr_ptr_);
-                }
-            }
-        }
+        state_counter_ = Retrieve (inmsgs, outmsgs, state_counter_);
     }
     else if(state_ == INSERT)
     {
-        if(state_counter_ == 0) // Read free page
-        {
-            // Read FLA
-            readFLA_ = regFLA_;
-            outmsgs[PORT_raddr] = new IndexMessage (0, readPLA_);
-
-            // Read DALA
-            uint16_t reg_idx = (reg_head_ + in_delay_) % reg_size_;
-            addr_ptr_ = internal_reg_[reg_idx]; 
-                
-            // Update DALA
-            internal_reg_[reg_idx] = readFLA_;
-
-            state_counter_ = 1;
-        }
-        else if(state_counter_ == 1)
-        {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                // Update FLA
-                regFLA_ = meta_msg->next_addr;
-                
-                // Write data
-                outmsgs[PORT_waddr] = new IndexMessage (0, readFLA_);
-                outmsgs[PORT_wdata] = 
-                    new DelayMetaMessage (0, addr_ptr_, in_axaddr_, in_len_);
-
-                if(addr_ptr_ == 0)
-                {
-                    state_counter_ = 2;
-                    addr_ptr_ = readFLA_;
-                
-                    // Read free entry (for header)
-                    readFLA_ = regFLA_;
-                    outmsgs[PORT_raddr] = new IndexMessage (0, readPLA_);
-                }
-                else
-                {
-                    state_ = IDLE;
-                    state_counter_ = 0;
-                }
-            }
-        }
-        else if(state_counter_ == 2) // Over 255th case, write header
-        {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                // Update FLA
-                regFLA_ = meta_msg->next_addr;
-                
-                // Read preheader
-                outmsgs[PORT_raddr] = new IndexMessage (0, prehead_ptr_);
-                prePLE_.addr = prehead_ptr_; 
-
-                state_counter_ = 3;
-            }            
-        }
-        else if(state_counter_ == 3)
-        {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                // Store pre PLE
-                prePLE_.next_ptr = meta_msg->next_addr;
-                prePLE_.delay = meta_msg->val16;
-                prePLE_.list_head = meta_msg->addr_sub;
-
-                // Write new head pointer
-                uint16_t delay = in_delay_ - prePLE_.delay;
-                outmsgs[PORT_waddr] = new IndexMessage(0, readFLA_);
-                outmsgs[PORT_wdata] = 
-                    new DelayMetaMessage (0, prePLE_.next_ptr,
-                                          addr_ptr_, delay);
-
-                // Read post head pointer
-                postPLE_.addr = prePLE_.next_ptr;
-                if (postPLE_.addr != 0) 
-                {
-                    outmsgs[PORT_raddr] = 
-                        new IndexMessage(0, postPLE_.addr);
-                }
-
-                state_counter_ = 4;
-            }
-        }
-        else if(state_counter_ == 4)
-        {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                if(unlikely(!postPLE_.addr))
-                {
-                    SIM_FATAL ("postPLE is not valid", GetFullName().c_str());
-                    return;
-                }
-
-                // Store pre PLE
-                postPLE_.next_ptr = meta_msg->next_addr;
-                postPLE_.delay = meta_msg->val16;
-                postPLE_.list_head = meta_msg->addr_sub;
-
-                // Write new pre-head pointer
-                outmsgs[PORT_waddr] = new IndexMessage (0, prePLE_.addr);
-                outmsgs[PORT_wdata] = 
-                    new DelayMetaMessage (0, addr_ptr_,
-                                          prePLE_.list_head,
-                                          prePLE_.delay);
-                
-                state_counter_ = 5;
-            }
-            else if(!postPLE_.addr)
-            {
-                // Write new pre-head pointer
-                outmsgs[PORT_waddr] = new IndexMessage (0, prePLE_.addr);
-                outmsgs[PORT_wdata] = 
-                    new DelayMetaMessage (0, addr_ptr_,
-                                          prePLE_.list_head,
-                                          prePLE_.delay);
-
-                state_ = IDLE;
-                state_counter_ = 0;
-            }
-
-        }
-        else if(state_counter_ == 5)
-        {
-            // Write new post-head pointer
-            outmsgs[PORT_waddr] = new IndexMessage (0, postPLE_.addr);
-            outmsgs[PORT_wdata] = 
-                new DelayMetaMessage (0, addr_ptr_,
-                                      postPLE_.list_head,
-                                      postPLE_.delay);
-        }
+        state_counter_ = Insert (inmsgs, outmsgs, state_counter_);
     }
     else if(state_ == FETCH)
     {
-        if(state_counter_ == 0)
-        {
-            readFLA_ = regFLA_;
-            readDALA_ = internal_reg_[reg_head_];
+        state_counter_ = Fetch (inmsgs, outmsgs, state_counter_);
+    }
+}
 
-            if(readDALA_ == 0)
+int16_t DelayAxonMgr::Promote (Message **inmsgs, Message **outmsgs,
+                               int state)
+{
+    // read PLA
+    if (state == 0)
+    {
+        if (regPLA_ == 0)
+        {
+            INFO_PRINT ("[DAM] PLA is nullptr");
+            state_ = IDLE;
+
+            reg_head_ = (reg_head_ + 1) % reg_size_;
+            return 0;
+        }
+
+        INFO_PRINT ("[DAM] Delay axon mgr is PROMOTE state");
+        // Read PLA and FLA, send read request to metadata storage
+        readPLA_ = regPLA_;
+        readFLA_ = regFLA_;
+        outmsgs[PORT_raddr] = new IndexMessage (0, readPLA_);
+        return 1;
+    }
+    // 
+    else if (state == 1)
+    {
+        DelayMetaMessage *meta_msg =
+            static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
+        
+        if(meta_msg)
+        {
+            uint16_t relative_delay = meta_msg->val16;
+            if(relative_delay == 1)
             {
-                state_ = IDLE;
-                state_counter_ = 0;
-                fetch_fin_ = true;
+                INFO_PRINT ("[DAM] Update 255th DALA");
+
+                // Update last DALA (Delayed Axon List Address)
+                uint32_t last_dala = meta_msg->addr_sub;
+                internal_reg_[reg_head_] = last_dala;
+
+                // Update new free page
+                outmsgs[PORT_waddr] = 
+                    new IndexMessage (0, readPLA_);
+                outmsgs[PORT_wdata] = 
+                    new DelayMetaMessage(0, readFLA_, 0, 0);
+
+                // Update PLA and FLA
+                regFLA_ = readPLA_;
+                regPLA_ = meta_msg->next_addr;
             }
             else
             {
-                outmsgs[PORT_raddr] = new IndexMessage (0, readDALA_); 
-                state_counter_ = 1;
+                INFO_PRINT ("[DAM] Decrement relative delay (%u)",
+                             relative_delay);
+
+                // Decrement relative delay
+                outmsgs[PORT_waddr] = new IndexMessage (0, readPLA_);
+                outmsgs[PORT_wdata] = 
+                    new DelayMetaMessage (0, meta_msg->next_addr,
+                            meta_msg->addr_sub, 
+                            relative_delay-1);
             }
         }
-        else if(state_counter_ == 1)
+            
+        state_ = IDLE;
+
+        reg_head_ = (reg_head_ + 1) % reg_size_;
+        return 0;
+    }
+
+
+    return -1;
+}
+
+int16_t DelayAxonMgr::Retrieve (Message **inmsgs, Message **outmsgs,
+                               int state)
+{
+    // Read PLA
+    if(state == 0)
+    {
+        INFO_PRINT ("[DAM] Retrieve state read PLA");
+
+        // Read PLA and FLA, send read request to metadata storage
+        readFLA_ = regFLA_;
+        readPLA_ = regPLA_;
+
+        // Reset pre-PLE
+        prePLE_ = PLE();
+        postPLE_ = PLE();
+
+        if(readPLA_)
         {
-            DelayMetaMessage *meta_msg =
-                static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
-
-            if(meta_msg)
-            {
-                // New FL elem.
-                outmsgs[PORT_waddr] = new IndexMessage (0, readDALA_);
-                outmsgs[PORT_wdata] = 
-                    new DelayMetaMessage (0, readFLA_, 0, 0);
-
-                // Output
-                outmsgs[PORT_output] = 
-                    new AxonMessage (0, meta_msg->addr_sub, 
-                                    meta_msg->val16);
-              
-                // Update 0th DALA / FLA
-                internal_reg_[reg_head_] = meta_msg->next_addr;
-                regFLA_ = readDALA_; 
-               
-                state_ = IDLE;
-                state_counter_ = 0;
-            }           
-
+            outmsgs[PORT_raddr] = new IndexMessage (0, readPLA_);
+            delay_buf_ = reg_size_;
+            return 1;
+        }
+        else
+        {
+            outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
+            regPLA_ = readFLA_;
+            return 2;
         }
     }
+    // Find corresponding pointer list
+    else if (state == 1)
+    {
+        DelayMetaMessage *meta_msg =
+            static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
+
+        if(meta_msg)
+        {
+            delay_buf_ += meta_msg->val16;  
+
+            if(delay_buf_ == in_delay_) // Found it!
+            {
+                // Update head pointer
+                outmsgs[PORT_waddr] = new IndexMessage (0, addr_ptr_);
+                outmsgs[PORT_wdata] = 
+                    new DelayMetaMessage (0, meta_msg->next_addr,
+                                          readFLA_,
+                                          meta_msg->val16);
+                
+                // Read free page
+                outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
+                addr_ptr_ = meta_msg->addr_sub;
+
+                // Pass to insert state
+                state_ = INSERT;
+                return 1;
+            }
+            else if(delay_buf_ > in_delay_)
+            {
+                // Update post PLE
+                postPLE_ = PLE (addr_ptr_, meta_msg->next_addr, 
+                                delay_buf_, meta_msg->addr_sub);
+
+                // Read free page
+                outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
+           
+                // Write post-PLE
+                uint16_t rel_delay = delay_buf_ - in_delay_;
+                outmsgs[PORT_waddr] = new IndexMessage (0, addr_ptr_);
+                outmsgs[PORT_wdata] =
+                    new DelayMetaMessage (0, postPLE_.next_ptr,
+                                          rel_delay,
+                                          postPLE_.list_head);
+
+                return 2;
+            }
+            else
+            {
+                prePLE_ = PLE (addr_ptr_, meta_msg->next_addr, 
+                        delay_buf_, meta_msg->addr_sub);
+                prePLE_.delay = meta_msg->val16;
+
+                addr_ptr_ = meta_msg->next_addr;
+                
+                // Read next list entry
+                if(addr_ptr_)
+                {
+                    outmsgs[PORT_raddr] = new IndexMessage (0, addr_ptr_);
+                    return 1;
+                }
+                else // End of Pointer list
+                {
+                    // Get free entry
+                    postPLE_ = PLE();
+                    
+                    outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
+                    return 2;
+                }
+            }
+        }
+    }
+    // Write new head pointer 
+    else if (state == 2)
+    {
+        DelayMetaMessage *meta_msg =
+            static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
+
+        // List head is nullptr
+        addr_ptr_ = 0;
+
+        if(meta_msg)
+        {
+            // Update FLA
+            regFLA_ = meta_msg->next_addr;
+            if(!regFLA_)
+                regFLA_ = readFLA_ + 1;
+
+            // Write new PLE
+            // Update list head before write it
+            outmsgs[PORT_waddr] = new IndexMessage (0, readFLA_);
+            outmsgs[PORT_wdata] = 
+                new DelayMetaMessage (0, postPLE_.addr,
+                                      in_delay_ - prePLE_.abs_delay, regFLA_);
+      
+
+            if(prePLE_.addr)
+                return 3;
+            else
+            {
+                state_ = IDLE;
+                return 0;
+            }
+        }
+
+        return 2;
+    }
+    else if(state == 3)
+    {
+        // Write pre PLE
+        outmsgs[PORT_waddr] = new IndexMessage(0, prePLE_.addr);
+        outmsgs[PORT_wdata] =
+            new DelayMetaMessage (0, readFLA_, 
+                                  prePLE_.delay, prePLE_.list_head);
+
+    
+        state_ = IDLE;
+        return 0;
+    }
+
+    return -1;
 }
+
+int16_t DelayAxonMgr::Insert (Message **inmsgs, Message **outmsgs,
+                               int state)
+{
+    // Read free entry
+    if(state == 0)
+    {
+        INFO_PRINT("[DAM] INSERT-0 state (FLA: %u)", regFLA_);
+        
+        // Read FLA
+        readFLA_ = regFLA_;
+        outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
+
+        // Read DALA
+        uint16_t reg_idx = (reg_head_ + in_delay_) % reg_size_;
+        addr_ptr_ = internal_reg_[reg_idx]; 
+            
+        // Update DALA
+        internal_reg_[reg_idx] = readFLA_;
+
+        return 1;
+    }
+    else if(state == 1)
+    {
+        DelayMetaMessage *meta_msg =
+            static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
+
+        if(meta_msg)
+        {
+            INFO_PRINT ("[DAM] Insert-1 %x %lx %u", 
+                    addr_ptr_, in_axaddr_, in_len_);
+            
+            // Update FLA
+            regFLA_ = meta_msg->next_addr;
+            if(!regFLA_)
+                regFLA_ = readFLA_ + 1;
+
+            // Write data
+            outmsgs[PORT_waddr] = new IndexMessage (0, readFLA_);
+            outmsgs[PORT_wdata] = 
+                new DelayMetaMessage (0, addr_ptr_, in_axaddr_, in_len_);
+        
+            state_ = IDLE;
+            return 0;
+        }      
+
+        return 1;
+    }
+
+
+    return -1;
+}
+
+int16_t DelayAxonMgr::Fetch (Message **inmsgs, Message **outmsgs,
+                               int state)
+{
+    if (state == 0)
+    {
+        readFLA_ = regFLA_;
+        readDALA_ = internal_reg_[reg_head_];
+        
+        INFO_PRINT ("[DAM] Fetch-0 (FLA %u DALA %u)", readFLA_, readDALA_);
+
+        if(readDALA_ == 0)
+        {
+            state_ = IDLE;
+            fetch_fin_ = true;
+            return 0;
+        }
+        else
+        {
+            outmsgs[PORT_raddr] = new IndexMessage (0, readDALA_);
+            return 1;
+        }
+    }
+    else if (state == 1)
+    {
+        DelayMetaMessage *meta_msg =
+            static_cast<DelayMetaMessage*> (inmsgs[PORT_rdata]);
+
+        if(meta_msg)
+        {
+            INFO_PRINT ("[DAM] Fetch-1 (DALA %x, addr %lx, len %d)", 
+                    meta_msg->next_addr, meta_msg->addr_sub,
+                    meta_msg->val16);
+            
+            // New FL elem.
+            outmsgs[PORT_waddr] = new IndexMessage (0, readDALA_);
+            outmsgs[PORT_wdata] = 
+                new DelayMetaMessage (0, readFLA_, 0, 0);
+
+            // Output
+            outmsgs[PORT_output] = 
+                new AxonMessage (0, meta_msg->addr_sub, 
+                                meta_msg->val16);
+          
+            // Update 0th DALA / FLA
+            internal_reg_[reg_head_] = meta_msg->next_addr;
+            regFLA_ = readDALA_; 
+           
+            state_ = IDLE;
+            return 0; 
+        }
+
+        return 1;
+    }
+
+    return -1;
+}
+
 
 

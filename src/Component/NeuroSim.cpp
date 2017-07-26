@@ -145,7 +145,10 @@ NeuroSim::NeuroSim (string iname, Component *parent)
                                                           num_chips + (2*i+1)));
         propagators[i]->Connect ("DelayAxon", 
                                  axon_data[i]->GetEndpoint (Endpoint::LHS, 
-                                                           num_chips)); 
+                                                           num_chips));
+        axon_data[i]
+            ->GetEndpoint (Endpoint::LHS, num_chips)
+            ->SetCapacity (1);
 
 
         propagators[i]->Connect ("Synapse", syn_data[i]->GetEndpoint (Endpoint::LHS));
