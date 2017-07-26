@@ -42,6 +42,7 @@ public:
         COMPONENT_DIS_POWER,
         REGISTER_READ_ENERGY,
         REGISTER_WRITE_ENERGY,
+        REGISTER_STATIC_POWER,
         PARAMETER
     };
 
@@ -72,5 +73,6 @@ protected:
     map<string, uint32_t> compdispow;
     map<string, uint32_t> regwrenergy;
     map<string, uint32_t> regrdenergy;
+    map<string, uint32_t> regstapow;
     map<string, uint32_t> modparams;
 };

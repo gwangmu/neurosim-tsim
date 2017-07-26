@@ -43,11 +43,14 @@ public:
     /* Called by 'Simulator' */
     void SetReadEnergy (uint32_t rdenergy) { this->rdenergy = rdenergy; }
     void SetWriteEnergy (uint32_t wrenergy) { this->wrenergy = wrenergy; }
+    void SetStaticPower (uint32_t stapower) { this->stapower = stapower; }
     uint32_t GetReadEnergy () { return rdenergy; }
     uint32_t GetWriteEnergy () { return wrenergy; }
+    uint32_t GetStaticPower () { return stapower; }
 
-    uint32_t GetAccumReadEnergy ();
-    uint32_t GetAccumWriteEnergy ();
+    double GetConsumedStaticEnergy ();
+    double GetAccumReadEnergy ();
+    double GetAccumWriteEnergy ();
 
     // TODO: need to be optimized
     virtual const RegisterWord* GetWord (uint64_t addr) = 0;
@@ -66,6 +69,7 @@ private:
 
     uint32_t rdenergy;
     uint32_t wrenergy;
+    uint32_t stapower;
     uint32_t rdcount;
     uint32_t wrcount;
 };

@@ -174,6 +174,8 @@ bool Simulator::LoadTestbench ()
             if (module->GetRegister())
             {
                 Register *reg = module->GetRegister();
+                reg->SetStaticPower (tb->GetUIntParam (Testbench::REGISTER_STATIC_POWER,
+                            module->GetFullNameWOClass()));
                 reg->SetReadEnergy (tb->GetUIntParam (Testbench::REGISTER_READ_ENERGY,
                             module->GetFullNameWOClass()));
                 reg->SetWriteEnergy (tb->GetUIntParam (Testbench::REGISTER_WRITE_ENERGY,
@@ -821,7 +823,7 @@ void Simulator::ReportSimulationSummary ()
     double energy = tb->GetTopComponent(KEY(Simulator))->GetAggregateConsumedEnergy ();
     ROW ("Estimated energy (J)", (energy == -1 ? "Unknown" : to_string(energy).c_str()));
 
-    double power = energy / (curtime * 1E-9);
+    double power = energy / (curtime * 10E-9);
     ROW ("Estimated power (W)", (energy == -1 ? "Unknown" : to_string(power).c_str()));
 
     STROKE;
@@ -898,9 +900,9 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
                 to_string(ecount.stalled) + " cycle(s))";
 
         double avgactive = (double)cclass.active / (cclass.active + cclass.idle) * 100;
-        double oenergy = unit->GetConsumedEnergy (); 
+        double oenergy = unit->GetConsumedEnergy ();
         double energy = oenergy * 1000;
-        double power = energy / (curtime * 1E-9);
+        double power = energy / (curtime * 10E-9);
 
         ROW (indented_name.c_str(), avgactive, 
                 (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
@@ -962,7 +964,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
             (aggcclass.active + aggcclass.idle) * 100;
         double oenergy = comp->GetAggregateConsumedEnergy (); 
         double energy = oenergy * 1000;
-        double power = energy / (curtime * 1E-9);
+        double power = energy / (curtime * 10E-9);
 
         ROW (indented_name.c_str(), avgactive,
                 (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
@@ -993,7 +995,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 
             double oenergy = pathway->GetConsumedEnergy (); 
             double energy = oenergy * 1000;
-            double power = energy / (curtime * 1E-9);
+            double power = energy / (curtime * 10E-9);
 
             ROW (indented_name.c_str(), avgpactive,
                     (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
