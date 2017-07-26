@@ -11,7 +11,6 @@ DeltaStorage::DeltaStorage (string iname, Component* parent,
         uint32_t row_size, uint32_t col_size)
     : Module ("DeltaStorage", iname, parent, 1)
 {
-
     NPORT_raddr = CreatePort ("nr_addr", Module::PORT_INPUT,
             Prototype<IndexMessage>::Get());
     NPORT_rdata = CreatePort ("nr_data", Module::PORT_OUTPUT,

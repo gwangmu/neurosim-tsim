@@ -50,6 +50,8 @@ DelayAxonMgr::DelayAxonMgr (string iname, Component* parent)
     in_axaddr_ = 0;
 
     delay_buf_ = reg_size_;
+
+    entry_cnt_ = 0;
 }
 
 void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs, 
@@ -102,7 +104,7 @@ void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs,
             state_ = INSERT;
         }
     }
-    else if (!fetch_fin_)
+    else if (!fetch_fin_ && (outque_size[PORT_output] < 2))
     {
         INFO_PRINT ("[DAM] FETCH state");
         state_ = FETCH;

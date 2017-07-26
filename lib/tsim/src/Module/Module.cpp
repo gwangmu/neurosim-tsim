@@ -182,8 +182,10 @@ void Module::PreClock (PERMIT(Simulator))
                 {
                     INFO_PRINT("[FW] %s(%s) is stalled (capacity %d) (condition %d || %d)",
                             GetFullName().c_str(),
-                            outport.endpt->GetConnectedPortName().c_str(), outport.endpt->GetCapacity(),
-                            !outport.endpt->IsSelectedLHSOfThisCycle (), outport.endpt->IsOverloaded()
+                            outport.endpt->GetConnectedPortName().c_str(), 
+                            outport.endpt->GetCapacity(),
+                            !outport.endpt->IsSelectedLHSOfThisCycle (), 
+                            outport.endpt->IsOverloaded()
                             );
                     stalled = true;
                     break;

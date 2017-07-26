@@ -107,14 +107,20 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
 
     if(clk_parity_)
     {
+        // Output queue is full
+        bool is_full = entry_cnt + io_buf_size_ + outque_size[PORT_data]
+                        > outque_size_;
+        if(is_full)
+        {
+            inmsgs[PORT_addr] = nullptr;
+            raddr_msg = nullptr;
+        }
+            
         if(raddr_msg)
         {
-            INFO_PRINT ("[DRAM] Receive dram request");
+            INFO_PRINT ("[DRAM] Receive dram request %d/%d",
+                    entry_cnt + io_buf_size_, outque_size_);
 
-            // Output queue is full
-            if(((entry_cnt + io_buf_size_) > outque_size_))
-                inmsgs[PORT_addr] = nullptr;
-            
             uint32_t read_addr = raddr_msg->value;
             
             // Check tag

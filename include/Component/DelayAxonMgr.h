@@ -72,4 +72,7 @@ private:
     int16_t Insert (Message **inmsgs, Message **outmsgs, int state);
     int16_t Promote (Message **inmsgs, Message **outmsgs, int state);
     int16_t Fetch (Message **inmsgs, Message **outmsgs, int state);
+
+    // Statistics
+    int entry_cnt_;
 };

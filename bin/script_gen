@@ -1,10 +1,10 @@
 #!/bin/bash
 python data/script_generator.py \
-           --neurons=$1 --timestep=10 \
+           --neurons=$1 --timestep=5 \
            --chip=8 --core=8 --propagator=4 --dram_size=$2 \
            --spike_rate=10 --sparsity=0.002
 
 cp simspec/neurosim0.simspec simspec/neurosim.simspec
 cat simspec/neurosim.simspec
 
-# bin/script_gen 16384 550000000
+# bin/script_gen 16384 555000000

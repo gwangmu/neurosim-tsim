@@ -38,7 +38,7 @@ Propagator::Propagator (string iname, Component *parent)
     int dram_outque_size = 64 * dram_io_buf_size;
 
     int delay_storage_size = 2048;
-    int delay_input_queue_sz = 64;
+    int delay_input_queue_sz = 256;
 
     /** Components **/
     Component *delay_module = new DelayModule ("delay_module", this);

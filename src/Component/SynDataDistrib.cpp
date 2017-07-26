@@ -13,7 +13,8 @@
 
 using namespace std;
 
-SynDataDistrib::SynDataDistrib (string iname, Component *parent, uint32_t num_propagator)
+SynDataDistrib::SynDataDistrib (string iname, Component *parent, 
+        uint32_t num_propagator)
     : Module ("SynDataDistrib", iname, parent, 1)
 {
     SetClock ("dram");
@@ -21,17 +22,22 @@ SynDataDistrib::SynDataDistrib (string iname, Component *parent, uint32_t num_pr
     num_prop_ = num_propagator;;
     for (int i=0; i<num_prop_; i++)
     {
-        IPORT_Syn.push_back (CreatePort("syn_in" + to_string(i), Module::PORT_INPUT,
+        IPORT_Syn.push_back (CreatePort("syn_in" + to_string(i), 
+                    Module::PORT_INPUT,
                     Prototype<SynapseMessage>::Get()));
-        IPORT_Cidx.push_back (CreatePort("syn_cidx" + to_string(i), Module::PORT_INPUT,
+        IPORT_Cidx.push_back (CreatePort("syn_cidx" + to_string(i), 
+                    Module::PORT_INPUT,
                     Prototype<SelectMessage>::Get()));
-        IPORT_TS.push_back (CreatePort("syn_ts_in" + to_string(i), Module::PORT_INPUT,
+        IPORT_TS.push_back (CreatePort("syn_ts_in" + to_string(i), 
+                    Module::PORT_INPUT,
                     Prototype<SignalMessage>::Get()));
 
         
-        OPORT_Syn.push_back (CreatePort("syn_out" + to_string(i), Module::PORT_OUTPUT,
+        OPORT_Syn.push_back (CreatePort("syn_out" + to_string(i), 
+                    Module::PORT_OUTPUT,
                     Prototype<SynapseMessage>::Get()));
-        OPORT_TS.push_back (CreatePort("syn_ts_out" + to_string(i), Module::PORT_OUTPUT,
+        OPORT_TS.push_back (CreatePort("syn_ts_out" + to_string(i), 
+                    Module::PORT_OUTPUT,
                     Prototype<SignalMessage>::Get()));
     }
 }
@@ -42,9 +48,12 @@ void SynDataDistrib::Operation (Message **inmsgs, Message **outmsgs,
 
     for (int i=0; i<num_prop_; i++)
     {
-        SynapseMessage *syn_msg = static_cast<SynapseMessage*>(inmsgs[IPORT_Syn[i]]);
-        SelectMessage *sel_msg = static_cast<SelectMessage*> (inmsgs[IPORT_Cidx[i]]);
-        SignalMessage *ts_msg = static_cast<SignalMessage*> (inmsgs[IPORT_TS[i]]);
+        SynapseMessage *syn_msg = 
+            static_cast<SynapseMessage*>(inmsgs[IPORT_Syn[i]]);
+        SelectMessage *sel_msg = 
+            static_cast<SelectMessage*> (inmsgs[IPORT_Cidx[i]]);
+        SignalMessage *ts_msg =
+            static_cast<SignalMessage*> (inmsgs[IPORT_TS[i]]);
 
         if(syn_msg && sel_msg )
         {

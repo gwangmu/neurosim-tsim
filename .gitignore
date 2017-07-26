@@ -17,3 +17,4 @@ parse.py
 tmp/
 *script
 log
+lib/tsim/obj/*
