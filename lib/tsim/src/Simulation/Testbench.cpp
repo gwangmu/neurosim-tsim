@@ -6,6 +6,7 @@
 #define SET_COMPONENT_DIS_POWER(comp,pow) compdispow[comp] = pow
 #define SET_REGISTER_READ_ENERGY(mod,pow) regrdenergy[mod] = pow
 #define SET_REGISTER_WRITE_ENERGY(mod,pow) regwrenergy[mod] = pow
+#define SET_REGISTER_STATIC_POWER(reg,pow) regstapow[reg] = pow
 #define SET_PARAMETER(pname,param) modparams[pname] = param
 
 #include <TSim/Simulation/Testbench.h>
@@ -116,6 +117,11 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_REGISTER_WRITE_ENERGY (toked[1], stoi (toked[2]));
                 DEBUG_PRINT ("register wrenergy (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
+            else if (toked[0] == "REGISTER_STATIC_POWER")    
+            {
+                SET_REGISTER_STATIC_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("reg stapower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
             else if (toked[0] == "PARAMETER")
             {
                 SET_PARAMETER (toked[1], stoi (toked[2]));
@@ -216,6 +222,13 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype, string pname)
     {
         if (regwrenergy.count (pname))
             return regwrenergy[pname];
+        else
+            return -1;
+    }
+    else if (ptype == Testbench::REGISTER_STATIC_POWER)
+    {
+        if (regstapow.count (pname))
+            return regstapow[pname];
         else
             return -1;
     }

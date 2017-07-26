@@ -59,6 +59,8 @@ public:
     uint32_t GetStaticPower () { return stapower; }
     virtual double GetConsumedEnergy ();
 
+    uint32_t GetTotalCycleCount () { return cclass.active + cclass.idle; }
+
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();
     virtual double GetAggregateConsumedEnergy ();

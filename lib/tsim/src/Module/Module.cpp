@@ -99,10 +99,12 @@ double Module::GetConsumedEnergy ()
 
     if (reg)
     {
+        if (reg->GetStaticPower () != -1)
+            energy += reg->GetConsumedStaticEnergy();
         if (reg->GetReadEnergy() != -1)
-            energy += reg->GetAccumReadEnergy() * 1E-9;
+            energy += reg->GetAccumReadEnergy();
         if (reg->GetWriteEnergy() != -1)
-            energy += reg->GetAccumWriteEnergy() * 1E-9;
+            energy += reg->GetAccumWriteEnergy();
     }
     
     return energy;
@@ -121,13 +123,13 @@ IssueCount Module::Validate (PERMIT(Simulator))
 
     if (GetDynamicPower() == -1)
     {
-        //DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
+        DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
         icount.warning++;
     }
 
     if (GetStaticPower() == -1)
     {
-        //DESIGN_WARNING ("no static power info", GetFullName().c_str());
+        DESIGN_WARNING ("no static power info", GetFullName().c_str());
         icount.warning++;
     }
 
@@ -135,6 +137,30 @@ IssueCount Module::Validate (PERMIT(Simulator))
     {
         SYSTEM_ERROR ("no clock period (module: %s)", GetFullName().c_str());
         icount.error++;
+    }
+
+    if (reg)
+    {
+        if (reg->GetStaticPower() == -1)
+        {
+            DESIGN_WARNING ("no register static power info. assuming 0.", 
+                    GetFullName().c_str());
+            icount.warning++;
+        }
+
+        if (reg->GetReadEnergy() == -1)
+        {
+            DESIGN_WARNING ("no register read energy info. assuming 0.", 
+                    GetFullName().c_str());
+            icount.warning++;
+        }
+
+        if (reg->GetWriteEnergy() == -1)
+        {
+            DESIGN_WARNING ("no register write energy info. assuming 0.", 
+                    GetFullName().c_str());
+            icount.warning++;
+        }
     }
 
     for (auto i = 0; i < ninports; i++)
