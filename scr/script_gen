@@ -1,4 +1,7 @@
 #!/bin/bash
+
+mkdir -p data data/dram data/spikes data/delay
+
 python data/script_generator.py \
            --neurons=$1 --timestep=5 \
            --chip=8 --core=8 --propagator=4 --dram_size=$2 \
