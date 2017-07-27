@@ -1,0 +1,7 @@
+#!/bin/bash
+python data/script_generator.py \
+           --neurons=16 --timestep=5 \
+           --chip=1 --core=1 --propagator=1 --dram_size=256 \
+           --spike_rate=1000 --sparsity=0.5 --delay=4
+
+ln -s simspec/neurosim0.simspec simspec/neurosim.simspec
