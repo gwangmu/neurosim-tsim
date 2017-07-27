@@ -13,7 +13,7 @@ class Module;
 class Register: public Metadata
 {
 public:
-    enum Type { FF, SRAM };
+    enum Type { FF, SRAM, DRAM };
 
     struct Attr
     {

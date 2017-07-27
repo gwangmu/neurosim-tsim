@@ -108,10 +108,11 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs,
                 (GetRegister()->GetWord (idx_counter_));
             uint64_t metadata = word->value;
 
-            uint64_t ax_addr = metadata >> 16;
+            uint16_t delay = (metadata >> 52) & 0x3ff;
+            uint64_t ax_addr = (metadata >> 16) & 0xfffffffff;
             uint16_t ax_len = metadata & 0xffff;
             
-            outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, ax_len); 
+            outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, ax_len, delay); 
         }
         else
         {

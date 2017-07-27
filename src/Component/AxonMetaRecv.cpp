@@ -19,6 +19,8 @@ AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
             Prototype<AxonMessage>::Get());
     OPORT_Axon = CreatePort ("axon_out", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
+    OPORT_delay = CreatePort ("delay_out", Module::PORT_OUTPUT,
+            Prototype<AxonMessage>::Get());
     OPORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
 
@@ -33,7 +35,14 @@ void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs,
     if(axon_msg)
     {
         INFO_PRINT ("[AMR] Receive message (addr %lu)", axon_msg->value);
-        outmsgs[OPORT_Axon] = new AxonMessage (0, axon_msg->value, axon_msg->len);
+
+        if(!axon_msg->delay)
+            outmsgs[OPORT_Axon] = 
+                new AxonMessage (0, axon_msg->value, axon_msg->len);
+        else    
+            outmsgs[OPORT_delay] = 
+                new AxonMessage (0, axon_msg->value, 
+                                axon_msg->len, axon_msg->delay);
 
         if (is_idle_)
         {

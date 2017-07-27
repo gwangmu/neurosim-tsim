@@ -64,7 +64,7 @@ def generate_syn (length):
 
     return dram_data
 
-def generate_meta(last_addr):
+def generate_meta(last_addr, core_neurons):
     num_neurons = FLAGS.neurons * FLAGS.core * FLAGS.chip
     sparsity = FLAGS.sparsity
     
@@ -74,7 +74,7 @@ def generate_meta(last_addr):
 
     dram_idx = (last_addr / FLAGS.dram_size) + 1
 
-    for n in range(FLAGS.neurons):
+    for n in range(core_neurons):
         off_board = 0
         on_board = np.random.binomial(num_neurons, sparsity)
         length = off_board + on_board + FLAGS.delay # 1 for delay
@@ -119,8 +119,6 @@ def generate_meta(last_addr):
 
     return meta_table, last_addr, dram_data, pseudo_dram
 
-     
-
 def meta_generator():
     np.random.seed(946)
 
@@ -139,7 +137,8 @@ def meta_generator():
             f.write("CLASSNAME: MetaFileRegister\n")
             f.write("DATA:\n")
             
-            meta, last_addr, dram, pseudo_dram = generate_meta(last_addr)
+            meta, last_addr, dram, pseudo_dram = \
+                            generate_meta(last_addr, FLAGS.neurons)
             
             if(FLAGS.pseudo):
                 dram_info.append (pseudo_dram)
@@ -154,12 +153,30 @@ def meta_generator():
 
             f.close()
 
-    print "Required DRAM size", last_addr // FLAGS.propagator
+    # Write input neurons
+    input_neurons_n = FLAGS.neurons * FLAGS.core * FLAGS.chip // 10
+    meta, last_addr, dram, pseudo_dram = \
+            generate_meta(last_addr, input_neurons_n)
 
-    # dram_size = 1
-    # while (dram_size < (len(dram_info) // FLAGS.propagator)):
-    #     dram_size = dram_size * 2
-    # FLAGS.dram_size = dram_size
+    if(FLAGS.pseudo):
+        dram_info.append (pseudo_dram)
+    else:
+        dram_info += dram
+
+    f = open(FLAGS.path + 'data/input.script', 'w')
+    f.write("#!Tsim Script\n\n")
+    f.write("CLASSNAME: InputFileRegister\n")
+    f.write("DATA:\n")
+           
+    for idx, m in enumerate(meta):
+        addr, length = m
+
+        d = (addr << 16) | (length)
+        f.write("\taddr=0x%04x, data=0x%016x\n" %(idx, d))
+
+    f.close()
+
+    print "Required DRAM size", last_addr // FLAGS.propagator
 
     for i in range(FLAGS.propagator):
         f = open(FLAGS.path + 'data/dram/dram' + str(i) + '.script', 'w')
@@ -231,7 +248,9 @@ def spec_generator(fast=0):
                 %(i, i))
         f.write("REGISTER_DATAPATH(top.propagator%d.delay_module.delay_storage): data/delay/delay%d.script\n" \
                 %(i, i))
-    
+   
+        f.write ("REGISTER_DATAPATH(top.input_feeder): data/input.script\n")
+
     f.write ("\n# Clock\n")
     f.write ("CLOCK_PERIOD(main): 4\n")
     f.write ("CLOCK_PERIOD(dram): 1\n")
@@ -246,6 +265,11 @@ def spec_generator(fast=0):
     f.write ("PARAMETER(max_timestep): %d\n" %(FLAGS.timestep))
     f.write ("PARAMETER(pseudo): %d\n" %(FLAGS.pseudo))
     f.write ("PARAMETER(fast): %d\n" %(fast))
+    f.write ("PARAMETER(spk_freq): %d\n" %(FLAGS.spike_rate))
+    f.write ("PARAMETER(time_scale): %d\n" %(10000))
+
+    input_neurons_n = FLAGS.neurons * FLAGS.core * FLAGS.chip // 10
+    f.write ("PARAMETER(num_input_neurons): %d\n" %(input_neurons_n))
 
     f.write ("\n# Unit power\n")
 

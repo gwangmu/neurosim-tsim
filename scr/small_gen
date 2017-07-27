@@ -4,4 +4,7 @@ python data/script_generator.py \
            --chip=1 --core=1 --propagator=1 --dram_size=256 \
            --spike_rate=1000 --sparsity=0.5 --delay=4
 
-ln -s simspec/neurosim0.simspec simspec/neurosim.simspec
+rm simspec/neurosim.simspec
+cd simspec
+ln -s neurosim0.simspec neurosim.simspec
+cd ..

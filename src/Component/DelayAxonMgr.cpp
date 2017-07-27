@@ -1,10 +1,9 @@
 #include <Component/DelayAxonMgr.h>
 
-#include <Message/DelayMessage.h>
+#include <Message/AxonMessage.h>
 #include <Message/DelayMetaMessage.h>
 #include <Message/SignalMessage.h>
 #include <Message/IndexMessage.h>
-#include <Message/AxonMessage.h>
 
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
@@ -14,7 +13,7 @@ DelayAxonMgr::DelayAxonMgr (string iname, Component* parent)
     : Module ("DelayAxonMgr", iname, parent, 1)
 {
     PORT_input = CreatePort ("delay_input", Module::PORT_INPUT,
-            Prototype<DelayMessage>::Get());
+            Prototype<AxonMessage>::Get());
     PORT_TSparity = CreatePort ("curTS", Module::PORT_INPUT,
             Prototype<IntegerMessage>::Get());
     PORT_output = CreatePort ("axon_output", Module::PORT_OUTPUT,
@@ -61,8 +60,8 @@ void DelayAxonMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     IntegerMessage *ts_msg = 
         static_cast<IntegerMessage*> (inmsgs[PORT_TSparity]);
-    DelayMessage *input_msg =
-        static_cast<DelayMessage*> (inmsgs[PORT_input]);
+    AxonMessage *input_msg =
+        static_cast<AxonMessage*> (inmsgs[PORT_input]);
 
     if(ts_msg && (ts_parity_ != ts_msg->value))
     {
