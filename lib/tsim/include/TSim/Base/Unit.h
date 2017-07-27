@@ -1,7 +1,9 @@
 #pragma once
 
 #include <TSim/Base/Component.h>
+#include <TSim/Pathway/Message.h>
 #include <TSim/Interface/IClockable.h>
+#include <TSim/Interface/IWarmUp.h>
 
 #include <cinttypes>
 #include <string>
@@ -14,7 +16,7 @@ class Simulator;
 class Message;
 
 
-class Unit: public Component, public IClockable
+class Unit: public Component, public IClockable, public IWarmUp
 {
 public:
     enum PortType { PORT_UNKNOWN, PORT_INPUT, PORT_CONTROL, PORT_OUTPUT };
@@ -86,6 +88,7 @@ public:
     bool IsControlPort (string portname);
 
     /* Called by 'Simulator' */
+    virtual void WarmUp (PERMIT(Simulator));
     virtual IssueCount Validate (PERMIT(Simulator)) = 0;
     virtual void PreClock (PERMIT(Simulator)) = 0;
     virtual void PostClock (PERMIT(Simulator)) = 0;
@@ -120,6 +123,17 @@ protected:
     // report
     CycleClass<uint64_t> cclass;
     EventCount<uint64_t> ecount;
+
+    // warm-up
+    struct EndpointInfo
+    {
+        bool plainmsg;
+        bool zerocap;
+    };
+
+    EndpointInfo ineptinfos[MAX_MODULE_PORTS];
+    EndpointInfo outeptinfos[MAX_MODULE_PORTS];
+    EndpointInfo ctrleptinfos[MAX_MODULE_PORTS];
 
 private:
     // property

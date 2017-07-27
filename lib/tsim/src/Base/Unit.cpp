@@ -164,6 +164,31 @@ bool Unit::IsControlPort (string portname)
 }
 
 
+void Unit::WarmUp (PERMIT(Simulator))
+{
+    for (auto i = 0; i < ninports; i++)
+    {
+        ineptinfos[i].plainmsg = (inports[i].endpt->GetMsgPrototype()->
+                GetType() == Message::PLAIN);
+        ineptinfos[i].zerocap = (inports[i].endpt->GetCapacity() == 0);
+    }
+
+    for (auto i = 0; i < noutports; i++)
+    {
+        outeptinfos[i].plainmsg = (outports[i].endpt->GetMsgPrototype()->
+                GetType() == Message::PLAIN);
+        outeptinfos[i].zerocap = (outports[i].endpt->GetCapacity() == 0);
+    }
+
+    for (auto i = 0; i < nctrlports; i++)
+    {
+        ctrleptinfos[i].plainmsg = (ctrlports[i].endpt->GetMsgPrototype()->
+                GetType() == Message::PLAIN);
+        ctrleptinfos[i].zerocap = (ctrlports[i].endpt->GetCapacity() == 0);
+    }
+}
+
+
 string Unit::GetGraphVizBody (uint32_t level)
 {
     string body = "";

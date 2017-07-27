@@ -623,6 +623,19 @@ bool Simulator::Simulate ()
             cdomains[i].nexttime = i;
     }
 
+    macrotask ("Warming up..")
+    {
+        for (ClockDomain &cdom : cdomains)
+        {
+            for (Module *module : cdom.modules)
+                module->WarmUp (KEY(Simulator));
+            for (Device *device : cdom.devices)
+                device->WarmUp (KEY(Simulator));
+            for (Pathway *pathway : cdom.pathways)
+                pathway->WarmUp (KEY(Simulator));
+        }
+    }
+
     macrotask ("Starting simulation..")
     {
         uint64_t nexttstime = 0;

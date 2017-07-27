@@ -281,6 +281,24 @@ bool Pathway::IsControlPathway ()
     return false;
 }
 
+
+void Pathway::WarmUp (PERMIT(Simulator))
+{
+    numlhs = endpts.lhs.size();
+    numrhs = endpts.rhs.size();
+
+    has0caprhs = false;
+    for (auto i = 0; i < endpts.rhs.size(); i++)
+    {
+        if (endpts.rhs[i].GetCapacity() == 0)
+        {
+            has0caprhs = true;   
+            break;
+        }
+    }
+}
+
+
 IssueCount Pathway::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
@@ -477,7 +495,7 @@ void Pathway::PostClock (PERMIT(Simulator))
     // TODO: optimize this (cache RHSs whos capacity is 0)
     Message *sampledmsg = conn.Sample ();
 
-    if (sampledmsg)
+    if (has0caprhs && sampledmsg)
     {
         if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
         {

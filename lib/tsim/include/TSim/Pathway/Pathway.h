@@ -3,7 +3,9 @@
 #include <TSim/Base/Metadata.h>
 #include <TSim/Interface/IValidatable.h>
 #include <TSim/Interface/IClockable.h>
+#include <TSim/Interface/IWarmUp.h>
 #include <TSim/Pathway/Endpoint.h>
+#include <TSim/Pathway/Message.h>
 #include <TSim/Base/IssueCount.h>
 
 #include <cinttypes>
@@ -18,7 +20,8 @@ class Simulator;
 class Message;
 
 
-class Pathway: public Metadata, public IValidatable, public IClockable
+class Pathway: public Metadata, public IValidatable, 
+    public IClockable, public IWarmUp
 {
 private:
     static const uint32_t MAX_ENDPOINTS = 64;
@@ -140,6 +143,7 @@ public:
     }
 
     /* Called by 'Simulator' */
+    virtual void WarmUp (PERMIT(Simulator));
     virtual IssueCount Validate (PERMIT(Simulator)) final;
     virtual void PreClock (PERMIT(Simulator)) final;
     virtual void PostClock (PERMIT(Simulator)) final;
@@ -196,6 +200,12 @@ private:
     // report
     CycleClass<uint64_t> cclass;
     EventCount<uint64_t> ecount;
+
+    // warm-up
+    uint32_t numlhs;
+    uint32_t numrhs;
+    bool has0caprhs;
+    Message::Type msgtype;
 };
 
 
