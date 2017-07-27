@@ -16,5 +16,6 @@ makegv
 parse.py
 tmp/
 *script
-log
+log*
 lib/tsim/obj/*
+oprof*

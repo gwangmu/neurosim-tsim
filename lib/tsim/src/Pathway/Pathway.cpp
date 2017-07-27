@@ -381,7 +381,7 @@ void Pathway::PreClock (PERMIT(Simulator))
             {
                 operation ("broadcast message")
                 {
-                    for (auto i = 0; i < endpts.rhs.size(); i++)
+                    for (auto i = 0; i < numrhs; i++)
                     {
                         Endpoint &ept = endpts.rhs[i];
 
@@ -433,7 +433,7 @@ void Pathway::PostClock (PERMIT(Simulator))
 
     operation ("update next ready state")
     {
-        for (auto i = 0; i < endpts.rhs.size(); i++)
+        for (auto i = 0; i < numrhs; i++)
         {
             Endpoint &ept = endpts.rhs[i];
 
@@ -479,7 +479,7 @@ void Pathway::PostClock (PERMIT(Simulator))
                     }
                     else
                     {
-                        for (auto i = 0; i < endpts.rhs.size(); i++)
+                        for (auto i = 0; i < numrhs; i++)
                             ecount.rhs_blocked[i]++;
                     }
                 }

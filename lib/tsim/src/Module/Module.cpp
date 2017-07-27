@@ -283,21 +283,19 @@ void Module::PostClock (PERMIT(Simulator))
     {
         for (auto i = 0; i < ninports; i++)
         {
-            if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
+            Message *inmsg = inports[i].endpt->Peek ();
+            if (inmsg)
             {
-                if (!nextinmsgs[i])
+                // NOTE: opted
+                if (ineptinfos[i].plainmsg)
                 {
-                    if (likely (!stalled))
+                    if (!nextinmsgs[i] && likely (!stalled))
                     {
                         nextinmsgs[i] = inports[i].endpt->Peek ();
                         DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
                     }
                 }
-            }
-            else /* TOGGLE */
-            {
-                Message *inmsg = inports[i].endpt->Peek ();
-                if (inmsg)
+                else /* TOGGLE */
                 {
                     inports[i].endpt->Pop ();
                     if (nextinmsgs[i]) nextinmsgs[i]->Dispose ();
@@ -338,7 +336,8 @@ void Module::PostClock (PERMIT(Simulator))
             UpdateInMsgValidCount ();
             for (auto i = 0; i < ninports; i++)
             {
-                if (inports[i].endpt->GetMsgPrototype()->GetType() == Message::PLAIN)
+                // NOTE: opted
+                if (ineptinfos[i].plainmsg)
                 {
                     if (nextinmsgs[i])
                     {
@@ -369,10 +368,11 @@ void Module::PostClock (PERMIT(Simulator))
 
     if (likely (pdepth == 0 || !stalled))
     {
-        // TODO: optimize this
+        // TODO: optimize thisdd
         for (auto i = 0; i < noutports; i++)
         {
-            if (nextoutmsgs[omsgidx][i] && outports[i].endpt->GetCapacity() == 0)
+            // NOTE: opted
+            if (nextoutmsgs[omsgidx][i] && outeptinfos[i].zerocap)
             {
                 operation ("ahead-of-time assign if LHS.capacity==0")
                 {
