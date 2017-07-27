@@ -208,6 +208,8 @@ private:
     bool w_has_0cap_rhs;
     bool w_has_non0cap_rhs;
     Message::Type w_msgtype;
+
+    double w_dispow;
 };
 
 

@@ -249,12 +249,10 @@ double Pathway::GetConsumedEnergy ()
         SYSTEM_ERROR ("zero module clock period (module: %s)",
                 GetName().c_str());
 
-    double pow = parent->GetDisPowerPerPathway();
-
-    if (pow == -1)
+    if (w_dispow == -1)
         return -1;
     else
-        return (clkperiod * 1E-9 * pow * 1E-9 * cclass.propagating);
+        return (clkperiod * 1E-9 * w_dispow * 1E-9 * cclass.propagating);
 }
 
 
@@ -308,6 +306,7 @@ void Pathway::WarmUp (PERMIT(Simulator))
     }
 
     w_msgtype = msgproto->GetType();
+    w_dispow = parent->GetDisPowerPerPathway();
 }
 
 

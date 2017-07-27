@@ -25,6 +25,9 @@ public:
     virtual const RegisterWord* GetWord (uint64_t addr) final;
     virtual bool SetWord (uint64_t addr, RegisterWord *word) final;
 
+protected:
+    virtual bool InitWord (uint64_t addr, RegisterWord *word) final;
+
 private:
     map<uint64_t, RegisterWord *> words;
 };

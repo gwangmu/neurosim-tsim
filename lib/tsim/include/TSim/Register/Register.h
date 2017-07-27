@@ -60,6 +60,9 @@ public:
     void IncrReadCount () { rdcount++; }
     void IncrWriteCount () { wrcount++; }
 
+protected:
+    virtual bool InitWord (uint64_t addr, RegisterWord *word) = 0;
+
 private:
     Module *parent;
 
