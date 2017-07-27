@@ -310,7 +310,7 @@ void Module::PostClock (PERMIT(Simulator))
         /*operation ("load output que size")
         {
             for (auto i = 0; i < noutports; i++)
-                outque_size[i] = outports[i].endpt->GetNumMessages ();
+                GetOutQueSize(i] = outports[i).endpt->GetNumMessages ();
         }*/
 
         operation ("call operation")

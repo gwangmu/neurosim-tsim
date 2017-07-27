@@ -52,8 +52,7 @@ FastSynQueue::FastSynQueue (
     coreTS_ = false;
 }
 
-void FastSynQueue::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void FastSynQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     // Process parity message
     SignalMessage *parity_msg = 
@@ -75,7 +74,7 @@ void FastSynQueue::Operation (Message **inmsgs, Message **outmsgs,
         SignalMessage *synTS_msg =
             static_cast<SignalMessage*> (inmsgs[PORT_synTS[s]]);
 
-        if(outque_size[PORT_acc[s]] > 2)
+        if(GetOutQueSize(PORT_acc[s]) > 2)
         {
             inmsgs[PORT_syns[s]] = nullptr;
             inmsgs[PORT_synTS[s]] = nullptr;
@@ -116,7 +115,7 @@ void FastSynQueue::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            if(!queue_state_[s] && (outque_size[PORT_acc[s]] == 0))
+            if(!queue_state_[s] && (GetOutQueSize(PORT_acc[s]) == 0))
             {
                 if(outmsgs[PORT_acc[s]] == nullptr)
                     queue_state_[s] = true;       

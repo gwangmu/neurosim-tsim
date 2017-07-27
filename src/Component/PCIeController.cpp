@@ -26,8 +26,7 @@ PCIeController::PCIeController (string iname, Component *parent)
     /// TODO Implement Board-to-Board communication
 }
 
-void PCIeController::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void PCIeController::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     PacketMessage *pkt_msg = static_cast<PacketMessage*> (inmsgs[IPORT_Packet]);
 

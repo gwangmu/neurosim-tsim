@@ -36,8 +36,7 @@ AxonMetaQueue::AxonMetaQueue (string iname, Component *parent)
     ongoing_jobs = 0;
 }
 
-void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     NeuronBlockOutMessage *nb_msg = static_cast<NeuronBlockOutMessage*>(inmsgs[IPORT_NB]);
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Meta]);
@@ -51,7 +50,7 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
         if(spike)
         {
             INFO_PRINT ("[AMQ] Receive spike (idx: %d, queue size: %u)", 
-                    idx, *outque_size);
+                    idx, /**outque_size*/ GetOutQueSize(OPORT_SRAM));
             outmsgs[OPORT_SRAM] = new IndexMessage (0, idx);
             ongoing_jobs++;
             
@@ -76,7 +75,7 @@ void AxonMetaQueue::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT ("[AMQ] Recieve Axon data %lu %u", ax_addr, ax_len);
         ongoing_jobs--;
     }
-    else if(!is_empty && *outque_size == 0 && ongoing_jobs==0)
+    else if(!is_empty && /**outque_size == 0*/ GetOutQueSize(OPORT_SRAM) == 0 && ongoing_jobs==0)
     {
         is_empty = true;
         INFO_PRINT ("[AMQ] Axon metatda queue is empty");

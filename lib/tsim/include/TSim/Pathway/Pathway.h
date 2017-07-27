@@ -52,6 +52,7 @@ public:
     template <typename T>
     struct EventCount
     {
+        T rhs_all_blocked = 0;
         T rhs_blocked[MAX_ENDPOINTS] = {0};
         T msgdrop = 0;
     };
@@ -202,10 +203,11 @@ private:
     EventCount<uint64_t> ecount;
 
     // warm-up
-    uint32_t numlhs;
-    uint32_t numrhs;
-    bool has0caprhs;
-    Message::Type msgtype;
+    uint32_t w_numlhs;
+    uint32_t w_numrhs;
+    bool w_has_0cap_rhs;
+    bool w_has_non0cap_rhs;
+    Message::Type w_msgtype;
 };
 
 

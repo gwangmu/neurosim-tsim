@@ -28,8 +28,7 @@ PacketConstructor::PacketConstructor (string iname, Component *parent)
             Prototype<PacketMessage>::Get());
 }
 
-void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     SignalMessage *end_msg = static_cast<SignalMessage*> (inmsgs[IPORT_TSEnd]); 
     AxonMessage *axon_msg = static_cast <AxonMessage*> (inmsgs[IPORT_Axon]);

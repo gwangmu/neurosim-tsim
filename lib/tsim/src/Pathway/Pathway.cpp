@@ -284,18 +284,30 @@ bool Pathway::IsControlPathway ()
 
 void Pathway::WarmUp (PERMIT(Simulator))
 {
-    numlhs = endpts.lhs.size();
-    numrhs = endpts.rhs.size();
+    w_numlhs = endpts.lhs.size();
+    w_numrhs = endpts.rhs.size();
 
-    has0caprhs = false;
+    w_has_0cap_rhs = false;
     for (auto i = 0; i < endpts.rhs.size(); i++)
     {
         if (endpts.rhs[i].GetCapacity() == 0)
         {
-            has0caprhs = true;   
+            w_has_0cap_rhs = true;   
             break;
         }
     }
+
+    w_has_non0cap_rhs = false;
+    for (auto i = 0; i < endpts.rhs.size(); i++)
+    {
+        if (endpts.rhs[i].GetCapacity() != 0)
+        {
+            w_has_non0cap_rhs = true;   
+            break;
+        }
+    }
+
+    w_msgtype = msgproto->GetType();
 }
 
 
@@ -375,13 +387,13 @@ void Pathway::PreClock (PERMIT(Simulator))
     {    
         Message *sampledmsg = conn.Sample ();
 
-        if (sampledmsg)
+        if (/* w_has_non0cap_rhs &&*/ sampledmsg)
         {
             if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
             {
                 operation ("broadcast message")
                 {
-                    for (auto i = 0; i < numrhs; i++)
+                    for (auto i = 0; i < w_numrhs; i++)
                     {
                         Endpoint &ept = endpts.rhs[i];
 
@@ -433,14 +445,16 @@ void Pathway::PostClock (PERMIT(Simulator))
 
     operation ("update next ready state")
     {
-        for (auto i = 0; i < numrhs; i++)
+        if (w_msgtype == Message::PLAIN)
         {
-            Endpoint &ept = endpts.rhs[i];
+            for (auto i = 0; i < w_numrhs; i++)
+            {
+                Endpoint &ept = endpts.rhs[i];
 
-            if (ept.GetCapacity() != 0 && 
-                    ept.GetMsgPrototype()->GetType() == Message::PLAIN)
-                SetNextReady (i, ept.GetCapacity () - ept.GetNumMessages () >
-                        conn.conattr.latency);
+                if (ept.GetCapacity() != 0)
+                    SetNextReady (i, ept.GetCapacity () - ept.GetNumMessages () >
+                            conn.conattr.latency);
+            }
         }
 
         UpdateReadyState ();
@@ -467,7 +481,7 @@ void Pathway::PostClock (PERMIT(Simulator))
                     if (msg_to_assign->DEST_RHS_ID != -1)
                         msg_to_assign->SetNumDestination (1);
                     else
-                        msg_to_assign->SetNumDestination (endpts.rhs.size());
+                        msg_to_assign->SetNumDestination (w_numrhs);
 
                     conn.Assign (msg_to_assign);
                 }
@@ -479,8 +493,10 @@ void Pathway::PostClock (PERMIT(Simulator))
                     }
                     else
                     {
-                        for (auto i = 0; i < numrhs; i++)
-                            ecount.rhs_blocked[i]++;
+                        // NOTE: opted
+                        //for (auto i = 0; i < w_numrhs; i++)
+                        //    ecount.rhs_blocked[i]++;
+                        ecount.rhs_all_blocked++;
                     }
                 }
 
@@ -495,14 +511,13 @@ void Pathway::PostClock (PERMIT(Simulator))
     // TODO: optimize this (cache RHSs whos capacity is 0)
     Message *sampledmsg = conn.Sample ();
 
-    if (has0caprhs && sampledmsg)
+    if (w_has_0cap_rhs && sampledmsg)
     {
         if (sampledmsg->DEST_RHS_ID == (uint32_t)-1)
         {
-            uint64_t processed = (-1 << endpts.rhs.size());
+            uint64_t processed = (-1 << w_numrhs);
 
-            //DEBUG_PRINT ("%lx", processed);
-            for (auto i = 0; i < endpts.rhs.size(); i++)
+            for (auto i = 0; i < w_numrhs; i++)
             {
                 Endpoint &ept = endpts.rhs[i];
 
@@ -525,7 +540,6 @@ void Pathway::PostClock (PERMIT(Simulator))
                 }
             }
 
-            //DEBUG_PRINT ("%lx", processed);
             if (processed == -1) conn.NullifyNow ();
         }
         else

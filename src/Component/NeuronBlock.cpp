@@ -43,7 +43,7 @@ NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
     is_idle_ = true;
 }
 
-void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
+void NeuronBlock::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     NeuronBlockInMessage *in_msg = static_cast<NeuronBlockInMessage*>(inmsgs[PORT_in]);
     SpikeInstruction *spk_inst = static_cast<SpikeInstruction*>(instr);

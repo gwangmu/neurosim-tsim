@@ -26,8 +26,7 @@ PacketDecoder::PacketDecoder (string iname, Component *parent)
             Prototype<AxonMessage>::Get());
 }
 
-void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     PacketMessage *pkt_msg = static_cast<PacketMessage*> (inmsgs[IPORT_Packet]);
 

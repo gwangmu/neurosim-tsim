@@ -35,8 +35,7 @@ DeltaStorage::DeltaStorage (string iname, Component* parent,
 }   
 
 
-void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void DeltaStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[NPORT_raddr]);

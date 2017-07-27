@@ -37,14 +37,13 @@ SynDataQueue::SynDataQueue (string iname, Component *parent,
     this->max_queue_size_ = max_queue_size;
 }
 
-void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     SynapseMessage *syn_msg = static_cast<SynapseMessage*>(inmsgs[IPORT_Synapse]);
     SignalMessage *coreTS_msg = static_cast<SignalMessage*>(inmsgs[IPORT_CoreTS]);
     SignalMessage *synTS_msg = static_cast<SignalMessage*>(inmsgs[IPORT_SynapseTS]);
 
-    if(*outque_size > 2)
+    if(/**outque_size*/ GetOutQueSize(OPORT_Acc) > 2)
     {
         inmsgs[IPORT_Synapse] = nullptr;
         inmsgs[IPORT_SynapseTS] = nullptr;
@@ -100,7 +99,7 @@ void SynDataQueue::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT("[SDQ] Update TS parity (%d)", coreTS);
     }
 
-    if(!is_empty && outque_size[OPORT_Acc] == 0)
+    if(!is_empty && GetOutQueSize(OPORT_Acc) == 0)
     {
         if(outmsgs[OPORT_Acc] == nullptr)
         {

@@ -16,8 +16,7 @@ class SimpleDelta: public Module
 public:
     SimpleDelta (string iname, Component *parent, uint32_t row_size, 
             uint32_t col_size);
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr);
 
 private:
     uint32_t APORT_raddr, APORT_rdata;

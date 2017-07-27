@@ -37,8 +37,7 @@ AxonTransmitter::AxonTransmitter (string iname, Component *parent)
     idle_delay_ = 0;
 }
 
-void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Axon]);
 
@@ -58,7 +57,7 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs,
         }
         idle_delay_ = 3; // FIXME Delay between chip and propagator
     }
-    else if(!is_idle_ && *outque_size==0)
+    else if(!is_idle_ && /**outque_size == 0*/ GetOutQueSize(OPORT_idle) == 0)
     {
         if(idle_delay_ == 0)
         {

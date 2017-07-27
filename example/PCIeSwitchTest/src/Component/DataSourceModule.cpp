@@ -24,8 +24,7 @@ DataSourceModule::DataSourceModule (string iname, Component *parent, uint32_t te
     counter = 0;
 }
 
-void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void DataSourceModule::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     if (inmsgs[PORT_DATAIN])
     {

@@ -99,8 +99,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 }
 
 
-void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[PORT_addr]);
@@ -108,7 +107,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
     if(clk_parity_)
     {
         // Output queue is full
-        bool is_full = entry_cnt + io_buf_size_ + outque_size[PORT_data]
+        bool is_full = entry_cnt + io_buf_size_ + GetOutQueSize(PORT_data)
                         > outque_size_;
         if(is_full)
         {
@@ -188,7 +187,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
         }
 
         if(!is_idle_ && (entry_cnt==0) && 
-                (*outque_size==0) && io_counter == 0)
+                /*(*outque_size==0)*/ GetOutQueSize(PORT_data) == 0 && io_counter == 0)
         {
             INFO_PRINT ("[DRAM] DRAM is idle");
             is_idle_ = true;
@@ -220,7 +219,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs,
                     io_buffer[idx]->dest_idx, 
                     io_buffer[idx]->target_idx, 
                     io_buffer[idx]->val16);
-            INFO_PRINT ("[DRAM] outque %u/%u", *outque_size, outque_size_);
+            INFO_PRINT ("[DRAM] outque %u/%u", /**outque_size*/ GetOutQueSize(PORT_data), outque_size_);
 
             io_buffer[idx] = nullptr;
         }

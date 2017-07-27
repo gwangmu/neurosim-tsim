@@ -45,9 +45,12 @@ protected:
     virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr) = 0;
 
     /* Called by derived 'Module' */
-    inline uint32_t GetOutQueSize (uint32_t portid) { return outports[portid].endpt->GetNumMessage(); }
-    inline uint32_t GetInQueSize (uint32_t portid) { return inports[portid].endpt->GetNumMessage(); }
-    inline uint32_t GetCtrlQueSize (uint32_t portid) { return ctrlports[portid].endpt->GetNumMessage(); }
+    inline uint32_t GetOutQueSize (uint32_t portid) 
+    { return outports[portid].endpt->GetNumMessages(); }
+    inline uint32_t GetInQueSize (uint32_t portid) 
+    { return inports[portid].endpt->GetNumMessages(); }
+    inline uint32_t GetCtrlQueSize (uint32_t portid) 
+    { return ctrlports[portid].endpt->GetNumMessages(); }
 
 private:
     static const uint32_t MAX_PDEPTH = 64;

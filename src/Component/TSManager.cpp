@@ -42,8 +42,7 @@ TSManager::TSManager (string iname, Component *parent, uint32_t num_boards)
     ts_buf_ = 3;
 }
 
-void TSManager::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void TSManager::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     IntegerMessage *fin_msg = static_cast<IntegerMessage*> (inmsgs[IPORT_DynFin]);
     IntegerMessage *idle_msg = static_cast<IntegerMessage*> (inmsgs[IPORT_idle]);
