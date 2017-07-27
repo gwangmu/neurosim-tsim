@@ -47,8 +47,7 @@ public:
         return true;
     }
 
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr)
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
     {
         // NOTE: simply forwarding messages
         if (inmsgs[PORT_TX])

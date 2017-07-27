@@ -29,8 +29,7 @@ AxonMetaTable::AxonMetaTable (string iname, Component* parent,
 }
 
 
-void AxonMetaTable::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void AxonMetaTable::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[RPORT_addr]);

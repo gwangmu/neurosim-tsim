@@ -32,8 +32,7 @@ SimpleDelta::SimpleDelta (string iname, Component* parent,
 }   
 
 
-void SimpleDelta::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void SimpleDelta::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /* Read */
     auto raddr_msg = static_cast<IndexMessage*>(inmsgs[APORT_raddr]);

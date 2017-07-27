@@ -32,6 +32,9 @@ public:
 
     virtual IssueCount Validate (PERMIT(Simulator)) final;
 
+protected:
+    virtual bool InitWord (uint64_t addr, RegisterWord *word) = 0;
+
 private:
     bool loaded;
 };

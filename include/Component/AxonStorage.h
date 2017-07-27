@@ -20,8 +20,7 @@ class AxonStorage: public Module
 {
 public:
     AxonStorage (string iname, Component *parent, uint8_t io_buf_size, uint32_t dram_outque_size);
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr);
 
     typedef std::map<int, int> OrgMap;
     static OrgMap test_;

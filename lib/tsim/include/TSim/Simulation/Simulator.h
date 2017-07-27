@@ -65,7 +65,15 @@ protected:
 
             // TODO: optimizable?
             inline void Invoke (PERMIT(Simulator)) 
-            { (iclk->*clkfn) (TRANSFER_KEY(Simulator)); }
+            { 
+                // NOTE: fnpt -> branch
+                if (clkfn == &IClockable::PreClock)
+                    iclk->PreClock (TRANSFER_KEY(Simulator));
+                else if (clkfn == &IClockable::PostClock)
+                    iclk->PostClock (TRANSFER_KEY(Simulator));
+
+                //(iclk->*clkfn) (TRANSFER_KEY(Simulator)); 
+            }
             
             inline string GetTagString ()
             { 

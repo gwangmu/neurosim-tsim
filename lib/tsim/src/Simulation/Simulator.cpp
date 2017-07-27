@@ -613,8 +613,6 @@ bool Simulator::ValidateTestbench ()
 /* function Simulate */
 bool Simulator::Simulate ()
 {
-    auto start = chrono::steady_clock::now ();
-
     macrotask ("Initializing clocks..")
     {
         // offset clock start time by 1ns,
@@ -623,15 +621,29 @@ bool Simulator::Simulate ()
             cdomains[i].nexttime = i;
     }
 
+    macrotask ("Warming up..")
+    {
+        for (ClockDomain &cdom : cdomains)
+        {
+            for (Module *module : cdom.modules)
+                module->WarmUp (KEY(Simulator));
+            for (Device *device : cdom.devices)
+                device->WarmUp (KEY(Simulator));
+            for (Pathway *pathway : cdom.pathways)
+                pathway->WarmUp (KEY(Simulator));
+        }
+    }
+
+    auto start = chrono::steady_clock::now ();
+
     macrotask ("Starting simulation..")
     {
         uint64_t nexttstime = 0;
         while (!tb->IsFinished (KEY(Simulator)))
         {
-            ClockDomain *curCDom;
+            auto minidx = -1;
             operation ("advance clock")
             {
-                auto minidx = -1;
                 uint64_t mintime = (uint64_t)-1;
                 for (auto i = 0; i < cdomains.size(); i++)
                 {
@@ -643,10 +655,11 @@ bool Simulator::Simulate ()
                 }
 
                 curtime = mintime;
-                curCDom = &cdomains[minidx];
                 cdomains[minidx].nexttime += cdomains[minidx].period;
                 cdomains[minidx].ncycles++;
             }
+
+            ClockDomain &curCdom = cdomains[minidx];
 
             if (nexttstime <= curtime)
             {
@@ -656,11 +669,11 @@ bool Simulator::Simulate ()
 
             task ("simulate %.3lf ns", TO_SPEC_TIMEUNIT(curtime))
             {
-                for (ClockDomain::Clocker &clocker : curCDom->clockers)
+                for (ClockDomain::Clocker &clocker : curCdom.clockers)
                     clocker.Invoke (KEY(Simulator));
             }
 
-            if (curtime > opt.timelimit) 
+            if (unlikely (curtime > opt.timelimit))
             {
                 PRINT ("Simulation reached time limit (%.3lf ns)", 
                         TO_SPEC_TIMEUNIT(opt.timelimit));
@@ -670,9 +683,8 @@ bool Simulator::Simulate ()
     }
 
     auto end = chrono::steady_clock::now ();
-    chrono::duration<double> diff = end-start;
+    chrono::duration<double> diff = end - start;
     runtime = diff.count();
-    //runtime = chrono::duration_cast<chrono::milliseconds>(end - start).count ();
 
     PRINT ("Simulation finished at %.3lf ns", TO_SPEC_TIMEUNIT(curtime));
 
@@ -1004,11 +1016,11 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
 
             for (auto p = 0; p < pathway->GetNumRHS(); p++)
             {
-                if (pecount.rhs_blocked[p] != 0)
+                if (pecount.rhs_blocked[p] + pecount.rhs_all_blocked != 0)
                     PRINT ("%s  - %-6s: blocked (%lu cycle(s))", 
                             string (level + 2, ' ').c_str(),
                             pathway->GetRHS(p).GetInstanceName().c_str(), 
-                            pecount.rhs_blocked[p]);
+                            pecount.rhs_blocked[p] + pecount.rhs_all_blocked);
             }
         }
 

@@ -27,8 +27,7 @@ AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
     is_idle_ = false;
 }
 
-void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Axon]);
 

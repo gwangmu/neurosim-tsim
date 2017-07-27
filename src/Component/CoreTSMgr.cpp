@@ -35,8 +35,7 @@ CoreTSMgr::CoreTSMgr (string iname, Component* parent)
     is_dynfin = true;
 }
 
-void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void CoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /************* Check core components  ****************/
     SignalMessage *nbc_msg = static_cast<SignalMessage*>(inmsgs[PORT_NBC]);

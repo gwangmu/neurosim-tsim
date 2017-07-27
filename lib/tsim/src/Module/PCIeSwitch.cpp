@@ -76,8 +76,7 @@ bool PCIeSwitch::IsValidConnection (Port *port, Endpoint *endpt)
 }
 
 
-void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     // NOTE: DEV_ID=-1 for broadcast 
     cur_idx = next_idx;

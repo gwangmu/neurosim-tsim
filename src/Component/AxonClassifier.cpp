@@ -46,8 +46,7 @@ AxonClassifier::AxonClassifier (string iname, Component *parent)
     is_idle_ = false;
 }
 
-void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     DramMessage *dram_msg = static_cast<DramMessage*>(inmsgs[IPORT_Dram]);
 
@@ -84,7 +83,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs,
             INFO_PRINT ("[AEC] Axon entry classifier is busy");
         }
     }
-    else if(*outque_size == 0 && !is_idle_)
+    else if(/**outque_size == 0*/ GetOutQueSize(OPORT_Synapse) == 0 && !is_idle_)
     {
         is_idle_ = true;
         outmsgs[OPORT_idle] = new IntegerMessage (1);

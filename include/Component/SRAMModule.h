@@ -13,8 +13,7 @@ class SRAMModule: public Module
 {
 public:
     SRAMModule (const char* clsname, string iname, Component *parent, uint32_t row_size, uint32_t col_size);
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr) = 0;
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr) = 0;
 
 protected:
     /* Port IDs */

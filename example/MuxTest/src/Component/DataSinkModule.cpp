@@ -25,7 +25,7 @@ DataSinkModule::DataSinkModule (string iname, Component *parent)
 }
 
 // NOTE: called only if not stalled
-void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
+void DataSinkModule::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     ExampleMessage *inmsg = static_cast<ExampleMessage *>(inmsgs[PORT_DATAIN]);
         

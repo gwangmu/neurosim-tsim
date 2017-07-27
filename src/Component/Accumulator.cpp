@@ -41,7 +41,7 @@ Accumulator::Accumulator (string iname, Component *parent)
     ts_parity = false;
 }
 
-void Accumulator::Operation (Message **inmsgs, Message **outmsgs, const uint32_t *outque_size, Instruction *instr)
+void Accumulator::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     SynapseMessage *syn_msg = static_cast<SynapseMessage*>(inmsgs[PORT_in]);
     if(syn_msg)

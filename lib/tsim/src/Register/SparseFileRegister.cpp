@@ -46,3 +46,20 @@ bool SparseFileRegister::SetWord (uint64_t addr, RegisterWord *word)
 
     return true;
 }
+
+bool SparseFileRegister::InitWord (uint64_t addr, RegisterWord *word)
+{
+    // NOTE: same as SetWord, except not increasing write count
+    if (addr == -1) return true;
+    else if (unlikely (addr > GetAttr().addrsize))
+    {
+        SIM_FATAL ("writing out-of-bound address (addr: 0x%lu", 
+                GetName().c_str(), addr);
+        return false;
+    }
+
+    delete words[addr];
+    words[addr] = word;
+
+    return true;
+}

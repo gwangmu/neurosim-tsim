@@ -130,7 +130,7 @@ bool FileRegister::LoadDataFromFile (string filename)
                             return false;
                         }
 
-                        if (!SetWord (word_info.addr, newword))
+                        if (!InitWord (word_info.addr, newword))
                             SIM_ERROR ("failed to register word at 0x%lx", 
                                     GetName().c_str(), word_info.addr);
 

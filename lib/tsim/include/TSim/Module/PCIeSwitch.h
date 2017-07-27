@@ -19,8 +19,7 @@ public:
             uint32_t busid = 0);
 
     virtual bool IsValidConnection (Port *port, Endpoint *endpt);
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr);
 
     uint64_t GetAccumTrafficBytes () { return traffic_size_bits / 8; }
 

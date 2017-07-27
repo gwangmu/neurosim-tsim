@@ -16,8 +16,7 @@ class DataSourceModule: public Module
 {
 public:
     DataSourceModule (string iname, Component *parent, uint32_t testid);
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr);
 
 private:
     // Port IDs

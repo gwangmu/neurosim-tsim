@@ -42,8 +42,7 @@ SynDataDistrib::SynDataDistrib (string iname, Component *parent,
     }
 }
 
-void SynDataDistrib::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void SynDataDistrib::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
 
     for (int i=0; i<num_prop_; i++)

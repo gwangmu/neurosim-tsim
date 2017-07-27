@@ -13,8 +13,7 @@ class AxonClassifier: public Module
 {
 public:
     AxonClassifier (string iname, Component *parent);
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr);
 
 private:
     /* Port IDs */

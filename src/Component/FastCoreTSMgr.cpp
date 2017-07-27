@@ -31,8 +31,7 @@ FastCoreTSMgr::FastCoreTSMgr (string iname, Component* parent)
     next_tsparity_ = -1;
 }
 
-void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /************* Check core components  ****************/
     SignalMessage *end_msg = static_cast<SignalMessage*>(inmsgs[PORT_DynEnd]);

@@ -8,8 +8,7 @@
 
 /* to be used by module constructors */
 #define USING_TESTBENCH extern Testbench *simtb
-#define GET_PARAMETER(x) \
-    simtb->GetUIntParam (Testbench::PARAMETER, #x);
+#define GET_PARAMETER(x) simtb->GetUIntParam (Testbench::PARAMETER, #x);
 
 /* general */
 #define TO_SPEC_TIMEUNIT(simtime) ((double)simtime / 1000)

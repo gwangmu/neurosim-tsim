@@ -80,8 +80,7 @@ AxonStorage::AxonStorage (string iname, Component* parent, uint8_t io_buf_size, 
 }
 
 
-void AxonStorage::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void AxonStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /* Read */
     IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[PORT_addr]);
@@ -92,9 +91,9 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
         {
             uint32_t read_addr = raddr_msg->value;
 
-            if(((entry_cnt + io_buf_size_ + *outque_size) > outque_size_) || (!send(read_addr)))
+            if(((entry_cnt + io_buf_size_ + /**outque_size*/ GetOutQueSize(PORT_data)) > outque_size_) || (!send(read_addr)))
             {
-                INFO_PRINT("[DRAM] DRAM is full (entry %d/ outque %u)", entry_cnt, *outque_size); 
+                INFO_PRINT("[DRAM] DRAM is full (entry %d/ outque %u)", entry_cnt, /**outque_size*/ GetOutQueSize(PORT_data)); 
                 inmsgs[PORT_addr] = nullptr;
             }
             else
@@ -106,7 +105,7 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
         }
 
         if(!is_idle_ && (entry_cnt==0) && 
-                (*outque_size==0) && io_counter == 0)
+                /**outque_size*/ (GetOutQueSize(PORT_data) == 0) && io_counter == 0)
         {
             INFO_PRINT ("[DRAM] DRAM is idle");
             is_idle_ = true;
@@ -138,7 +137,7 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs,
                     io_buffer[idx]->dest_idx, 
                     io_buffer[idx]->target_idx, 
                     io_buffer[idx]->val16);
-            INFO_PRINT ("[DRAM] outque %u(%u)/%u", *outque_size, entry_cnt, outque_size_);
+            INFO_PRINT ("[DRAM] outque %u(%u)/%u", /**outque_size*/ GetOutQueSize(PORT_data), entry_cnt, outque_size_);
 
             io_buffer[idx] = nullptr;
         }

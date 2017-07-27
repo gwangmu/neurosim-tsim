@@ -49,3 +49,20 @@ bool DenseFileRegister::SetWord (uint64_t addr, RegisterWord *word)
 
     return true;
 }
+
+bool DenseFileRegister::InitWord (uint64_t addr, RegisterWord *word)
+{
+    // NOTE: same as SetWord, except not increasing write count
+    if (addr == -1) return true;
+    else if (unlikely (addr > words.size ()))
+    {
+        SIM_FATAL ("writing out-of-bound address (addr: 0x%lu/%lu)", 
+                GetName().c_str(), addr, words.size());
+        return false;
+    }
+
+    delete words[addr];
+    words[addr] = word;
+
+    return true;
+}

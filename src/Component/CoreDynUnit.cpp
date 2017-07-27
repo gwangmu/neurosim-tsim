@@ -59,8 +59,7 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     SetScript (new SpikeFileScript ());
 }
 
-void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     SpikeInstruction *spk_inst = 
         static_cast<SpikeInstruction*>(instr);

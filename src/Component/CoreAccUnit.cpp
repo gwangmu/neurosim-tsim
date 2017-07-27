@@ -35,8 +35,7 @@ CoreAccUnit::CoreAccUnit (string iname, Component *parent)
     sent_accfin_ = true;
 }
 
-void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     // Process inputs
     SynapseMessage *syn_msg = static_cast<SynapseMessage*>(inmsgs[PORT_syn]);;
