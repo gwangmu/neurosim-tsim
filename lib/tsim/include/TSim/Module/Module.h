@@ -42,8 +42,12 @@ protected:
     virtual bool IsValidConnection (Port *port, Endpoint *endpt);
 
     /* Called by this 'Module' */
-    virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr) = 0;
+    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr) = 0;
+
+    /* Called by derived 'Module' */
+    inline uint32_t GetOutQueSize (uint32_t portid) { return outports[portid].endpt->GetNumMessage(); }
+    inline uint32_t GetInQueSize (uint32_t portid) { return inports[portid].endpt->GetNumMessage(); }
+    inline uint32_t GetCtrlQueSize (uint32_t portid) { return ctrlports[portid].endpt->GetNumMessage(); }
 
 private:
     static const uint32_t MAX_PDEPTH = 64;

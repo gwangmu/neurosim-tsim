@@ -44,8 +44,6 @@ Module::Module (const char *clsname, string iname,
     for (uint32_t i = 0; i < omsgidxmask + 1; i++)
         nextoutmsgs[i] = new Message *[1];
 
-    outque_size = new uint32_t[0];
-
     pbusy_state = 0;
     inmsg_valid_count = 0;
 }
@@ -201,7 +199,8 @@ void Module::PreClock (PERMIT(Simulator))
         {
             Port &outport = outports[p];
 
-            if (outport.endpt->GetCapacity() == 0)
+            // NOTE: opted
+            if (outeptinfos[p].zerocap)
             {
                 if (!outport.endpt->IsSelectedLHSOfThisCycle ()
                         || outport.endpt->IsOverloaded ())
@@ -229,7 +228,7 @@ void Module::PreClock (PERMIT(Simulator))
         }
     }
 
-    if (likely (pdepth == 0 || !stalled))
+    if (pdepth == 0 || !stalled)
     {
         operation ("assign module output to pathway")
         {
@@ -270,7 +269,7 @@ void Module::PostClock (PERMIT(Simulator))
     MICRODEBUG_PRINT ("calc '%s' (stall: %d)", GetFullName().c_str(), stalled);
 
     Instruction *nextinstr = nullptr;
-    if (likely (!stalled))
+    if (!stalled)
     {
         if (script)
         {
@@ -289,7 +288,7 @@ void Module::PostClock (PERMIT(Simulator))
                 // NOTE: opted
                 if (ineptinfos[i].plainmsg)
                 {
-                    if (!nextinmsgs[i] && likely (!stalled))
+                    if (!nextinmsgs[i] && !stalled)
                     {
                         nextinmsgs[i] = inports[i].endpt->Peek ();
                         DEBUG_PRINT ("peaking message %p", nextinmsgs[i]);
@@ -305,21 +304,21 @@ void Module::PostClock (PERMIT(Simulator))
         }
     }
 
-    if (likely (pdepth == 0 || !stalled))
+    if (pdepth == 0 || !stalled)
     {
-        operation ("load output que size")
+        // NOTE: opted out
+        /*operation ("load output que size")
         {
             for (auto i = 0; i < noutports; i++)
                 outque_size[i] = outports[i].endpt->GetNumMessages ();
-        }
+        }*/
 
         operation ("call operation")
         {
             // NOTE: set nextinmsgs[i] to nullptr not to use ith input
             // NOTE: assign new message to nextoutmsgs[j] to push to jth output
             uint32_t omsgidx_out = (omsgidx + pdepth) & omsgidxmask;
-            Operation (nextinmsgs, nextoutmsgs[omsgidx_out], 
-                    outque_size, nextinstr);
+            Operation (nextinmsgs, nextoutmsgs[omsgidx_out], nextinstr);
 
             for (auto i = 0; i < noutports; i++)
             {
@@ -366,7 +365,7 @@ void Module::PostClock (PERMIT(Simulator))
         if (stalled) ecount.stalled++;
     }
 
-    if (likely (pdepth == 0 || !stalled))
+    if (pdepth == 0 || !stalled)
     {
         // TODO: optimize thisdd
         for (auto i = 0; i < noutports; i++)
@@ -406,9 +405,6 @@ void Module::OnCreatePort (Port &newport)
                 delete[] nextoutmsgs[i];
                 nextoutmsgs[i] = new Message *[noutports] ();
             }
-            
-            delete[] outque_size;
-            outque_size = new uint32_t[noutports] ();
             break;
         default:
             SYSTEM_ERROR ("Module cannot have %s type port (module: %s)", 
