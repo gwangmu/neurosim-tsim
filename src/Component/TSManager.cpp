@@ -116,7 +116,7 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs, Instruction *ins
         is_start = false;
         is_end = false;
 
-        SIM_DEBUG ("[TSM] Current Timestep %d", cur_timestep);
+        PRINT ("Timestep %d..", cur_timestep);
         INFO_PRINT ("[TSM] Current Timestep %d", cur_timestep);
         INFO_PRINT ("[TSM] Update Timestep parity %d to %d", !ts_parity, ts_parity);
     }
