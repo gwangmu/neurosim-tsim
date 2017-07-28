@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TSim/Pathway/Message.h>
+#include <TSim/Pathway/PCIeMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -8,26 +8,27 @@
 
 using namespace std;
 
-enum PacketType {TSEND, AXON};
-
-struct PacketMessage: public Message
+struct PacketMessage: public PCIeMessage
 {
 public:
-    // NOTE: must provide default constructor
-    PacketMessage () : Message ("PacketMessage") {}
+    enum Type { TSEND, AXON };
 
-    PacketMessage (uint32_t destrhsid, int32_t rhs,  PacketType type, uint64_t val, int16_t val16=0)
-        : Message ("PacketMessage", destrhsid)
+    PacketMessage () : PCIeMessage ("PacketMessage") {}
+
+    PacketMessage (Type type, uint32_t boardid = -1, uint64_t addr = 0, 
+            uint16_t len = 0, uint32_t delay = 0)
+        : PCIeMessage ("PacketMessage", 64, boardid)
     {
-        this->rhs = rhs;
-        this->value = val;
         this->type = type;
-        this->val16 = val16;
+        this->addr = addr;
+        this->len = len;
+        this->delay = delay;
     }
 
-public:
-    PacketType type;
-    int32_t rhs;
-    uint64_t value;
-    uint16_t val16;
+    virtual PCIeMessage* Clone () { return new PacketMessage (*this); }
+
+    Type type;
+    uint64_t addr;
+    uint16_t len;
+    uint16_t delay;
 };

@@ -1,5 +1,7 @@
-#pragma once
+// DEPRECATED
 
+#if 0
+#pragma once
 
 #include <TSim/Module/Module.h>
 
@@ -24,3 +26,4 @@ private:
     // Output port
     uint32_t OPORT_Packet, OPORT_PCIe;
 };
+#endif

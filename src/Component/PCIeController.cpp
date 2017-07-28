@@ -1,3 +1,6 @@
+// DEPRECATED
+
+#if 0
 #include <Component/PCIeController.h>
 
 #include <TSim/Utility/Prototype.h>
@@ -38,3 +41,4 @@ void PCIeController::Operation (Message **inmsgs, Message **outmsgs, Instruction
         SIM_WARNING ("PCIe controller is not implemented. DROP the packet.", GetFullName().c_str());
     }
 }
+#endif

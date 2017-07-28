@@ -19,6 +19,7 @@ tmp/
 log*
 lib/tsim/obj/*
 oprof*
+sync*
 simspec/*
 SH/
 result/

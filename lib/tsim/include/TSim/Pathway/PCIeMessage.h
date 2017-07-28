@@ -17,8 +17,8 @@ private:
     static const uint32_t PACKET_HEADER_SIZE = 26 * 8;
 
 public:
-    // NOTE: for Prototype<>
-    PCIeMessage () : Message ("PCIeMessage"), BUS_ID (-1), DEV_ID (-1) {}
+    PCIeMessage (const char *clsname) 
+        : Message (clsname), BUS_ID (-1), DEV_ID (-1) {}
 
     PCIeMessage (const char *clsname, uint32_t payload_size, 
             uint32_t devid, uint32_t busid = 0)
