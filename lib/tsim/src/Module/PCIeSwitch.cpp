@@ -12,9 +12,9 @@
 using namespace std;
 
 // NOTE: GUESSING pipeline depth..
-PCIeSwitch::PCIeSwitch (string iname, Component *parent, string clkname, PCIeMessage *msgproto,
-        uint32_t n_ports, uint32_t inque_size, uint32_t outque_size,
-        uint32_t busid)
+PCIeSwitch::PCIeSwitch (string iname, Component *parent, string clkname, 
+        PCIeMessage *msgproto, uint32_t n_ports, uint32_t inque_size, 
+        uint32_t outque_size, uint32_t busid)
     : Module ("PCIeSwitch", iname, parent, 10)
 {
     SetClock (clkname);
@@ -53,23 +53,24 @@ bool PCIeSwitch::IsValidConnection (Port *port, Endpoint *endpt)
 {
     Module::IsValidConnection (port, endpt);
 
-    if (!dynamic_cast<Link *>(endpt->GetParent()))
+    if (endpt->GetEndpointType() != Endpoint::CAP)
     {
-        DESIGN_FATAL ("must be connected with Link", GetName().c_str());
-    }
+        if (!dynamic_cast<Link *>(endpt->GetParent()))
+            DESIGN_FATAL ("must be connected with Link", GetName().c_str());
 
-    if (port->iotype == Unit::PORT_INPUT)
-    {
-        DESIGN_INFO ("resetting input queue size to %u..",
-                GetName().c_str(), inque_size);
-        endpt->SetCapacity (inque_size);
-    }
+        if (port->iotype == Unit::PORT_INPUT)
+        {
+            DESIGN_INFO ("resetting input queue size to %u..",
+                    GetName().c_str(), inque_size);
+            endpt->SetCapacity (inque_size);
+        }
 
-    if (port->iotype == Unit::PORT_OUTPUT)
-    {
-        DESIGN_INFO ("resetting output queue size to %u..",
-                GetName().c_str(), outque_size);
-        endpt->SetCapacity (outque_size);
+        if (port->iotype == Unit::PORT_OUTPUT)
+        {
+            DESIGN_INFO ("resetting output queue size to %u..",
+                    GetName().c_str(), outque_size);
+            endpt->SetCapacity (outque_size);
+        }
     }
 
     return true;
@@ -94,21 +95,25 @@ void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs, Instruction *in
             
             if (likely (pciemsg->DEV_ID < n_ports))
             {
-                PRINT ("%s forwarded %p to %u (cur_idx: %u)", GetName().c_str(), pciemsg, pciemsg->DEV_ID, cur_idx);
+                DEBUG_PRINT ("forwarded %p to %u (cur_idx: %u)", 
+                        GetName().c_str(), pciemsg, pciemsg->DEV_ID, cur_idx);
                 
-                if (pciemsg->DEV_ID != -1)
+                pciemsg->Recycle ();
+                outmsgs[PORT_TX[pciemsg->DEV_ID]] = pciemsg;
+
+                traffic_size_bits += pciemsg->BIT_WIDTH;
+            }
+            else if (pciemsg->DEV_ID == -1)
+            {
+                DEBUG_PRINT ("forwarded %p to everyone (cur_idx: %u)", 
+                        GetName().c_str(), pciemsg, cur_idx);
+                
+                for (auto i = 0; i < n_ports; i++)
                 {
-                    pciemsg->Recycle ();
-                    outmsgs[PORT_TX[pciemsg->DEV_ID]] = pciemsg;
-                }
-                else
-                {
-                    for (auto i = 0; i < n_ports; i++)
-                    {
-                        PCIeMessage* msgclone = pciemsg->Clone ();
-                        msgclone->Recycle ();
-                        outmsgs[PORT_TX[i]] = msgclone;
-                    }
+                    if (i == cur_idx) continue; 
+                    PCIeMessage* msgclone = pciemsg->Clone ();
+                    msgclone->Recycle ();
+                    outmsgs[PORT_TX[i]] = msgclone;
                 }
 
                 traffic_size_bits += pciemsg->BIT_WIDTH;

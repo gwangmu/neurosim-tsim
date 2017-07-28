@@ -42,7 +42,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     SetClock ("main");
 
     /** Parameters **/
-    const int num_boards = 1;
+    const int num_boards = GET_PARAMETER (num_boards);
     const int num_chips = GET_PARAMETER (num_chips);
     const int num_propagators = GET_PARAMETER (num_propagators);
     
@@ -179,6 +179,9 @@ NeuroSim::NeuroSim (string iname, Component *parent)
 
         }
     }
+
+    ExportPort ("PCIeTxExport", controller, "PCIeTxExport");
+    ExportPort ("PCIeRxImport", controller, "PCIeRxImport");
 }
 
 

@@ -26,23 +26,30 @@ PacketDecoder::PacketDecoder (string iname, Component *parent)
             Prototype<AxonMessage>::Get());
 }
 
-void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs, 
+        Instruction *instr)
 {
     PacketMessage *pkt_msg = static_cast<PacketMessage*> (inmsgs[IPORT_Packet]);
 
     if(pkt_msg)
     {
-       PacketType type = pkt_msg->type;
-       if(type == TSEND)
-       {
-           INFO_PRINT ("[PkD] Receive remote TS end message");
-           outmsgs[OPORT_TSEnd] = new SignalMessage (0, pkt_msg->value);
-       }
-       else if(type == AXON)
-       {
-           INFO_PRINT ("[PkD] Receive Axon message");
-           outmsgs[OPORT_Axon] = new AxonMessage (0, pkt_msg->value,
-                   pkt_msg->val16);
-       }
+        PacketMessage::Type type = pkt_msg->type;
+
+        if (type == PacketMessage::TSEND)
+        {
+            INFO_PRINT ("[PkD] Receive remote TS end message");
+            outmsgs[OPORT_TSEnd] = new SignalMessage (0, 1);
+        }
+        else if (type == PacketMessage::AXON)
+        {
+            INFO_PRINT ("[PkD] Receive Axon message");
+            outmsgs[OPORT_Axon] = new AxonMessage (0, pkt_msg->addr,
+                    pkt_msg->len/*, pkt_msg->delay*/);
+            // FIXME: constructor needs the 4th argument 'delay'.
+        }
+        else
+            SYSTEM_ERROR ("bogus PacketMessage type");
     }
+
+    return;
 }

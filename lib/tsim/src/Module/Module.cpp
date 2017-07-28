@@ -416,7 +416,8 @@ void Module::OnCreatePort (Port &newport)
 
 bool Module::IsValidConnection (Port *port, Endpoint *endpt)
 {
-    if (port->iotype == Unit::PORT_INPUT)
+    if (port->iotype == Unit::PORT_INPUT &&
+            endpt->GetEndpointType() != Endpoint::CAP)
     {
         if (endpt->GetCapacity () == 0)
         {

@@ -28,7 +28,8 @@ PacketConstructor::PacketConstructor (string iname, Component *parent)
             Prototype<PacketMessage>::Get());
 }
 
-void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs, 
+        Instruction *instr)
 {
     SignalMessage *end_msg = static_cast<SignalMessage*> (inmsgs[IPORT_TSEnd]); 
     AxonMessage *axon_msg = static_cast <AxonMessage*> (inmsgs[IPORT_Axon]);
@@ -37,24 +38,28 @@ void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs, Instruct
     if(end_msg)
     {
         if(unlikely(axon_msg || sel_msg))
-        {
-            SIM_ERROR ("It sends end message before finishing", GetFullName().c_str());
-            return;
-        }
+            SIM_ERROR ("It sends end message before finishing", 
+                    GetFullName().c_str());
 
         INFO_PRINT ("[PkC] Broadcast end message");
-        outmsgs[OPORT_Packet] = new PacketMessage (0, -1, TSEND, 1);
+        outmsgs[OPORT_Packet] = new PacketMessage (PacketMessage::TSEND);
+
+        // NOTE: unpop not-yet-processed axon metadata
+        inmsgs[IPORT_Axon] = nullptr;
+        inmsgs[IPORT_boardID] = nullptr;
     }
     else if(axon_msg && sel_msg)
     {
-        outmsgs[OPORT_Packet] = new PacketMessage (0, sel_msg->value, 
-                AXON, axon_msg->value, axon_msg->len);
         INFO_PRINT ("[PkC] Send packet to %d", sel_msg->value);  
+        outmsgs[OPORT_Packet] = new PacketMessage (PacketMessage::AXON,
+                sel_msg->value, axon_msg->value, axon_msg->len/*, axon_msg->delay*/);
+        // FIXME: should insert axon_msg->delay
     }
     else if(unlikely(axon_msg || sel_msg))
     {
         SIM_ERROR ("Packet constructor receive only either axon or board id", 
                 GetFullName().c_str());
-        return;
     }
+
+    return;
 }

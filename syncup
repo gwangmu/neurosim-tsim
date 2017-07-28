@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rsync -rvzh ./ root@10.8.0.1:/work/neurosim-tsim --exclude '.*.swp' --exclude 'sync*' --exclude 'include/TSim' --exclude 'include/Ramulator' --exclude 'neurosim-tsim' --exclude 'obj'

@@ -2,8 +2,6 @@
 
 #include <TSim/Simulation/Testbench.h>
 #include <Message/AxonMessage.h>
-#include <Component/DataSinkModule.h>
-#include <Component/TSManager.h>
 
 #include <cinttypes>
 #include <string>
@@ -11,7 +9,7 @@
 
 using namespace std;
 
-struct NeuronBlockOutMessage;
+class TimestepReporter;
 
 class NeuroSimTestbench: public Testbench
 {
@@ -21,6 +19,6 @@ public:
     virtual bool IsFinished (PERMIT(Simulator));
 
 private:
-    TSManager *ts_mgr;
+    TimestepReporter *tsrep;
     int max_timestep;
 };

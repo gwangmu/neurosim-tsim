@@ -21,7 +21,8 @@ private:
     uint32_t PORT_RX_IMPORT;
 
 public:
-    PCIeController (string iname, Component *parent, string clkname, PCIeMessage *msgproto)
+    PCIeController (string iname, Component *parent, string clkname, 
+            PCIeMessage *msgproto)
         : Module ("PCIeController", iname, parent, 1)
     {
         PORT_TX = CreatePort ("tx", Module::PORT_INPUT, msgproto);
@@ -47,7 +48,8 @@ public:
         return true;
     }
 
-    virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+    virtual void Operation (Message **inmsgs, Message **outmsgs, 
+            Instruction *instr)
     {
         // NOTE: simply forwarding messages
         if (inmsgs[PORT_TX])
