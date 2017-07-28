@@ -1,7 +1,7 @@
 #! /bin/bash
 
 cd workloads
-sh spec_generator.sh
+make
 cd ..
 
 make superclean
