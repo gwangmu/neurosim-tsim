@@ -16,7 +16,7 @@ public:
     InputFeeder (string iname, Component *parent, 
             int num_propagators);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
-            const uint32_t *outque_size, Instruction *instr);
+            Instruction *instr);
 
 private:
     // Port IDs

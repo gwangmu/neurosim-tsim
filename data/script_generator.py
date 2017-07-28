@@ -175,6 +175,12 @@ def meta_generator():
         f.write("\taddr=0x%04x, data=0x%016x\n" %(idx, d))
 
     f.close()
+    
+    f = open(FLAGS.path + 'data/empty.script', 'w')
+    f.write("#!Tsim Script\n\n")
+    f.write("CLASSNAME: EmptyFileRegister\n")
+    f.write("DATA:\n")
+    f.close()
 
     print "Required DRAM size", last_addr // FLAGS.propagator
 
@@ -241,6 +247,13 @@ def spec_generator(fast=0):
             f.write("REGISTER_DATAPATH(top.chip%d.core%d." %(i, j) \
                     + meta_tgt + \
                     "): data/meta/meta%d_%d.script\n" %(i, j))
+    
+    f.write ("\n")
+    for i in range(FLAGS.chip):
+        for j in range(FLAGS.core):
+            f.write("REGISTER_DATAPATH(top.chip%d.core%d." %(i, j) \
+                    + "core_acc_unit" + \
+                    "): data/empty.script\n")
 
     f.write ("\n")
     for i in range(FLAGS.propagator):
@@ -249,7 +262,7 @@ def spec_generator(fast=0):
         f.write("REGISTER_DATAPATH(top.propagator%d.delay_module.delay_storage): data/delay/delay%d.script\n" \
                 %(i, i))
    
-        f.write ("REGISTER_DATAPATH(top.input_feeder): data/input.script\n")
+    f.write ("REGISTER_DATAPATH(top.input_feeder): data/input.script\n")
 
     f.write ("\n# Clock\n")
     f.write ("CLOCK_PERIOD(main): 4\n")

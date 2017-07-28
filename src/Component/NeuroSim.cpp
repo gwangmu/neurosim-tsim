@@ -65,7 +65,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     AndGate *idle_and = new AndGate ("idle_and", this, num_propagators);
     AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_chips + 1);
 
-    InputFeeder *input_feeder = 
+    Module *input_feeder = 
         new InputFeeder ("input_feeder", this, num_propagators);
 
     /** Module & Wires **/
@@ -173,7 +173,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
                                                            num_chips));
         axon_data[i]
             ->GetEndpoint (Endpoint::LHS, num_chips)
-            ->SetCapacity (2);
+            ->SetCapacity (4);
         axon_data[i]
             ->GetEndpoint (Endpoint::LHS, num_chips + 1)
             ->SetCapacity (2);

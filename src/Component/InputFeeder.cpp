@@ -1,8 +1,9 @@
+#include <Component/InputFeeder.h>
+
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 #include <TSim/Pathway/IntegerMessage.h>
 
-#include <Component/InputFeeder.h>
 #include <Message/AxonMessage.h>
 #include <Message/SignalMessage.h>
 #include <Register/InputFileRegister.h>
@@ -57,7 +58,7 @@ InputFeeder::InputFeeder (string iname, Component *parent,
 
 // NOTE: called only if not stalled
 void InputFeeder::Operation (Message **inmsgs, Message **outmsgs, 
-        const uint32_t *outque_size, Instruction *instr)
+        Instruction *instr)
 {
     IntegerMessage *ts_msg =
         static_cast<IntegerMessage*>(inmsgs[PORT_TSparity]);
