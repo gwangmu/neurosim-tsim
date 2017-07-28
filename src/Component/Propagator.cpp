@@ -19,7 +19,6 @@
 #include <Message/SignalMessage.h>
 #include <Message/IndexMessage.h>
 #include <Message/DramMessage.h>
-#include <Message/DelayMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -77,7 +76,8 @@ Propagator::Propagator (string iname, Component *parent)
     Wire *dram_addr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
     Wire *dram_data = new Wire (this, conattr, Prototype<DramMessage>::Get());
 
-    Wire *delay_out = new Wire (this, conattr, Prototype<DelayMessage>::Get());
+    RRFaninWire *delay_out = 
+        new RRFaninWire (this, conattr, Prototype<AxonMessage>::Get(), 2);
         
     Wire *recv_idle = 
         new Wire (this, conattr, Prototype<IntegerMessage>::Get());
@@ -102,10 +102,14 @@ Propagator::Propagator (string iname, Component *parent)
     dram_data->GetEndpoint (Endpoint::LHS)->SetCapacity (dram_outque_size);
 
     axon_classifier->Connect ("delay_out", 
-                              delay_out->GetEndpoint (Endpoint::LHS));
+                              delay_out->GetEndpoint (Endpoint::LHS, 0));
+    axon_receiver->Connect ("delay_out", 
+                              delay_out->GetEndpoint (Endpoint::LHS, 1));
     delay_module->Connect ("Input", 
                            delay_out->GetEndpoint (Endpoint::RHS));
     delay_out->GetEndpoint (Endpoint::RHS)->SetCapacity (delay_input_queue_sz);
+    delay_out->GetEndpoint (Endpoint::LHS, 0)
+             ->SetCapacity (2);
 
     axon_receiver->Connect ("idle", recv_idle->GetEndpoint (Endpoint::LHS)); 
     axon_classifier->Connect ("idle", class_idle->GetEndpoint (Endpoint::LHS)); 

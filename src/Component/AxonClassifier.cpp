@@ -10,7 +10,6 @@
 #include <Message/SynapseMessage.h>
 #include <Message/AxonMessage.h>
 #include <Message/SelectMessage.h>
-#include <Message/DelayMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -36,7 +35,7 @@ AxonClassifier::AxonClassifier (string iname, Component *parent)
     OPORT_Axon = CreatePort ("axon_out", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
     OPORT_Delay = CreatePort ("delay_out", Module::PORT_OUTPUT,
-            Prototype<DelayMessage>::Get());
+            Prototype<AxonMessage>::Get());
     OPORT_BoardID = CreatePort ("board_id", Module::PORT_OUTPUT,
             Prototype<SelectMessage>::Get());
     OPORT_Sel = CreatePort ("tar_idx", Module::PORT_OUTPUT,
@@ -55,7 +54,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs, Instruction
     {
         if(dram_msg->type == DramMessage::REMOTE)
         {
-            outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16);
+            outmsgs[OPORT_Axon] = new AxonMessage (0, dram_msg->val32, dram_msg->val16, 0);
             outmsgs[OPORT_BoardID] = new SelectMessage (0, dram_msg->target_idx); 
             INFO_PRINT ("[AEC] Send routing information to controller");
         }
@@ -63,7 +62,7 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs, Instruction
         {
             INFO_PRINT ("[AEC] Send delay information %lx %x %u",
                     dram_msg->val32, dram_msg->val16, dram_msg->target_idx);
-            outmsgs[OPORT_Delay] = new DelayMessage (0, dram_msg->val32,
+            outmsgs[OPORT_Delay] = new AxonMessage (0, dram_msg->val32,
                                                      dram_msg->val16, 
                                                      dram_msg->target_idx);
         }

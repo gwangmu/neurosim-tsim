@@ -20,3 +20,4 @@ log*
 lib/tsim/obj/*
 oprof*
 sync*
+simspec/*

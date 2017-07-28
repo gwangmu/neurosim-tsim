@@ -46,7 +46,7 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs, Instructio
         INFO_PRINT ("[AT] Receive axon message (addr %lu)", axon_msg->value);
 
         uint8_t prop_idx = axon_msg->value / dram_size;
-        uint32_t addr = axon_msg->value % dram_size;
+        uint64_t addr = axon_msg->value % dram_size;
         outmsgs[OPORT_Axons[prop_idx]] = new AxonMessage (0, addr, axon_msg->len); 
         
         if (is_idle_)

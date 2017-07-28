@@ -21,7 +21,7 @@ private:
     uint32_t IPORT_Axon;
 
     // Output port
-    uint32_t OPORT_Axon, OPORT_idle;
+    uint32_t OPORT_Axon, OPORT_idle, OPORT_delay;
 
     bool is_idle_;
 };

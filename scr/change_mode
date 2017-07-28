@@ -1,4 +1,4 @@
 #!/bin/bash
 
-ln -s simspec/neurosim"$1".simspec simspec/neurosim.simspec
+cp simspec/neurosim"$1".simspec simspec/neurosim.simspec
 cat simspec/neurosim.simspec
