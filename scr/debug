@@ -1,2 +1,0 @@
-#!/bin/bash
-gdb --args ./neurosim-tsim simspec/neurosim.simspec -l 50000

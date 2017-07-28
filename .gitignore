@@ -20,3 +20,5 @@ log*
 lib/tsim/obj/*
 oprof*
 simspec/*
+SH/
+result/
