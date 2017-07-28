@@ -93,6 +93,8 @@ double Component::CalcDirectDisPowerShare (Component *child)
     else
         direct_dispower = parent->CalcDirectDisPowerShare (this);
 
+    if (direct_dispower == -1) return -1;
+
     for (Component *comp : children)
     {
         if (comp->GetDisPower() != -1)
