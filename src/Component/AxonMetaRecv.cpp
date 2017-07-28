@@ -33,7 +33,8 @@ void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs, Instruction *
 
     if(axon_msg)
     {
-        INFO_PRINT ("[AMR] Receive message (addr %lu)", axon_msg->value);
+        INFO_PRINT ("[AMR] Receive message (addr %lu, delay %u)", 
+                axon_msg->value, axon_msg->delay);
 
         if(!axon_msg->delay)
             outmsgs[OPORT_Axon] = 

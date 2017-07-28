@@ -1,7 +1,7 @@
 #! /bin/bash
 
 mkdir -p result
-for i in 10 25 64 200
+for i in 10 25 64 200 
 do
     f=isp_"$i"k
     echo "Simulate $f workloads" 
