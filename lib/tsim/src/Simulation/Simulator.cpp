@@ -40,6 +40,9 @@ Simulator::Simulator (string specfilename, Simulator::Option opt)
     this->opt = opt;
     tb = NULL;
     curtime = 0;
+
+    if (opt.logfilename != "")
+        SET_LOGFILE (opt.logfilename.c_str());
 }
 
 
@@ -135,6 +138,14 @@ bool Simulator::LoadTestbench ()
                 (tb->GetUIntParam (Testbench::COMPONENT_DIS_POWER, 
                                    nextcomp->GetClassName()),
                  KEY(Simulator));
+            nextcomp->SetStaticPower 
+                (tb->GetUIntParam (Testbench::COMPONENT_STATIC_POWER, 
+                                   nextcomp->GetClassName()),
+                 KEY(Simulator));
+            nextcomp->SetDynamicPower 
+                (tb->GetUIntParam (Testbench::COMPONENT_DYNAMIC_POWER, 
+                                   nextcomp->GetClassName()),
+                 KEY(Simulator));
         }
 
         PRINT ("total %u module(s), %u device(s) (with %u gate(s)), %u pathway(s) found",
@@ -175,11 +186,11 @@ bool Simulator::LoadTestbench ()
             {
                 Register *reg = module->GetRegister();
                 reg->SetStaticPower (tb->GetUIntParam (Testbench::REGISTER_STATIC_POWER,
-                            module->GetFullNameWOClass()));
-                reg->SetReadEnergy (tb->GetUIntParam (Testbench::REGISTER_READ_ENERGY,
-                            module->GetFullNameWOClass()));
-                reg->SetWriteEnergy (tb->GetUIntParam (Testbench::REGISTER_WRITE_ENERGY,
-                            module->GetFullNameWOClass()));
+                            module->GetClassName()));
+                reg->SetReadEnergy (tb->GetDoubleParam (Testbench::REGISTER_READ_ENERGY,
+                            module->GetClassName()));
+                reg->SetWriteEnergy (tb->GetDoubleParam (Testbench::REGISTER_WRITE_ENERGY,
+                            module->GetClassName()));
             }
         }
 
@@ -663,7 +674,7 @@ bool Simulator::Simulate ()
 
             if (nexttstime <= curtime)
             {
-                INFO_PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
+                PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
                 nexttstime += opt.tsinterval;
             }
 
@@ -835,7 +846,7 @@ void Simulator::ReportSimulationSummary ()
     double energy = tb->GetTopComponent(KEY(Simulator))->GetAggregateConsumedEnergy ();
     ROW ("Estimated energy (J)", (energy == -1 ? "Unknown" : to_string(energy).c_str()));
 
-    double power = energy / (curtime * 10E-9);
+    double power = energy / (curtime * 1E-9);
     ROW ("Estimated power (W)", (energy == -1 ? "Unknown" : to_string(power).c_str()));
 
     STROKE;
@@ -914,7 +925,7 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
         double avgactive = (double)cclass.active / (cclass.active + cclass.idle) * 100;
         double oenergy = unit->GetConsumedEnergy ();
         double energy = oenergy * 1000;
-        double power = energy / (curtime * 10E-9);
+        double power = energy / (curtime * 1E-9);
 
         ROW (indented_name.c_str(), avgactive, 
                 (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
@@ -976,51 +987,54 @@ void Simulator::ReportComponentRec (Component *comp, uint32_t level)
             (aggcclass.active + aggcclass.idle) * 100;
         double oenergy = comp->GetAggregateConsumedEnergy (); 
         double energy = oenergy * 1000;
-        double power = energy / (curtime * 10E-9);
+        double power = energy / (curtime * 1E-9);
 
         ROW (indented_name.c_str(), avgactive,
                 (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
                 (oenergy == -1) ? "Unknown" : to_string(power).c_str(),
                 eventstr.c_str());
 
-        for (auto it = comp->PathwayBegin (); it != comp->PathwayEnd (); it++)
+        if (opt.printpath)
         {
-            Pathway *pathway = *it;
-            const Pathway::CycleClass<uint64_t>& pcclass = pathway->GetCycleClass ();
-            const Pathway::EventCount<uint64_t>& pecount = pathway->GetEventCount ();
-
-            double avgpactive = (double)pcclass.propagating / 
-                (pcclass.propagating + pcclass.idle) * 100;
-
-            string indented_name = string(level * 2 + 2, ' ') + 
-                "(Path) " + pathway->GetName();
-            if (indented_name.size() > 60)
+            for (auto it = comp->PathwayBegin (); it != comp->PathwayEnd (); it++)
             {
-                indented_name[58] = indented_name[59] = '.';
-                indented_name.resize (60);
-            }
+                Pathway *pathway = *it;
+                const Pathway::CycleClass<uint64_t>& pcclass = pathway->GetCycleClass ();
+                const Pathway::EventCount<uint64_t>& pecount = pathway->GetEventCount ();
 
-            string eventstr = "";
-            if (pecount.msgdrop != 0)
-                eventstr += string ("msgdrop (") + 
-                    to_string(pecount.msgdrop) + " msg(s))";
+                double avgpactive = (double)pcclass.propagating / 
+                    (pcclass.propagating + pcclass.idle) * 100;
 
-            double oenergy = pathway->GetConsumedEnergy (); 
-            double energy = oenergy * 1000;
-            double power = energy / (curtime * 10E-9);
+                string indented_name = string(level * 2 + 2, ' ') + 
+                    "(Path) " + pathway->GetName();
+                if (indented_name.size() > 60)
+                {
+                    indented_name[58] = indented_name[59] = '.';
+                    indented_name.resize (60);
+                }
 
-            ROW (indented_name.c_str(), avgpactive,
-                    (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
-                    (oenergy == -1) ? "Unknown" : to_string(power).c_str(),
-                    eventstr.c_str());
+                string eventstr = "";
+                if (pecount.msgdrop != 0)
+                    eventstr += string ("msgdrop (") + 
+                        to_string(pecount.msgdrop) + " msg(s))";
 
-            for (auto p = 0; p < pathway->GetNumRHS(); p++)
-            {
-                if (pecount.rhs_blocked[p] + pecount.rhs_all_blocked != 0)
-                    PRINT ("%s  - %-6s: blocked (%lu cycle(s))", 
-                            string (level + 2, ' ').c_str(),
-                            pathway->GetRHS(p).GetInstanceName().c_str(), 
-                            pecount.rhs_blocked[p] + pecount.rhs_all_blocked);
+                double oenergy = pathway->GetConsumedEnergy (); 
+                double energy = oenergy * 1000;
+                double power = energy / (curtime * 1E-9);
+
+                ROW (indented_name.c_str(), avgpactive,
+                        (oenergy == -1) ? "Unknown" : to_string(energy).c_str(),
+                        (oenergy == -1) ? "Unknown" : to_string(power).c_str(),
+                        eventstr.c_str());
+
+                for (auto p = 0; p < pathway->GetNumRHS(); p++)
+                {
+                    if (pecount.rhs_blocked[p] + pecount.rhs_all_blocked != 0)
+                        PRINT ("%s  - %-6s: blocked (%lu cycle(s))", 
+                                string (level + 2, ' ').c_str(),
+                                pathway->GetRHS(p).GetInstanceName().c_str(), 
+                                pecount.rhs_blocked[p] + pecount.rhs_all_blocked);
+                }
             }
         }
 

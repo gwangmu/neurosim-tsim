@@ -41,11 +41,11 @@ public:
     uint32_t GetWriteCount () { return wrcount; }
 
     /* Called by 'Simulator' */
-    void SetReadEnergy (uint32_t rdenergy) { this->rdenergy = rdenergy; }
-    void SetWriteEnergy (uint32_t wrenergy) { this->wrenergy = wrenergy; }
+    void SetReadEnergy (double rdenergy) { this->rdenergy = rdenergy; }
+    void SetWriteEnergy (double wrenergy) { this->wrenergy = wrenergy; }
     void SetStaticPower (uint32_t stapower) { this->stapower = stapower; }
-    uint32_t GetReadEnergy () { return rdenergy; }
-    uint32_t GetWriteEnergy () { return wrenergy; }
+    double GetReadEnergy () { return rdenergy; }
+    double GetWriteEnergy () { return wrenergy; }
     uint32_t GetStaticPower () { return stapower; }
 
     double GetConsumedStaticEnergy ();
@@ -70,8 +70,8 @@ private:
     Attr attr;
     RegisterWord *wproto;
 
-    uint32_t rdenergy;
-    uint32_t wrenergy;
+    double rdenergy;
+    double wrenergy;
     uint32_t stapower;
     uint32_t rdcount;
     uint32_t wrcount;

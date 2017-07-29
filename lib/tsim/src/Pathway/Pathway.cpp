@@ -250,7 +250,7 @@ double Pathway::GetConsumedEnergy ()
                 GetName().c_str());
 
     if (w_dispow == -1)
-        return -1;
+        return 0;       // NOTE: 0 by default
     else
         return (clkperiod * 1E-9 * w_dispow * 1E-9 * cclass.propagating);
 }

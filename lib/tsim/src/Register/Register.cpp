@@ -32,11 +32,11 @@ double Register::GetConsumedStaticEnergy ()
 double Register::GetAccumReadEnergy ()
 {
     if (rdenergy == -1) return -1;
-    else return (rdenergy * rdcount * 1E-9);
+    else return (rdenergy * rdcount) * 1E-9;
 }
 
 double Register::GetAccumWriteEnergy ()
 {
     if (wrenergy == -1) return -1;
-    else return (wrenergy * wrcount * 1E-9);
+    else return (wrenergy * wrcount) * 1E-9;
 }
