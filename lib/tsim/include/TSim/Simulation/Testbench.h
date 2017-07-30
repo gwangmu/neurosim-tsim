@@ -39,6 +39,8 @@ public:
         UNIT_DYNAMIC_POWER,
         UNIT_STATIC_POWER,
         COMPONENT_DIS_POWER,
+        COMPONENT_DYNAMIC_POWER,
+        COMPONENT_STATIC_POWER,
         REGISTER_READ_ENERGY,
         REGISTER_WRITE_ENERGY,
         REGISTER_STATIC_POWER,
@@ -57,6 +59,7 @@ public:
 
     string GetStringParam (ParamType ptype, string pname);
     uint32_t GetUIntParam (ParamType ptype, string pname);
+    double GetDoubleParam (ParamType ptype, string pname);
 
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
 
@@ -70,8 +73,10 @@ protected:
     map<string, uint32_t> moddynpow;
     map<string, uint32_t> modstapow;
     map<string, uint32_t> compdispow;
-    map<string, uint32_t> regwrenergy;
-    map<string, uint32_t> regrdenergy;
+    map<string, uint32_t> compdynpow;
+    map<string, uint32_t> compstapow;
+    map<string, double> regwrenergy;
+    map<string, double> regrdenergy;
     map<string, uint32_t> regstapow;
     map<string, uint32_t> modparams;
 };

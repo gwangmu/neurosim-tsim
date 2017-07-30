@@ -4,6 +4,8 @@
 #define SET_UNIT_DYNAMIC_POWER(mod,pow) moddynpow[mod] = pow
 #define SET_UNIT_STATIC_POWER(mod,pow) modstapow[mod] = pow
 #define SET_COMPONENT_DIS_POWER(comp,pow) compdispow[comp] = pow
+#define SET_COMPONENT_DYNAMIC_POWER(comp,pow) compdynpow[comp] = pow
+#define SET_COMPONENT_STATIC_POWER(comp,pow) compstapow[comp] = pow
 #define SET_REGISTER_READ_ENERGY(mod,pow) regrdenergy[mod] = pow
 #define SET_REGISTER_WRITE_ENERGY(mod,pow) regwrenergy[mod] = pow
 #define SET_REGISTER_STATIC_POWER(reg,pow) regstapow[reg] = pow
@@ -107,14 +109,24 @@ bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))
                 SET_COMPONENT_DIS_POWER (toked[1], stoi (toked[2]));
                 DEBUG_PRINT ("component dispower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
+            else if (toked[0] == "COMPONENT_DYNAMIC_POWER")    
+            {
+                SET_COMPONENT_DYNAMIC_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("component dynpower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
+            else if (toked[0] == "COMPONENT_STATIC_POWER")    
+            {
+                SET_COMPONENT_STATIC_POWER (toked[1], stoi (toked[2]));
+                DEBUG_PRINT ("component stapower (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
+            }
             else if (toked[0] == "REGISTER_READ_ENERGY")    
             {
-                SET_REGISTER_READ_ENERGY (toked[1], stoi (toked[2]));
+                SET_REGISTER_READ_ENERGY (toked[1], stof (toked[2]));
                 DEBUG_PRINT ("register rdenergy (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
             else if (toked[0] == "REGISTER_WRITE_ENERGY")    
             {
-                SET_REGISTER_WRITE_ENERGY (toked[1], stoi (toked[2]));
+                SET_REGISTER_WRITE_ENERGY (toked[1], stof (toked[2]));
                 DEBUG_PRINT ("register wrenergy (%s <-- %s)", toked[1].c_str(), toked[2].c_str());
             }
             else if (toked[0] == "REGISTER_STATIC_POWER")    
@@ -211,17 +223,17 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype, string pname)
         else
             return -1;
     }
-    else if (ptype == Testbench::REGISTER_READ_ENERGY)
+    else if (ptype == Testbench::COMPONENT_DYNAMIC_POWER)
     {
-        if (regrdenergy.count (pname))
-            return regrdenergy[pname];
+        if (compdynpow.count (pname))
+            return compdynpow[pname];
         else
             return -1;
     }
-    else if (ptype == Testbench::REGISTER_WRITE_ENERGY)
+    else if (ptype == Testbench::COMPONENT_STATIC_POWER)
     {
-        if (regwrenergy.count (pname))
-            return regwrenergy[pname];
+        if (compstapow.count (pname))
+            return compstapow[pname];
         else
             return -1;
     }
@@ -246,4 +258,24 @@ uint32_t Testbench::GetUIntParam (Testbench::ParamType ptype, string pname)
     }
     else
         SYSTEM_ERROR ("parameter '%u' is not an integer", ptype);
+}
+
+double Testbench::GetDoubleParam (Testbench::ParamType ptype, string pname)
+{
+    if (ptype == Testbench::REGISTER_READ_ENERGY)
+    {
+        if (regrdenergy.count (pname))
+            return regrdenergy[pname];
+        else
+            return -1;
+    }
+    else if (ptype == Testbench::REGISTER_WRITE_ENERGY)
+    {
+        if (regwrenergy.count (pname))
+            return regwrenergy[pname];
+        else
+            return -1;
+    }
+    else
+        SYSTEM_ERROR ("parameter '%u' is not a double value", ptype);
 }

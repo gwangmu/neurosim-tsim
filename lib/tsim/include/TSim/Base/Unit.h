@@ -100,6 +100,10 @@ public:
     virtual bool IsValidConnection (Port *port, Endpoint *endpt) { return true; }
 
 protected:  
+    /* Called by 'Module' or 'Device' */
+    void SetDynamicPower (uint32_t pow) { dynpower = pow; }
+    void SetStaticPower (uint32_t pow) { stapower = pow; }
+
     /* Called by derived 'Unit' */
     uint32_t CreatePort (string portname, PortType iotype, Message* msgproto);
     virtual void OnCreatePort (Port &newport) = 0;

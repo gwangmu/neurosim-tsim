@@ -28,9 +28,12 @@ public:
     struct Option
     {
         Option () {}
+
         uint64_t timelimit = -1;
         uint64_t tsinterval = -1;
+        bool printpath = false;
         string gvfilename = "";
+        string logfilename = "";
     };
 
 protected:

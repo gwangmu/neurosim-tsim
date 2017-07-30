@@ -46,6 +46,9 @@ Module::Module (const char *clsname, string iname,
 
     pbusy_state = 0;
     inmsg_valid_count = 0;
+
+    w_stapow = -1;
+    w_dynpow = -1;
 }
 
 
@@ -93,7 +96,15 @@ double Module::GetConsumedEnergy ()
 {
     double energy = Unit::GetConsumedEnergy();
 
-    if (energy == -1) return -1;
+    if (energy == -1) 
+    {
+        if (w_stapow == -1 || w_dynpow == -1) return -1;
+
+        CycleClass<uint64_t> cclass = GetCycleClass();
+        energy = GetClockPeriod() * 1E-9 * 
+                (w_stapow * 1E-9 * (cclass.active + cclass.idle) +
+                 w_dynpow * 1E-9 * cclass.active);
+    }
 
     if (reg)
     {
@@ -109,6 +120,14 @@ double Module::GetConsumedEnergy ()
 }
 
 /* functions for 'Simulator' */
+void Module::WarmUp (PERMIT(Simulator))
+{
+    Unit::WarmUp (TRANSFER_KEY(Simulator));
+
+    w_stapow = GetParent()->GetStaticPowerPerModule();
+    w_dynpow = GetParent()->GetDynamicPowerPerModule();
+}
+
 IssueCount Module::Validate (PERMIT(Simulator))
 {
     IssueCount icount;
@@ -118,14 +137,14 @@ IssueCount Module::Validate (PERMIT(Simulator))
         SYSTEM_ERROR ("module '%s' has no parent", GetFullName().c_str());
         icount.error++;
     }
-
-    if (GetDynamicPower() == -1)
+ 
+    if (GetDynamicPower() == -1 && GetParent()->GetDynamicPowerPerModule() == -1)
     {
         DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
         icount.warning++;
     }
 
-    if (GetStaticPower() == -1)
+    if (GetStaticPower() == -1 && GetParent()->GetStaticPowerPerModule() == -1)
     {
         DESIGN_WARNING ("no static power info", GetFullName().c_str());
         icount.warning++;

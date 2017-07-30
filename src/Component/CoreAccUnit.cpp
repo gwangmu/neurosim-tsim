@@ -3,7 +3,7 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 
-#include <Register/EmptyFileRegister.h>
+#include <Register/EmptyRegister.h>
 #include <Register/EmptyRegisterWord.h>
 #include <Message/SignalMessage.h>
 #include <Message/SynapseMessage.h>
@@ -37,7 +37,7 @@ CoreAccUnit::CoreAccUnit (string iname, Component *parent)
     sent_accfin_ = true;
 
     Register::Attr regattr (10, 10);
-    SetRegister (new EmptyFileRegister (Register::SRAM, regattr));
+    SetRegister (new EmptyRegister (Register::SRAM, regattr));
 }
 
 void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)

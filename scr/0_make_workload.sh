@@ -1,8 +1,5 @@
 #! /bin/bash
 
-cd workloads
-make
-cd ..
-
+sh workloads/spec_generator.sh
 make superclean
 make NDEBUG=1 NINFO=1 -j10

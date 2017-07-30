@@ -1,6 +1,7 @@
 #include <TSim/Base/Component.h>
 
 #include <TSim/Simulation/Simulator.h>
+#include <TSim/Module/Module.h>
 #include <TSim/Base/Unit.h>
 #include <TSim/Device/Device.h>
 #include <TSim/Pathway/Pathway.h>
@@ -15,7 +16,6 @@
 
 using namespace std;
 
-
 Component::Component (const char *clsname, string name, Component *parent)
     : Metadata (clsname, name)
 {
@@ -25,6 +25,8 @@ Component::Component (const char *clsname, string name, Component *parent)
 
     this->clockname = "";
     this->dispower = -1;
+    this->stapower = -1;
+    this->dynpower = -1;
 }
 
 
@@ -54,14 +56,13 @@ uint32_t Component::GetDisPower ()
 
 double Component::GetDirectDisPower ()
 {
-    if (parent)
+    if (dispower == -1 && parent)
         return parent->CalcDirectDisPowerShare (this);
-    else
+    else if (dispower != -1)
     {
         uint32_t direct_dispower;
         uint32_t edges = pathways.size();
 
-        if (dispower == -1) return -1;
         direct_dispower = dispower;
 
         for (Component *comp : children)
@@ -78,6 +79,8 @@ double Component::GetDirectDisPower ()
 
         return ((double)direct_dispower / edges * pathways.size());
     }
+
+    return -1;
 }
 
 
@@ -92,6 +95,8 @@ double Component::CalcDirectDisPowerShare (Component *child)
         direct_dispower = dispower;
     else
         direct_dispower = parent->CalcDirectDisPowerShare (this);
+
+    if (direct_dispower == -1) return -1;
 
     for (Component *comp : children)
     {
@@ -118,6 +123,154 @@ double Component::GetDisPowerPerPathway ()
         return GetDirectDisPower() / pathways.size();
 }
 
+uint32_t Component::GetStaticPower ()
+{
+    return stapower;
+}
+
+double Component::GetDirectStaticPower ()
+{
+    if (stapower == -1 && parent)
+        return parent->CalcDirectStaticPowerShare (this);
+    else if (stapower != -1)
+    {
+        uint32_t direct_stapower;
+        uint32_t edges = GetNumDirectChildModules();
+
+        direct_stapower = stapower;
+
+        for (Component *comp : children)
+        {
+            if (comp->GetStaticPower() != -1)
+                direct_stapower -= comp->GetStaticPower();
+            else
+                edges += comp->GetNumDescendantModules();
+        }
+
+        if (!edges)
+            SYSTEM_ERROR ("component cannot have zero (direct) modules "
+                    "(comp: %s)", GetFullName().c_str());
+
+        return ((double)direct_stapower / edges * GetNumDirectChildModules());
+    }
+
+    return -1;
+}
+
+
+double Component::CalcDirectStaticPowerShare (Component *child)
+{
+    uint32_t direct_stapower;
+    uint32_t edges = GetNumDirectChildModules();
+
+    if (!parent && stapower == -1) return -1;
+
+    if (stapower != -1)
+        direct_stapower = stapower;
+    else
+        direct_stapower = parent->CalcDirectStaticPowerShare (this);
+
+    if (direct_stapower == -1) return -1;
+
+    for (Component *comp : children)
+    {
+        if (comp->GetStaticPower() != -1)
+            direct_stapower -= comp->GetStaticPower();
+        else
+            edges += comp->GetNumDescendantModules();
+    }
+
+    if (!edges)
+        SYSTEM_ERROR ("component cannot have zero (direct) modules "
+                "(comp: %s)", GetFullName().c_str());
+
+    return ((double)direct_stapower / edges * GetNumDirectChildModules());
+}
+
+double Component::GetStaticPowerPerModule ()
+{
+    double dstapow = GetDirectStaticPower ();
+    
+    if (dstapow == -1)
+        return -1;
+    else
+        return GetDirectStaticPower() / GetNumDirectChildModules();
+}
+
+uint32_t Component::GetDynamicPower ()
+{
+    return dynpower;
+}
+
+double Component::GetDirectDynamicPower ()
+{
+    if (dynpower == -1 && parent)
+        return parent->CalcDirectDynamicPowerShare (this);
+    else if (dynpower != -1)
+    {
+        uint32_t direct_dynpower;
+        uint32_t edges = GetNumDirectChildModules();
+
+        direct_dynpower = dynpower;
+
+        for (Component *comp : children)
+        {
+            if (comp->GetDynamicPower() != -1)
+                direct_dynpower -= comp->GetDynamicPower();
+            else
+                edges += comp->GetNumDescendantModules();
+        }
+
+        if (!edges)
+            SYSTEM_ERROR ("component cannot have zero (direct) modules "
+                    "(comp: %s)", GetFullName().c_str());
+
+        return ((double)direct_dynpower / edges * GetNumDirectChildModules());
+    }
+
+    return -1;
+}
+
+
+double Component::CalcDirectDynamicPowerShare (Component *child)
+{
+    uint32_t direct_dynpower;
+    uint32_t edges = GetNumDirectChildModules();
+
+    if (!parent && dynpower == -1) return -1;
+
+    if (dynpower != -1)
+        direct_dynpower = dynpower;
+    else
+        direct_dynpower = parent->CalcDirectDynamicPowerShare (this);
+
+    if (direct_dynpower == -1) return -1;
+
+    for (Component *comp : children)
+    {
+        if (comp->GetDynamicPower() != -1)
+            direct_dynpower -= comp->GetDynamicPower();
+        else
+            edges += comp->GetNumDescendantModules();
+    }
+
+    if (!edges)
+        SYSTEM_ERROR ("component cannot have zero (direct) modules "
+                "(comp: %s)", GetFullName().c_str());
+
+    return ((double)direct_dynpower / edges * GetNumDirectChildModules());
+}
+
+double Component::GetDynamicPowerPerModule ()
+{
+    double ddynpow = GetDirectDynamicPower ();
+    
+    if (ddynpow == -1)
+        return -1;
+    else
+        return GetDirectDynamicPower() / GetNumDirectChildModules();
+}
+
 
 string Component::GetFullName ()
 {
@@ -141,6 +294,16 @@ uint32_t Component::GetNumChildModules ()
     uint32_t nmods = 0;
     for (Component *child : children)
         nmods += child->GetNumChildModules ();
+
+    return nmods;
+}
+
+uint32_t Component::GetNumDirectChildModules ()
+{
+    uint32_t nmods = 0;
+    for (Component *comp : children)
+        if (dynamic_cast<Module *>(comp))
+            nmods++;
 
     return nmods;
 }
@@ -172,12 +335,6 @@ Unit* Component::GetUnit (string name)
     return tar;
 }
 
-
-void Component::SetDissipationPower (uint32_t pow, PERMIT(Simulator))
-{
-    dispower = pow;
-    DEBUG_PRINT ("%s dispower = %u", GetClassName(), pow);
-}
 
 Component::CycleClass<double> Component::GetAggregateCycleClass ()
 {
@@ -357,6 +514,15 @@ uint32_t Component::GetNumDescendantPathways ()
     return npaths;
 }
 
+uint32_t Component::GetNumDescendantModules ()
+{
+    uint32_t npaths = GetNumDirectChildModules();
+    for (Component *comp: children)
+        npaths += comp->GetNumDescendantModules ();
+
+    return npaths;
+}
+
 
 IssueCount Component::Validate (PERMIT(Simulator))
 {
@@ -382,13 +548,13 @@ IssueCount Component::Validate (PERMIT(Simulator))
         icount.warning += subicount.warning;
     }
 
-    if (GetDisPower() == -1 && (parent && parent->CalcDirectDisPowerShare (this) == -1))
+    /*if (GetDisPower() == -1 && (parent && parent->CalcDirectDisPowerShare (this) == -1))
     {
         DESIGN_WARNING ("component has no dissipation power", GetFullName().c_str());
         icount.warning++;
-    }
+    }*/
 
-    if (parent && parent->GetDisPower() != -1 && 
+    if (parent && parent->GetDisPower() != -1 && dispower != -1 && 
             parent->GetDisPower() < dispower)
     {
         DESIGN_FATAL ("child component cannot have larger dispower than parent",

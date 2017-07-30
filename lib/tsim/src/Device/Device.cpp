@@ -132,18 +132,18 @@ IssueCount Device::Validate (PERMIT(Simulator))
         icount.error++;
     }
 
-    // TODO: include this to dispower. for not just ignore
-    /*if (GetDynamicPower() == -1)
+    // NOTE: ignore power consumption if not defined
+    if (GetDynamicPower() == -1)
     {
-        DESIGN_WARNING ("no dynamic power info", GetFullName().c_str());
-        icount.warning++;
+        DESIGN_INFO ("no dynamic power info. assuming 0.", GetFullName().c_str());
+        SetDynamicPower(0);
     }
 
     if (GetStaticPower() == -1)
     {
-        DESIGN_WARNING ("no static power info", GetFullName().c_str());
-        icount.warning++;
-    }*/
+        DESIGN_INFO ("no static power info. assuming 0.", GetFullName().c_str());
+        SetStaticPower(0);
+    }
 
     if (GetClockPeriod() == -1)
     {

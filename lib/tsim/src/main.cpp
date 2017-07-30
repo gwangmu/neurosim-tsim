@@ -35,7 +35,15 @@ Simulator::Option LoadSimOption (int argc, char *argv[])
                 opt.gvfilename = string (argv[i + 1]);
                 i++;
             }
+            else if (arg == "-o")
+            {
+                opt.logfilename = string (argv[i + 1]);
+                i++;
+            }
         }
+
+        if (arg == "-pp")
+            opt.printpath = true;
     }
 
     return opt;
@@ -50,6 +58,8 @@ int main (int argc, char *argv[])
         PRINT ("  -p\ttimestamp print interval (-1 = off, by default)");
         PRINT ("  -l\tsimulation time limit (-1 = infinity, by default)");
         PRINT ("  -gv\tgraphviz source file name ("", by default)");
+        PRINT ("  -o\toutput log file name ("", by default)");
+        PRINT ("  -pp\treport pathways");
         return 0;
     }
 

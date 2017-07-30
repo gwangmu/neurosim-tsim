@@ -52,16 +52,23 @@ public:
     string GetFullNameWOClass ();
     Component* GetParent () { return parent; }
     virtual uint32_t GetNumChildModules ();
+    uint32_t GetNumDirectChildModules ();
 
     virtual string GetClock ();
     virtual set<string> GetClockSet ();
     uint32_t GetDisPower ();
+    uint32_t GetStaticPower ();
+    uint32_t GetDynamicPower ();
     double GetDirectDisPower ();
+    double GetDirectStaticPower ();
+    double GetDirectDynamicPower ();
 
     virtual Component* GetComponent (string name);
     virtual Unit* GetUnit (string name);
 
-    void SetDissipationPower (uint32_t pow, PERMIT(Simulator));
+    void SetDissipationPower (uint32_t pow, PERMIT(Simulator)) { dispower = pow; }
+    void SetStaticPower (uint32_t pow, PERMIT(Simulator)) { stapower = pow; }
+    void SetDynamicPower (uint32_t pow, PERMIT(Simulator)) { dynpower = pow; }
     virtual CycleClass<double> GetAggregateCycleClass ();
     virtual EventCount<double> GetAggregateEventCount ();
     virtual double GetAggregateConsumedEnergy ();
@@ -82,6 +89,7 @@ public:
     /* Called by 'Simulator' */
     vector<Component *>::iterator ChildBegin () { return children.begin (); }
     vector<Component *>::iterator ChildEnd () { return children.end (); }
+    uint32_t GetNumDescendantModules ();
 
     vector<Pathway *>::iterator PathwayBegin () { return pathways.begin (); }
     vector<Pathway *>::iterator PathwayEnd () { return pathways.end (); }
@@ -96,10 +104,14 @@ public:
 
     /* Called by child 'Component' */
     double CalcDirectDisPowerShare (Component *child);
+    double CalcDirectStaticPowerShare (Component *child);
+    double CalcDirectDynamicPowerShare (Component *child);
 
     /* Called by 'Pathway' */
     bool AddChildPathway (Pathway *pathway, PERMIT(Pathway));
     double GetDisPowerPerPathway ();
+    double GetStaticPowerPerModule ();
+    double GetDynamicPowerPerModule ();
 
 protected:
     /* Called by parent 'Component' */
@@ -120,4 +132,6 @@ private:
 
     string clockname;
     uint32_t dispower;
+    uint32_t stapower;
+    uint32_t dynpower;
 };

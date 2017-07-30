@@ -28,6 +28,7 @@ public:
     virtual double GetConsumedEnergy ();
 
     /* Called by 'Simulator' */
+    virtual void WarmUp (PERMIT(Simulator));
     virtual IssueCount Validate (PERMIT(Simulator));
     virtual void PreClock (PERMIT(Simulator)) final;
     virtual void PostClock (PERMIT(Simulator)) final;
@@ -80,4 +81,8 @@ private:
     // add-ons
     Script *script;
     Register *reg;
+
+    // warm-up
+    uint32_t w_stapow;
+    uint32_t w_dynpow;
 };
