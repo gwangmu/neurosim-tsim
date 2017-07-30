@@ -28,7 +28,7 @@ using namespace std;
 
 USING_TESTBENCH;
 
-Propagator::Propagator (string iname, Component *parent)
+Propagator::Propagator (string iname, Component *parent, int idx)
     : Component ("Propagator", iname, parent)
 {
     /** Parameters **/
@@ -55,7 +55,7 @@ Propagator::Propagator (string iname, Component *parent)
     {
         axon_storage = 
             new PseudoStorage ("axon_storage", this, 
-                               dram_io_buf_size, dram_outque_size); 
+                               dram_io_buf_size, dram_outque_size, idx); 
     }
     else
     {

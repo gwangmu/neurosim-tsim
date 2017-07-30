@@ -12,13 +12,14 @@
 #include <Ramulator/DRAM.h>
 #include <Ramulator/Processor.h>
 #include <Ramulator/SpeedyController.h>
+#include <Ramulator/Statistics.h>
 
 #include <cstdlib>
 
 USING_TESTBENCH;
 
 PseudoStorage::PseudoStorage (string iname, Component* parent, 
-        uint8_t io_buf_size, uint32_t dram_outque_size)
+        uint8_t io_buf_size, uint32_t dram_outque_size, int idx)
     : Module ("PseudoStorage", iname, parent, 0)
 {
     SetClock ("ddr");
@@ -58,7 +59,8 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 
     /* Initialize DRAM (ramulator */
     string config_path;
-    config_path = "lib/ramulator/configs/DDR4-config.cfg";
+    config_path = "lib/ramulator/configs/DDR4_" + 
+                         to_string(idx) + "-config.cfg";
 
     ramulator::Config configs(config_path);
 
@@ -92,10 +94,19 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     dram_ = new Memory<DDR4, Controller> (configs, ctrls);
 
     // Register
-    INFO_PRINT ("[DRAM] Initialize %s DRAM", standard.c_str());
+    PRINT ("[DRAM] Initialize %s DRAM", standard.c_str());
     Register::Attr regattr (64, dram_size_);
     SetRegister (new DramFileRegister (Register::SRAM, regattr));
     
+    //Stats::statlist.output("result/DRAM"+to_string(idx)+".stats");
+}
+
+void PseudoStorage::PrintStats ()
+{
+    dram_->finish();
+    //statlist_.printall();
+    //Stats::statlist.printall();
+    return;
 }
 
 
@@ -206,6 +217,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
         }
         
         dram_->tick();
+        //Stats::curTick++;
     }
     else
     {

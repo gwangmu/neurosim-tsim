@@ -20,13 +20,14 @@ class PseudoStorage: public Module
 {
 public:
     PseudoStorage (string iname, Component *parent, uint8_t io_buf_size, 
-            uint32_t dram_outque_size);
+            uint32_t dram_outque_size, int idx);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             Instruction *instr);
 
     typedef std::map<int, int> OrgMap;
     static OrgMap test_;
 
+    void PrintStats();
 private:
     struct SynMeta
     {
@@ -86,4 +87,6 @@ private:
 
     // For debug
     uint16_t idx_counter_;
+
+    Stats::StatList statlist_;
 };

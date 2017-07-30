@@ -691,6 +691,8 @@ bool Simulator::Simulate ()
                 break;
             }
         }
+
+        tb->Finalize(KEY(Simulator));
     }
 
     auto end = chrono::steady_clock::now ();

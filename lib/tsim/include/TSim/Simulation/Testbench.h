@@ -62,6 +62,7 @@ public:
     double GetDoubleParam (ParamType ptype, string pname);
 
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
+    virtual void Finalize (PERMIT(Simulator)) = 0;
 
 protected:
     Component *TOP_COMPONENT;

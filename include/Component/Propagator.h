@@ -13,5 +13,5 @@ using namespace std;
 class Propagator: public Component
 {
 public:
-    Propagator (string iname, Component *parent);
+    Propagator (string iname, Component *parent, int idx);
 };

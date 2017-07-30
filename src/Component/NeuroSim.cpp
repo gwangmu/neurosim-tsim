@@ -57,7 +57,7 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     std::vector<Component*> propagators;
     for (int i=0; i<num_propagators; i++)
         propagators.push_back(
-                new Propagator ("propagator" + to_string(i), this));
+                new Propagator ("propagator" + to_string(i), this, i));
 
     Controller *controller = new Controller ("controller", this, num_boards);
 

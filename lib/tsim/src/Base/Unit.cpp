@@ -93,7 +93,7 @@ bool Unit::Connect (string portname, Endpoint *endpt)
 
 Unit* Unit::GetUnit (string name)
 {
-    if (GetInstanceName() == name)
+    if (GetFullNameWOClass() == name)
         return this;
     else
         return nullptr;
