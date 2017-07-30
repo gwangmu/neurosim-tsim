@@ -60,8 +60,8 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
 
         is_idle_[idx] = false;
 
-        INFO_PRINT("[AS] Start DRAM streaming (addr: %lu, len: %u), stream_rr %d, task %d", 
-                axon_msg->value, axon_msg->len, idx, ongoing_task_);
+        INFO_PRINT("[AS] Start DRAM streaming (addr: %lx, len: %u, tag %d), stream_rr %d, task %d", 
+                axon_msg->value, axon_msg->len, tag, idx, ongoing_task_);
         
         tag_counter_[idx] += num_streamer_;
     
@@ -69,6 +69,12 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
             outmsgs[OPORT_idle] = new IntegerMessage (0);
 
         ongoing_task_++;
+
+        if(unlikely(!axon_msg->len))
+        {
+            SIM_FATAL ("[AS] Axon length is zero", GetFullName().c_str());
+
+        }
     }
     else if(axon_msg && free_list_.empty())
         inmsgs[IPORT_Axon] = nullptr;
@@ -86,7 +92,8 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
     StreamJob job = streaming_task_[out_idx];
     bool streamer_idle = is_idle_[out_idx]; 
     
-    if(!streamer_idle && (job.read_addr < job.base_addr + job.ax_len))
+    if(!streamer_idle && (job.read_addr < job.base_addr + job.ax_len) &&
+            (job.read_addr >= job.base_addr))
     {
         INFO_PRINT ("[AS] Send read request");
         outmsgs[OPORT_Addr] = new IndexMessage (0, job.read_addr, job.tag);

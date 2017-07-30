@@ -46,7 +46,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     this->io_buf_size_ = io_buf_size;
     io_buffer.resize(io_buf_size_);
 
-    reqID_range = 20;
+    reqID_range = 40;
     dram_state_.resize(reqID_range);
     
     reqID_table_.clear();
@@ -146,7 +146,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                     return;
                 }
                
-                INFO_PRINT ("[DRAM] Update metadata (addr: %x, reqID: %d, tag: %d)", 
+                INFO_PRINT ("[DRAM] Update metadata (addr: %u, reqID: %d, tag: %d)", 
                         read_addr, (int)reqID, tag);
 
                 const DramRegisterWord *word =
@@ -169,6 +169,8 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                                   on_ofs, next_len);
                 dram_state_[reqID] = synmeta;      
                 
+                INFO_PRINT ("[DRAM] synmeta entry. ID %d, addr %u, cnt %d",
+                        reqID, synmeta.base_addr, synmeta.entry_cnt);
             }
             else
             {
@@ -180,14 +182,17 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                 inmsgs[PORT_addr] = nullptr;
             else
             {
-                INFO_PRINT("[DRAM] Receive read request %d", entry_cnt);
+                INFO_PRINT("[DRAM] Receive read request (addr: %u, tag: %d/%d)", 
+                        read_addr, synmeta.tag,
+                        raddr_msg->tag);
                 outmsgs[PORT_data] = Message::RESERVE();
                 entry_cnt += io_buf_size_;
             }
         }
 
         if(!is_idle_ && (entry_cnt==0) && 
-                /*(*outque_size==0)*/ GetOutQueSize(PORT_data) == 0 && io_counter == 0)
+                /*(*outque_size==0)*/ GetOutQueSize(PORT_data) == 0 && 
+                io_counter == 0)
         {
             INFO_PRINT ("[DRAM] DRAM is idle");
             is_idle_ = true;
@@ -219,7 +224,9 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                     io_buffer[idx]->dest_idx, 
                     io_buffer[idx]->target_idx, 
                     io_buffer[idx]->val16);
-            INFO_PRINT ("[DRAM] outque %u/%u", /**outque_size*/ GetOutQueSize(PORT_data), outque_size_);
+            INFO_PRINT ("[DRAM] outque %u/%u", 
+                       /**outque_size*/ GetOutQueSize(PORT_data), 
+                       outque_size_);
 
             io_buffer[idx] = nullptr;
         }
@@ -257,7 +264,8 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
     SynMeta synmeta = dram_state_[reqID]; 
     if (unlikely(synmeta.entry_cnt == 0))
     {
-        SIM_ERROR ("Dram state is invalid", GetFullName().c_str());
+        SIM_FATAL ("Dram state(%u) is invalid (addr, %u, tag: %d)", 
+                GetFullName().c_str(), reqID, addr, synmeta.tag);
         return;
     }
     uint16_t offset = addr - synmeta.base_addr;

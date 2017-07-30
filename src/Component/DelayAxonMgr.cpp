@@ -376,8 +376,6 @@ int16_t DelayAxonMgr::Insert (Message **inmsgs, Message **outmsgs,
     // Read free entry
     if(state == 0)
     {
-        INFO_PRINT("[DAM] INSERT-0 state (FLA: %u)", regFLA_);
-        
         // Read FLA
         readFLA_ = regFLA_;
         outmsgs[PORT_raddr] = new IndexMessage (0, readFLA_);
@@ -388,6 +386,9 @@ int16_t DelayAxonMgr::Insert (Message **inmsgs, Message **outmsgs,
             
         // Update DALA
         internal_reg_[reg_idx] = readFLA_;
+        
+        INFO_PRINT("[DAM] INSERT-0 state (FLA: %u, reg %u)", 
+                regFLA_, reg_idx);
 
         return 1;
     }
@@ -464,7 +465,10 @@ int16_t DelayAxonMgr::Fetch (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_output] = 
                 new AxonMessage (0, meta_msg->addr_sub, 
                                 meta_msg->val16);
-          
+            
+            INFO_PRINT ("[DAM] Send axon msg (addr %lx, len %u)",
+                    meta_msg->addr_sub, meta_msg->val16);
+
             // Update 0th DALA / FLA
             internal_reg_[reg_head_] = meta_msg->next_addr;
             regFLA_ = readDALA_; 

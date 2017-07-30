@@ -29,7 +29,7 @@ private:
 
     // Parameters
     uint8_t num_streamer_;
-    std::vector<uint8_t> tag_counter_;
+    std::vector<uint16_t> tag_counter_;
 
     // Internal state
     //uint8_t is_idle_; // bitmap
