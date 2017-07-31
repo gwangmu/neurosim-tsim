@@ -18,6 +18,7 @@
 #include <Message/AxonMessage.h>
 #include <Message/SignalMessage.h>
 #include <Message/IndexMessage.h>
+#include <Message/DramReqMessage.h>
 #include <Message/DramMessage.h>
 
 #include <cinttypes>
@@ -73,7 +74,8 @@ Propagator::Propagator (string iname, Component *parent, int idx)
 
     // Wires
     Wire *axon_data = new Wire (this, conattr, Prototype<AxonMessage>::Get());
-    Wire *dram_addr = new Wire (this, conattr, Prototype<IndexMessage>::Get());
+    Wire *dram_addr = 
+        new Wire (this, conattr, Prototype<DramReqMessage>::Get());
     Wire *dram_data = new Wire (this, conattr, Prototype<DramMessage>::Get());
 
     RRFaninWire *delay_out = 
