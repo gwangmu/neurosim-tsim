@@ -4,6 +4,7 @@
 #include <Register/DramRegisterWord.h>
 #include <Message/IndexMessage.h>
 #include <Message/DramMessage.h>
+#include <Message/DramReqMessage.h>
 
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
@@ -25,7 +26,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     SetClock ("ddr");
 
     PORT_addr = CreatePort ("r_addr", Module::PORT_INPUT,
-            Prototype<IndexMessage>::Get());
+            Prototype<DramReqMessage>::Get());
     PORT_data = CreatePort ("r_data", Module::PORT_OUTPUT,
             Prototype<DramMessage>::Get());
     PORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,

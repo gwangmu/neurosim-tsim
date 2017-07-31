@@ -5,7 +5,7 @@
 #include <TSim/Pathway/IntegerMessage.h>
 
 #include <Message/AxonMessage.h>
-#include <Message/IndexMessage.h>
+#include <Message/DramReqMessage.h>
 
 #include <cinttypes>
 #include <string>
@@ -19,7 +19,7 @@ AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size
     IPORT_Axon = CreatePort ("axon_in", Module::PORT_INPUT,
             Prototype<AxonMessage>::Get());
     OPORT_Addr = CreatePort ("addr_out", Module::PORT_OUTPUT,
-            Prototype<IndexMessage>::Get());
+            Prototype<DramReqMessage>::Get());
     OPORT_idle = CreatePort ("idle", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
 
@@ -96,7 +96,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
             (job.read_addr >= job.base_addr))
     {
         INFO_PRINT ("[AS] Send read request");
-        outmsgs[OPORT_Addr] = new IndexMessage (0, job.read_addr, job.tag);
+        outmsgs[OPORT_Addr] = new DramReqMessage (0, job.read_addr, job.tag);
        
         streaming_task_[out_idx].read_addr += read_bytes;
     }
