@@ -61,6 +61,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     string config_path;
     config_path = "lib/ramulator/configs/DDR4_" + 
                          to_string(idx) + "-config.cfg";
+    //config_path = "lib/ramulator/configs/DDR4-config.cfg"; 
 
     ramulator::Config configs(config_path);
 
