@@ -193,7 +193,6 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                 //     on_ofs = 0;
                 // }
 
-                GetRegister()->GetWord(read_addr);
 
                 next_len = 0;
                 on_ofs = raddr_msg->len;
@@ -288,6 +287,7 @@ bool PseudoStorage::send (uint8_t reqID, uint64_t addr)
     {
         INFO_PRINT ("[DRAM] Response to request (ID: %u, addr: %lx)", 
                 reqID, addr);
+        GetRegister()->GetWord(addr);
         return true;
     }
     else
