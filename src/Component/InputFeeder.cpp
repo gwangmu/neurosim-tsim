@@ -51,9 +51,28 @@ InputFeeder::InputFeeder (string iname, Component *parent,
     counter_ = num_inputs_;
 
     ts_parity_ = false;
+
+    base_addr_ = GET_PARAMETER (base_addr);
+    this->avg_synapses_ = GET_PARAMETER(avg_synapses);
     
-    Register::Attr regattr (32, num_input_neurons_);
-    SetRegister (new InputFileRegister (Register::DRAM, regattr));
+    uint16_t num_delay = GET_PARAMETER(num_delay);
+    avg_synapses_ *= num_delay; // Connections per neurons
+
+    // Construct pseudo-random table
+    uint32_t n = GET_PARAMETER(num_samples);
+    uint32_t pint = GET_PARAMETER(probability);
+    double p = (2.5*pint) / double(1000000);
+
+    std::default_random_engine generator;
+    std::binomial_distribution<int> distribution (n, p); 
+    for (int i=0; i<512; i++)
+    {
+        synlen_table[i] = distribution(generator);
+    }
+
+
+    //Register::Attr regattr (32, num_input_neurons_);
+    //SetRegister (new InputFileRegister (Register::DRAM, regattr));
 }
 
 // NOTE: called only if not stalled
@@ -87,17 +106,22 @@ void InputFeeder::Operation (Message **inmsgs, Message **outmsgs,
     {
         uint32_t read_addr = rand() % num_input_neurons_;
 
-        const InputRegisterWord *word = 
-            static_cast<const InputRegisterWord *>
-                (GetRegister()->GetWord (read_addr));
-        uint64_t metadata = word->value;
+        // const InputRegisterWord *word = 
+        //     static_cast<const InputRegisterWord *>
+        //         (GetRegister()->GetWord (read_addr));
+        // uint64_t metadata = word->value;
+        // 
+        // uint16_t delay = (metadata >> 52) & 0x3ff;
+        // uint64_t dram_addr = (metadata >> 16) & 0xfffffffff;
+        // uint16_t len = metadata & 0xffff;
         
-        uint16_t delay = (metadata >> 52) & 0x3ff;
-        uint64_t dram_addr = (metadata >> 16) & 0xfffffffff;
-        uint16_t len = metadata & 0xffff; 
+        uint16_t delay = 0;
+        uint64_t dram_addr = 
+            base_addr_ - avg_synapses_*(read_addr/num_propagators_);
+        uint16_t len = synlen_table[read_addr % 512]; 
 
-        uint8_t prop_idx = dram_addr / dram_size_;
-        uint64_t addr = dram_addr % dram_size_;
+        uint8_t prop_idx = read_addr % num_propagators_ ;
+        uint64_t addr = dram_addr;
 
         INFO_PRINT ("[IF] Axon Message addr %lx, len %d", addr, len); 
         outmsgs[PORT_axons[prop_idx]] = new AxonMessage (0, addr, len, delay);

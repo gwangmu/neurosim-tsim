@@ -43,6 +43,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     dram_size_ = GET_PARAMETER (dram_size);
     num_chips_ = GET_PARAMETER (num_chips);
     num_cores_ = GET_PARAMETER (num_cores);
+    num_boards_ = GET_PARAMETER (num_boards);
 
     this->outque_size_ = dram_outque_size;
     this->io_buf_size_ = io_buf_size;
@@ -97,8 +98,8 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 
     // Register
     PRINT ("[DRAM] Initialize %s DRAM", standard.c_str());
-    Register::Attr regattr (64, dram_size_);
-    SetRegister (new DramFileRegister (Register::SRAM, regattr));
+    //Register::Attr regattr (64, dram_size_);
+    //SetRegister (new DramFileRegister (Register::SRAM, regattr));
     
     //Stats::statlist.output("result/DRAM"+to_string(idx)+".stats");
 }
@@ -115,7 +116,7 @@ void PseudoStorage::PrintStats ()
 void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     /* Read */
-    IndexMessage *raddr_msg = static_cast<IndexMessage*>(inmsgs[PORT_addr]);
+    DramReqMessage *raddr_msg = static_cast<DramReqMessage*>(inmsgs[PORT_addr]);
 
     if(clk_parity_)
     {
@@ -162,21 +163,37 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                 INFO_PRINT ("[DRAM] Update metadata (addr: %u, reqID: %d, tag: %d)", 
                         read_addr, (int)reqID, tag);
 
-                const DramRegisterWord *word =
-                    static_cast<const DramRegisterWord *>
-                        (GetRegister()->GetWord (read_addr));
-                if(!word)
-                {
-                    SIM_FATAL ("Data isn't existed (addr: %x)", 
-                            GetFullName().c_str(), read_addr);
+                uint16_t next_len, off_ofs, on_ofs;
+                
+                // const DramRegisterWord *word =
+                //     static_cast<const DramRegisterWord *>
+                //         (GetRegister()->GetWord (read_addr));
+               
+                // 
+                // if(unlikely(!word && !raddr_msg->len))
+                // {
+                //     SIM_FATAL ("Data isn't existed (addr: %x)", 
+                //             GetFullName().c_str(), read_addr);
         
-                }
+                // }
+                // else if(word)
+                // {
+                //     uint64_t data = word->value;
 
-                uint64_t data = word->value;
+                //     next_len = (data >> 32) & (0xffff);
+                //     off_ofs = (data >> 16) & (0xffff);
+                //     on_ofs = (data) & (0xffff);
+                // }
+                // else
+                // {
+                //     next_len = 0;
+                //     off_ofs = raddr_msg->len;
+                //     on_ofs = 0;
+                // }
 
-                uint16_t next_len = (data >> 32) & (0xffff);
-                uint16_t off_ofs = (data >> 16) & (0xffff);
-                uint16_t on_ofs = (data) & (0xffff);
+                next_len = 0;
+                on_ofs = raddr_msg->len;
+                off_ofs = num_boards_ - 1;
 
                 synmeta = SynMeta (tag, read_addr, off_ofs, 
                                   on_ofs, next_len);

@@ -13,5 +13,5 @@ using namespace std;
 class NeuroSim: public Component
 {
 public:
-    NeuroSim (string iname, Component *parent);
+    NeuroSim (string iname, Component *parent, int board_idx);
 };

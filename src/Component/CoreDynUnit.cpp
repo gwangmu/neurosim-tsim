@@ -16,8 +16,11 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
+#include <random>
 
 using namespace std;
+
+USING_TESTBENCH;
 
 CoreDynUnit::CoreDynUnit (string iname, Component *parent, 
         uint32_t num_neurons, uint32_t depth)
@@ -35,7 +38,13 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     this->num_neurons_ = num_neurons;
     this->row_size_ = num_neurons;
     this->col_size_ = 64;
-    
+   
+    this->avg_synapses_ = GET_PARAMETER(avg_synapses);
+    this->min_delay_ = GET_PARAMETER(min_delay);
+    uint16_t num_delay = GET_PARAMETER(num_delay);
+
+    avg_synapses_ *= num_delay; // Connections per neurons
+
     pipeline_depth_ = depth;
     // NBC-SRAM-NBC-(NB(depth))-AMQ-AT-AMQ
     if(pipeline_depth_ > 15)
@@ -53,13 +62,26 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     idx_counter_ = num_neurons;
 
     // init script
-    Register::Attr regattr (col_size_, row_size_);
+    // Register::Attr regattr (col_size_, row_size_);
+    // SetRegister (new MetaFileRegister (Register::SRAM, regattr));
     
-    SetRegister (new MetaFileRegister (Register::SRAM, regattr));
     SetScript (new SpikeFileScript ());
+
+    // Construct pseudo-random table
+    uint32_t n = GET_PARAMETER(num_samples);
+    uint32_t pint = GET_PARAMETER(probability);
+    double p = pint / double(1000000);
+
+    std::default_random_engine generator;
+    std::binomial_distribution<int> distribution (n, p); 
+    for (int i=0; i<1024; i++)
+    {
+        synlen_table[i] = distribution(generator);
+    }
 }
 
-void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
+void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs, 
+        Instruction *instr)
 {
     SpikeInstruction *spk_inst = 
         static_cast<SpikeInstruction*>(instr);
@@ -102,15 +124,19 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs, Instruction *i
             spike_state_ |= 0x1;
             spike_trace_.pop_front();
             
-            const MetaRegisterWord *word = 
-                static_cast<const MetaRegisterWord *> 
-                (GetRegister()->GetWord (idx_counter_));
-            uint64_t metadata = word->value;
+            // const MetaRegisterWord *word = 
+            //     static_cast<const MetaRegisterWord *> 
+            //     (GetRegister()->GetWord (idx_counter_));
+            
+            // uint64_t metadata = word->value;
 
-            uint16_t delay = (metadata >> 52) & 0x3ff;
-            uint64_t ax_addr = (metadata >> 16) & 0xfffffffff;
-            uint16_t ax_len = metadata & 0xffff;
-        
+            // uint16_t delay = (metadata >> 52) & 0x3ff;
+            // uint64_t ax_addr = (metadata >> 16) & 0xfffffffff;
+            // uint16_t ax_len = metadata & 0xffff;
+       
+            uint16_t delay = min_delay_;
+            uint64_t ax_addr = avg_synapses_ * idx_counter_;
+            uint16_t ax_len = synlen_table[idx_counter_ % 1024];
             outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, ax_len, delay); 
         }
         else

@@ -28,7 +28,7 @@ NeuroSimSystem::NeuroSimSystem (string iname, Component *parent)
     /** Components **/
     vector<Component *> neurosims;
     for (uint32_t i = 0; i < num_boards; i++)
-        neurosims.push_back (new NeuroSim ("neurosim" + to_string(i), this));
+        neurosims.push_back (new NeuroSim ("neurosim" + to_string(i), this, i));
 
     // NOTE: this TimestepReporter is only for simulation progress checking.
     tsrep = new TimestepReporter ("tsrep", this, num_boards);

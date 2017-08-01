@@ -28,6 +28,8 @@ class CoreDynUnit: public Module
     /* Parameters */
     uint32_t num_neurons_;
     uint32_t row_size_, col_size_;
+    uint32_t avg_synapses_;
+    uint16_t min_delay_;
 
     // Internal state
     uint32_t pipeline_depth_;
@@ -37,4 +39,7 @@ class CoreDynUnit: public Module
 
     bool ts_parity_;
     uint32_t idx_counter_;
+
+    // Pseudo-random table
+    uint16_t synlen_table[1024];
 };

@@ -32,7 +32,7 @@ using namespace std;
 
 USING_TESTBENCH;
 
-NeuroSim::NeuroSim (string iname, Component *parent)
+NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
     : Component ("NeuroSim", iname, parent)
 {
     // NOTE: children automatically inherit parent's clock
@@ -57,7 +57,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     std::vector<Component*> propagators;
     for (int i=0; i<num_propagators; i++)
         propagators.push_back(
-                new Propagator ("propagator" + to_string(i), this, i));
+                new Propagator ("propagator" + to_string(i), 
+                                this, board_idx, i));
 
     Controller *controller = new Controller ("controller", this, num_boards);
 
@@ -65,8 +66,8 @@ NeuroSim::NeuroSim (string iname, Component *parent)
     AndGate *idle_and = new AndGate ("idle_and", this, num_propagators);
     AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_chips + 1);
 
-    Module *input_feeder = 
-        new InputFeeder ("input_feeder", this, num_propagators);
+    Module *input_feeder;
+    input_feeder = new InputFeeder ("input_feeder", this, num_propagators);
 
     /** Module & Wires **/
     // create pathways

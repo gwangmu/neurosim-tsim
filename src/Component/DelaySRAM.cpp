@@ -30,8 +30,8 @@ DelaySRAM::DelaySRAM (string iname, Component* parent,
     WPORT_data = CreatePort ("wdata", Module::PORT_INPUT,
             Prototype<DelayMetaMessage>::Get());
 
-    Register::Attr regattr (col_size_, row_size_);
-    SetRegister (new DelayFileRegister (Register::SRAM, regattr));
+    // Register::Attr regattr (col_size_, row_size_);
+    // SetRegister (new DelayFileRegister (Register::SRAM, regattr));
 }
 
 
@@ -51,22 +51,22 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs, Instruction *ins
             return;
         }
 
-        const DelayRegisterWord *word =
-            static_cast<const DelayRegisterWord*>
-                (GetRegister()->GetWord(read_addr));
-        if(word)
-        {
-            uint32_t next_addr = word->next_addr;
-            uint64_t addr_sub = word->addr_sub;
-            uint16_t val16 = word->val16;
+        // const DelayRegisterWord *word =
+        //     static_cast<const DelayRegisterWord*>
+        //         (GetRegister()->GetWord(read_addr));
+        // if(word)
+        // {
+        //     uint32_t next_addr = word->next_addr;
+        //     uint64_t addr_sub = word->addr_sub;
+        //     uint16_t val16 = word->val16;
 
-            outmsgs[RPORT_data] = new DelayMetaMessage (0, next_addr,
-                                                    addr_sub, val16);
+        //     outmsgs[RPORT_data] = new DelayMetaMessage (0, next_addr,
+        //                                             addr_sub, val16);
 
-            INFO_PRINT ("[DeSRAM] read address %lx - %x %lx %u", 
-                            read_addr, next_addr, addr_sub, val16);
-        }
-        else
+        //     INFO_PRINT ("[DeSRAM] read address %lx - %x %lx %u", 
+        //                     read_addr, next_addr, addr_sub, val16);
+        // }
+        // else
         {
             outmsgs[RPORT_data] = new DelayMetaMessage (0, 0, 0, 0);
             INFO_PRINT ("[DeSRAM] read null data (address %x)",
@@ -90,10 +90,10 @@ void DelaySRAM::Operation (Message **inmsgs, Message **outmsgs, Instruction *ins
                     wdata_msg->addr_sub,
                     wdata_msg->val16);
         
-        GetRegister()->SetWord (write_addr, 
-                            new DelayRegisterWord (wdata_msg->next_addr,
-                                                   wdata_msg->addr_sub,
-                                                   wdata_msg->val16));
+        // GetRegister()->SetWord (write_addr, 
+        //                     new DelayRegisterWord (wdata_msg->next_addr,
+        //                                            wdata_msg->addr_sub,
+        //                                            wdata_msg->val16));
     }
     else if (unlikely (waddr_msg || wdata_msg))
     {

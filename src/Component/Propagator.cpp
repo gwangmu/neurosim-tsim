@@ -14,6 +14,7 @@
 #include <Component/AxonStorage.h>
 #include <Component/PseudoStorage.h>
 #include <Component/DelayModule.h>
+#include <Component/FastDelayMgr.h>
 
 #include <Message/AxonMessage.h>
 #include <Message/SignalMessage.h>
@@ -29,7 +30,8 @@ using namespace std;
 
 USING_TESTBENCH;
 
-Propagator::Propagator (string iname, Component *parent, int idx)
+Propagator::Propagator (string iname, Component *parent, 
+        int board_idx, int prop_idx)
     : Component ("Propagator", iname, parent)
 {
     /** Parameters **/
@@ -40,8 +42,13 @@ Propagator::Propagator (string iname, Component *parent, int idx)
     int delay_storage_size = 2048;
     int delay_input_queue_sz = 256;
 
+    int fast = GET_PARAMETER (fast);
+
     /** Components **/
-    Component *delay_module = new DelayModule ("delay_module", this);
+    // Component *delay_module =
+    //     new DelayModule ("delay_module", this);
+    
+    Module *delay_module = new FastDelayMgr ("delay_module", this, board_idx); 
    
     /** Modules **/
     Module *axon_receiver = new AxonMetaRecv ("axon_meta_receiver", this);
@@ -56,7 +63,7 @@ Propagator::Propagator (string iname, Component *parent, int idx)
     {
         axon_storage = 
             new PseudoStorage ("axon_storage", this, 
-                               dram_io_buf_size, dram_outque_size, idx); 
+                               dram_io_buf_size, dram_outque_size, prop_idx); 
     }
     else
     {

@@ -237,39 +237,41 @@ def spec_generator(fast=0):
     f.write ("# External file\n")
     for i in range(FLAGS.chip):
         for j in range(FLAGS.core):
-            f.write("FILESCRIPT_PATH(top.chip%d.core%d." %(i,j) \
+            f.write("FILESCRIPT_PATH(top.neurosim0.chip%d.core%d." %(i,j) \
                     + spike_tgt + \
                     "): data/spikes/spike%d_%d.script\n" %(i, j))
 
     f.write ("\n")
     for i in range(FLAGS.chip):
         for j in range(FLAGS.core):
-            f.write("REGISTER_DATAPATH(top.chip%d.core%d." %(i, j) \
+            f.write("REGISTER_DATAPATH(top.neurosim0.chip%d.core%d." %(i, j) \
                     + meta_tgt + \
                     "): data/meta/meta%d_%d.script\n" %(i, j))
     
     f.write ("\n")
     for i in range(FLAGS.chip):
         for j in range(FLAGS.core):
-            f.write("REGISTER_DATAPATH(top.chip%d.core%d." %(i, j) \
+            f.write("REGISTER_DATAPATH(top.neurosim0.chip%d.core%d." %(i, j) \
                     + "core_acc_unit" + \
                     "): data/empty.script\n")
 
     f.write ("\n")
     for i in range(FLAGS.propagator):
-        f.write("REGISTER_DATAPATH(top.propagator%d.axon_storage): data/dram/dram%d.script\n" \
+        f.write("REGISTER_DATAPATH(top.neurosim0.propagator%d.axon_storage): data/dram/dram%d.script\n" \
                 %(i, i))
-        f.write("REGISTER_DATAPATH(top.propagator%d.delay_module.delay_storage): data/delay/delay%d.script\n" \
+        f.write("REGISTER_DATAPATH(top.neurosim0.propagator%d.delay_module.delay_storage): data/delay/delay%d.script\n" \
                 %(i, i))
    
-    f.write ("REGISTER_DATAPATH(top.input_feeder): data/input.script\n")
+    f.write ("REGISTER_DATAPATH(top.neurosim0.input_feeder): data/input.script\n")
 
     f.write ("\n# Clock\n")
     f.write ("CLOCK_PERIOD(main): 4\n")
     f.write ("CLOCK_PERIOD(dram): 1\n")
     f.write ("CLOCK_PERIOD(ddr): 0.5\n")
+    f.write ("CLOCK_PERIOD(pcie): 4\n")
     
     f.write ("\n# Parameters\n")
+    f.write ("PARAMETER(num_boards): %d\n" %(1))
     f.write ("PARAMETER(num_neurons): %d\n" %(FLAGS.neurons))
     f.write ("PARAMETER(num_cores): %d\n" %(FLAGS.core))
     f.write ("PARAMETER(num_chips): %d\n" %(FLAGS.chip))
@@ -282,8 +284,23 @@ def spec_generator(fast=0):
     f.write ("PARAMETER(time_scale): %d\n" %(10000))
 
     input_neurons_n = FLAGS.neurons * FLAGS.core * FLAGS.chip // 10
+    input_neurons_n = 0
     f.write ("PARAMETER(num_input_neurons): %d\n" %(input_neurons_n))
+    
+    total_neurons = FLAGS.neurons * FLAGS.core * FLAGS.chip
+    avg_synapse = total_neurons * FLAGS.sparsity
+    f.write ("PARAMETER(avg_synapses): %d\n" %(avg_synapse))
 
+    f.write ("PARAMETER(num_samples): %d\n" %(total_neurons)) 
+    f.write ("PARAMETER(probability): %d\n" %(int(FLAGS.sparsity * 1000000))) 
+
+    f.write ("PARAMETER(min_delay): %d\n" %(0))
+    f.write ("PARAMETER(num_delay): %d\n" %(1))
+    
+    base_addr = ((total_neurons + input_neurons_n) // FLAGS.propagator) * \
+            avg_synapse 
+    f.write ("PARAMETER(base_addr): %d\n" %(base_addr)) 
+    
     f.write ("\n# Unit power\n")
 
 

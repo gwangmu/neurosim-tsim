@@ -78,8 +78,7 @@ private:
     uint32_t outque_size_;
 
     // NeuroSim specification
-    uint8_t num_chips_;
-    uint8_t num_cores_;
+    uint8_t num_chips_, num_cores_, num_boards_;
 
     // Internal function
     bool send(uint8_t reqID, uint64_t addr);

@@ -30,4 +30,10 @@ private:
     uint32_t num_inputs_, num_input_neurons_;
     uint32_t counter_;
     bool ts_parity_;
+    
+    uint64_t base_addr_;
+    uint32_t avg_synapses_;
+
+    // Pseudo-random table
+    uint16_t synlen_table[512];
 };
