@@ -1,6 +1,7 @@
 #include <Component/PseudoStorage.h>
 
 #include <Register/DramFileRegister.h>
+#include <Register/EmptyRegister.h>
 #include <Register/DramRegisterWord.h>
 #include <Message/IndexMessage.h>
 #include <Message/DramMessage.h>
@@ -98,8 +99,9 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 
     // Register
     PRINT ("[DRAM] Initialize %s DRAM", standard.c_str());
-    //Register::Attr regattr (64, dram_size_);
+    Register::Attr regattr (64, dram_size_);
     //SetRegister (new DramFileRegister (Register::SRAM, regattr));
+    SetRegister (new EmptyRegister (Register::SRAM, regattr));
     
     //Stats::statlist.output("result/DRAM"+to_string(idx)+".stats");
 }
@@ -190,6 +192,8 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                 //     off_ofs = raddr_msg->len;
                 //     on_ofs = 0;
                 // }
+
+                GetRegister()->GetWord(read_addr);
 
                 next_len = 0;
                 on_ofs = raddr_msg->len;

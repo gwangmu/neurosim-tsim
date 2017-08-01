@@ -35,7 +35,7 @@ using namespace std;
 USING_TESTBENCH;
 
 NeuroChip::NeuroChip (string iname, Component *parent, 
-        int num_cores, int num_propagators)
+        int num_cores, int num_propagators, uint16_t chip_idx)
     : Component ("NeuroChip", iname, parent)
 {
     /** Parameters **/
@@ -45,12 +45,14 @@ NeuroChip::NeuroChip (string iname, Component *parent,
 
     /** Components **/
     std::vector<Component*> cores;
+    uint16_t core_idx = chip_idx * num_cores; 
+
     for (int i=0; i<num_cores; i++)
     {
         if(fast == 1)
             cores.push_back (
                     new FastCore ("core" + to_string(i) , 
-                                  this, num_propagators));
+                                  this, num_propagators, core_idx + i));
         else if(fast == 0)
             cores.push_back (
                     new NeuroCore ("core" + to_string(i) , 

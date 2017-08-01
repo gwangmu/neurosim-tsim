@@ -52,7 +52,7 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
     std::vector<Component*> neurochips;
     for (int i=0; i<num_chips; i++)
         neurochips.push_back (new NeuroChip ("chip" + to_string(i), this, 
-                                             num_cores, num_propagators));
+                                             num_cores, num_propagators, i));
     
     std::vector<Component*> propagators;
     for (int i=0; i<num_propagators; i++)

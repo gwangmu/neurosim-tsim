@@ -13,5 +13,5 @@ using namespace std;
 class FastCore: public Component
 {
 public:
-    FastCore (string iname, Component *parent, int num_propagators);
+    FastCore (string iname, Component *parent, int num_propagators, int idx);
 };

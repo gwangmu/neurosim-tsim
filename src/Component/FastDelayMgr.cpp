@@ -57,6 +57,8 @@ FastDelayMgr::FastDelayMgr (string iname, Component* parent, uint8_t board_idx)
     {
         synlen_table[i] = distribution(generator);
     }
+
+    input_n = 0;
 }
 
 void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs, 
@@ -70,6 +72,10 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         delayed_spks_.back().spikes.assign 
             (spk_inst->spike_idx.begin(),
              spk_inst->spike_idx.end());
+
+        for (auto it = spk_inst->spike_idx.begin(); 
+                it != spk_inst->spike_idx.end(); it++)
+            INFO_PRINT ("[FDM] instr %u", *it);
     }
 
     IntegerMessage *ts_msg = 
@@ -83,6 +89,9 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             spk_idx_ = 0;
             delay_idx_ = 0;
             ts_parity_ = ts_msg->value;
+            input_n = 0;
+        
+            GetScript()->NextSection();
         }
     }
 
@@ -99,13 +108,12 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         // Insert
         state_ = INSERT;
         state_counter_ = 2;
-        INFO_PRINT ("[FDM] Insert state %d", GetInQueSize (PORT_input));
+        INFO_PRINT ("[FDM] Insert state %d/%d", 
+                GetInQueSize (PORT_input), ++input_n);
     }
     else
     {
         // Fetch. Fast-mode support only continuous delay
-        INFO_PRINT ("[FDM] ELSE state %d/%d", fetch_fin_, is_idle_);
-
         if(!fetch_fin_)
         {
             state_ = FETCH;
@@ -122,6 +130,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
     if(state_counter_ != 0 && is_idle_)
     {
         INFO_PRINT ("[FDM] state counter %d (fin %d)", state_counter_, fetch_fin_);
+        delete outmsgs[PORT_idle];
         outmsgs[PORT_idle] = new IntegerMessage (0);
         is_idle_ = false;
     }
@@ -136,7 +145,6 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            INFO_PRINT ("[FDM] Fetch idx %d", delay_idx_);
 
             uint32_t out_idx = delayed_spks_[delay_idx_].spikes[spk_idx_];
             // Send Message
@@ -170,6 +178,8 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_output] = 
                 new AxonMessage (0, ax_addr, ax_len);
 
+            INFO_PRINT ("[FDM] Fetch idx %d (addr %lu, %u)", 
+                    delay_idx_, ax_addr, ax_len);
 
             // Advance 
             spk_idx_ += 1;

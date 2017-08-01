@@ -3,6 +3,7 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 
+#include <Register/EmptyRegister.h>
 #include <Register/MetaFileRegister.h>
 #include <Register/MetaRegisterWord.h>
 #include <Message/IndexMessage.h>
@@ -23,7 +24,7 @@ using namespace std;
 USING_TESTBENCH;
 
 CoreDynUnit::CoreDynUnit (string iname, Component *parent, 
-        uint32_t num_neurons, uint32_t depth)
+        uint32_t num_neurons, uint32_t depth, uint16_t core_idx)
     : Module ("CoreDynUnitModule", iname, parent, depth)
 {
     PORT_coreTS = CreatePort ("coreTS", Module::PORT_INPUT, 
@@ -33,6 +34,7 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
             Prototype<SignalMessage>::Get());
     PORT_axon = CreatePort ("axon", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
+
 
     /* variable initialization */
     this->num_neurons_ = num_neurons;
@@ -44,6 +46,19 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     uint16_t num_delay = GET_PARAMETER(num_delay);
 
     avg_synapses_ *= num_delay; // Connections per neurons
+
+    // Propagator Information
+    this->core_idx_ = core_idx;
+
+    uint16_t num_cores = GET_PARAMETER(num_cores);
+    uint16_t num_chips = GET_PARAMETER(num_chips);
+    uint16_t num_propagators = GET_PARAMETER(num_propagators);
+    
+    uint8_t group_size = num_cores * num_chips / num_propagators;
+    
+    prop_idx_ = core_idx / group_size;
+    base_addr_ = num_neurons_ * avg_synapses_ * 
+                (core_idx_ % group_size);
 
     pipeline_depth_ = depth;
     // NBC-SRAM-NBC-(NB(depth))-AMQ-AT-AMQ
@@ -62,8 +77,8 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     idx_counter_ = num_neurons;
 
     // init script
-    // Register::Attr regattr (col_size_, row_size_);
-    // SetRegister (new MetaFileRegister (Register::SRAM, regattr));
+    Register::Attr regattr (col_size_, row_size_);
+    SetRegister (new EmptyRegister (Register::SRAM, regattr));
     
     SetScript (new SpikeFileScript ());
 
@@ -133,11 +148,17 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs,
             // uint16_t delay = (metadata >> 52) & 0x3ff;
             // uint64_t ax_addr = (metadata >> 16) & 0xfffffffff;
             // uint16_t ax_len = metadata & 0xffff;
-       
+      
+            GetRegister()->GetWord (idx_counter_);
+
             uint16_t delay = min_delay_;
-            uint64_t ax_addr = avg_synapses_ * idx_counter_;
+            uint64_t ax_addr = base_addr_ + avg_synapses_ * idx_counter_;
             uint16_t ax_len = synlen_table[idx_counter_ % 1024];
-            outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, ax_len, delay); 
+            outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, 
+                                                 ax_len, delay, prop_idx_);
+
+            INFO_PRINT ("[DYN] Send Axon Message (addr %lu, len %u)",
+                    ax_addr, ax_len);
         }
         else
         {

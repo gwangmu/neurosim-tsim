@@ -27,6 +27,7 @@ public:
     virtual bool SetWord (uint64_t addr, RegisterWord *word) 
     { 
         IncrWriteCount();
+        delete word;
         return true; 
     }
 

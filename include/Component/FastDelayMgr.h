@@ -48,6 +48,9 @@ private:
     uint8_t state_counter_;
     bool ts_parity_;
 
+    // Stats
+    uint16_t input_n;
+
     // Hash table
     uint16_t synlen_table[256];
 };

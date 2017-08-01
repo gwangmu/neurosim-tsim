@@ -13,5 +13,7 @@ using namespace std;
 class NeuroChip: public Component
 {
 public:
-    NeuroChip (string iname, Component *parent, int num_cores, int num_propagators);
+    NeuroChip (string iname, Component *parent, 
+            int num_cores, int num_propagators,
+            uint16_t chip_idx);
 };

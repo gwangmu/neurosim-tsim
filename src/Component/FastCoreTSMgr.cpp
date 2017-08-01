@@ -93,6 +93,8 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction 
             INFO_PRINT ("[CoTS](%s) Update Core TS parity to %d", 
                     GetParent()->GetName().c_str(), cur_tsparity_);
             dyn_end_ = false;
+
+            delete outmsgs[PORT_DynFin];
             outmsgs[PORT_DynFin] = new IntegerMessage (0);
         }
     }

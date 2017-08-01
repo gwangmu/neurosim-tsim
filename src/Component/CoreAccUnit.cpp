@@ -57,7 +57,7 @@ void CoreAccUnit::Operation (Message **inmsgs, Message **outmsgs, Instruction *i
         acc_state_ |= 1;
             
         GetRegister()->GetWord (0);
-        GetRegister()->SetWord (0, new EmptyRegisterWord());
+        GetRegister()->SetWord (0, 0);
 
     }
     else

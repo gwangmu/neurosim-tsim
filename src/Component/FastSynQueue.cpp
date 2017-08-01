@@ -133,6 +133,7 @@ void FastSynQueue::Operation (Message **inmsgs, Message **outmsgs, Instruction *
 
         if(all_empty)
         {
+            delete outmsgs[PORT_empty];
             outmsgs[PORT_empty] = new IntegerMessage(1);
             is_empty_ = true;
         }

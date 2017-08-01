@@ -15,16 +15,18 @@ public:
     AxonMessage () : Message ("AxonMessage") {}
 
     AxonMessage (uint32_t destrhsid, uint64_t idx, uint16_t len,
-            uint16_t delay=0)
+            uint16_t delay=0, int16_t tgt=-1)
         : Message ("AxonMessage", destrhsid)
     {
         this->value = idx;
         this->len = len;
         this->delay = delay;
+        this->target = tgt;
     }
 
 public:
     uint64_t value;
     uint16_t len;
     uint16_t delay;
+    int target;
 };

@@ -674,7 +674,7 @@ bool Simulator::Simulate ()
 
             if (nexttstime <= curtime)
             {
-                PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
+                INFO_PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
                 nexttstime += opt.tsinterval;
             }
 

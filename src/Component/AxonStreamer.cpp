@@ -82,6 +82,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
    
     if(work_list_.empty())
     {
+        delete outmsgs[OPORT_idle];
         outmsgs[OPORT_idle] = new IntegerMessage (1);
         return;
     }
@@ -113,8 +114,11 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         if(ongoing_task_ != 0)
             ongoing_task_--;
 
-        if(ongoing_task_ == 0)
+        else if(ongoing_task_ == 0)
+        {
+            delete outmsgs[OPORT_idle];
             outmsgs[OPORT_idle] = new IntegerMessage (1);
+        }
         
         is_idle_[out_idx] = true;
 

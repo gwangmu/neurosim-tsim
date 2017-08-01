@@ -89,7 +89,7 @@ void InputFeeder::Operation (Message **inmsgs, Message **outmsgs,
             counter_ = 0;
             ts_parity_ = ts_msg->value;
 
-            INFO_PRINT ("[IF} Input Feed TS updated");
+            INFO_PRINT ("[IF] Input Feed TS updated");
             outmsgs[PORT_idle] = new IntegerMessage (0);
         }
     }
@@ -123,7 +123,8 @@ void InputFeeder::Operation (Message **inmsgs, Message **outmsgs,
         uint8_t prop_idx = read_addr % num_propagators_ ;
         uint64_t addr = dram_addr;
 
-        INFO_PRINT ("[IF] Axon Message addr %lx, len %d", addr, len); 
+        INFO_PRINT ("[IF] Axon Message to %d addr %lx, len %d", 
+                prop_idx, addr, len); 
         outmsgs[PORT_axons[prop_idx]] = new AxonMessage (0, addr, len, delay);
         
         counter_++;

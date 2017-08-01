@@ -47,6 +47,10 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs, Instructio
 
         uint8_t prop_idx = axon_msg->value / dram_size;
         uint64_t addr = axon_msg->value % dram_size;
+        
+        if(axon_msg->target != -1)
+            prop_idx = axon_msg->target;
+
         outmsgs[OPORT_Axons[prop_idx]] = 
             new AxonMessage (0, addr, axon_msg->len, axon_msg->delay); 
         

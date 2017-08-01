@@ -93,7 +93,8 @@ void AxonClassifier::Operation (Message **inmsgs, Message **outmsgs, Instruction
         INFO_PRINT ("[AEC] Axon entry classifier is idle");
     }
 
-    IntegerMessage *parity_msg = static_cast<IntegerMessage*>(inmsgs[IPORT_TSparity]);
+    IntegerMessage *parity_msg = 
+        static_cast<IntegerMessage*>(inmsgs[IPORT_TSparity]);
     if(parity_msg)
     {
         if(parity_msg->value != ts_parity)

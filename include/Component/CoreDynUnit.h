@@ -14,7 +14,7 @@ class CoreDynUnit: public Module
 {
   public:
     CoreDynUnit (string iname, Component *parent, 
-            uint32_t num_neurons, uint32_t depth);
+            uint32_t num_neurons, uint32_t depth, uint16_t core_idx);
     virtual void Operation (Message **inmsgs, Message **outmsgs, Instruction *instr);
 
   private:
@@ -30,6 +30,9 @@ class CoreDynUnit: public Module
     uint32_t row_size_, col_size_;
     uint32_t avg_synapses_;
     uint16_t min_delay_;
+    
+    uint16_t core_idx_, prop_idx_;
+    uint64_t base_addr_;
 
     // Internal state
     uint32_t pipeline_depth_;

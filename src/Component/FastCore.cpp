@@ -34,7 +34,8 @@ using namespace std;
 
 USING_TESTBENCH;
 
-FastCore::FastCore (string iname, Component *parent, int num_propagators)
+FastCore::FastCore (string iname, Component *parent, int num_propagators, 
+        int idx)
     : Component ("FastCore", iname, parent)
 {
     // Parameters
@@ -45,7 +46,8 @@ FastCore::FastCore (string iname, Component *parent, int num_propagators)
     // NBC-SRAM-NBC-(NB(depth))-AMQ-AT-AMQ
     pipeline_depth += 6;
     Module *dyn_unit =
-        new CoreDynUnit ("core_dyn_unit", this, num_neurons, pipeline_depth);
+        new CoreDynUnit ("core_dyn_unit", this, num_neurons, 
+                         pipeline_depth, idx);
     Module *syn_queue =
         new FastSynQueue ("syn_queue", this, num_propagators);
     Module *acc_unit =
