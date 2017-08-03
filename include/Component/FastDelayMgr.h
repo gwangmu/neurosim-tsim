@@ -46,7 +46,7 @@ private:
     uint16_t spk_idx_;
     bool fetch_fin_, is_idle_;
 
-    enum State {IDLE, PROMOTE, RETRIEVE, INSERT, FETCH};
+    enum State {IDLE, PROMOTE, RETRIEVE, INSERT, FETCH, START};
     State state_;
     uint8_t state_counter_;
     bool ts_parity_;

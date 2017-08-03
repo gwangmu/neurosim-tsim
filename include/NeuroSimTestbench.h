@@ -17,6 +17,7 @@ public:
     NeuroSimTestbench ();
     virtual void Initialize (PERMIT(Simulator));
     virtual bool IsFinished (PERMIT(Simulator));
+    virtual uint16_t GetTimestep (PERMIT(Simulator));
     virtual void Finalize (PERMIT(Simulator));
 
 private:

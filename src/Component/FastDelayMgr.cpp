@@ -84,6 +84,13 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             (spk_inst->spike_idx.begin(),
              spk_inst->spike_idx.end());
         delayed_spks_.back().is_inh = spk_inst->is_inh;
+    
+        INFO_PRINT ("Spike list length: %zu", delayed_spks_.size());
+        
+        delay_it_ = delayed_spks_.begin();
+
+        if(state_ != START)
+            SIM_FATAL ("[FDM] Order of state broke", GetFullName().c_str());
     }
 
     IntegerMessage *ts_msg = 
@@ -100,9 +107,13 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             input_n = 0;
         
             GetScript()->NextSection();
+            INFO_PRINT ("[FAM] (next) Spike list length: %zu", 
+                    delayed_spks_.size());
+
+            state_ = START;
+            state_counter_ = 3;
         }
     }
-
 
     AxonMessage *input_msg =
         static_cast<AxonMessage*> (inmsgs[PORT_input]);
@@ -126,10 +137,12 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         {
             state_ = FETCH;
             state_counter_ = 2;            
+            INFO_PRINT ("[FDM] FETCH state (fin: %d)", fetch_fin_);
         }
         else if(!is_idle_)
         {
-            INFO_PRINT ("[FDM] state counter %d (fin %d)", state_counter_, fetch_fin_);
+            INFO_PRINT ("[FDM] state counter %d (fin %d)", 
+                    state_counter_, fetch_fin_);
             outmsgs[PORT_idle] = new IntegerMessage (1);
             is_idle_ = true;
         }
@@ -137,17 +150,20 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     if(state_counter_ != 0 && is_idle_)
     {
-        INFO_PRINT ("[FDM] state counter %d (fin %d)", state_counter_, fetch_fin_);
+        INFO_PRINT ("[FDM] state counter %d (fin %d)", 
+                state_counter_, fetch_fin_);
         delete outmsgs[PORT_idle];
         outmsgs[PORT_idle] = new IntegerMessage (0);
         is_idle_ = false;
     }
 
-    if(state_ == FETCH && !state_counter_)
+    if(state_ == FETCH && (state_counter_ != 0))
     {
         if(delay_it_ == delayed_spks_.end() ||
                 delayed_spks_.empty())
         {
+            INFO_PRINT ("[FDM] Empty Spike list (fin %d, cnt %d)",
+                    fetch_fin_, state_counter_);
             fetch_fin_ = true;
             state_counter_ = 0;
         }

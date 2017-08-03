@@ -74,9 +74,9 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 
     /* Initialize DRAM (ramulator */
     string config_path;
-    config_path = "lib/ramulator/configs/DDR4_" + 
-                         to_string(prop_idx) + "-config.cfg";
-    //config_path = "lib/ramulator/configs/DDR4-config.cfg"; 
+    // config_path = "lib/ramulator/configs/DDR4_" + 
+    //                      to_string(prop_idx) + "-config.cfg";
+    config_path = "lib/ramulator/configs/DDR4-config.cfg"; 
 
     ramulator::Config configs(config_path);
 

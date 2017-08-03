@@ -650,6 +650,7 @@ bool Simulator::Simulate ()
     macrotask ("Starting simulation..")
     {
         uint64_t nexttstime = 0;
+        bool print_report = true;
         while (!tb->IsFinished (KEY(Simulator)))
         {
             auto minidx = -1;
@@ -690,6 +691,19 @@ bool Simulator::Simulate ()
                         TO_SPEC_TIMEUNIT(opt.timelimit));
                 break;
             }
+
+            if(tb->GetTimestep(KEY(Simulator))%100 == 0 && 
+                    tb->GetTimestep(KEY(Simulator)) != 0)
+            {
+                if(!print_report)
+                {
+                    print_report = true;
+                    ReportSimulationSummary();
+                }
+               
+            }
+            else
+                print_report = false;
         }
 
         tb->Finalize(KEY(Simulator));

@@ -34,6 +34,11 @@ bool NeuroSimTestbench::IsFinished (PERMIT(Simulator))
 {
     return (tsrep->cur_timestep > max_timestep);
 }
+    
+uint16_t NeuroSimTestbench::GetTimestep (PERMIT(Simulator))
+{
+    return tsrep->cur_timestep;
+}
 
 void NeuroSimTestbench::Finalize (PERMIT(Simulator))
 {

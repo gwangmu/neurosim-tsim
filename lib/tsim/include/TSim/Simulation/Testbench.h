@@ -63,6 +63,7 @@ public:
 
     virtual bool IsFinished (PERMIT(Simulator)) = 0;
     virtual void Finalize (PERMIT(Simulator)) = 0;
+    virtual uint16_t GetTimestep (PERMIT(Simulator)) { return -1;}
 
 protected:
     Component *TOP_COMPONENT;
