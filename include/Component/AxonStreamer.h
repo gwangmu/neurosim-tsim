@@ -43,13 +43,16 @@ private:
     {
         StreamJob() :
             base_addr(0), ax_len(0), read_addr(0), tag(0) {}
-        StreamJob(uint32_t base, uint16_t len, uint32_t read, uint8_t tag) :
-            base_addr(base), ax_len(len), read_addr(read), tag(tag) {}
+        StreamJob(uint32_t base, uint16_t len, uint32_t read, 
+                uint8_t tag, bool is_inh) :
+            base_addr(base), ax_len(len), read_addr(read), 
+            tag(tag), is_inh(is_inh) {}
 
         uint32_t base_addr;
         uint16_t ax_len;
         uint32_t read_addr;
         uint8_t tag;
+        bool is_inh;
     };
     std::vector<StreamJob> streaming_task_;
         

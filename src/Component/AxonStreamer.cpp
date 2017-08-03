@@ -56,7 +56,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         uint8_t tag = tag_counter_[idx]; 
         streaming_task_[idx] = 
             StreamJob (axon_msg->value, axon_msg->len,
-                    axon_msg->value, tag_counter_[idx]);
+                    axon_msg->value, tag_counter_[idx], axon_msg->is_inh);
 
         is_idle_[idx] = false;
 
@@ -100,10 +100,11 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         if(job.read_addr == job.base_addr)
         {
             outmsgs[OPORT_Addr] = new DramReqMessage (0, job.read_addr, 
-                    job.tag, job.ax_len);
+                    job.tag, job.ax_len, job.is_inh);
         }
         else
-            outmsgs[OPORT_Addr] = new DramReqMessage (0, job.read_addr, job.tag);
+            outmsgs[OPORT_Addr] = new DramReqMessage (0, 
+                    job.read_addr, job.tag, 0, job.is_inh);
 
         streaming_task_[out_idx].read_addr += read_bytes;
     }

@@ -45,6 +45,9 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     this->min_delay_ = GET_PARAMETER(min_delay);
     uint16_t num_delay = GET_PARAMETER(num_delay);
 
+    this->dyn_latency_ = GET_PARAMETER(dyn_latency);
+    dyn_counter_ = dyn_latency_;
+
     avg_synapses_ *= num_delay; // Connections per neurons
 
     // Propagator Information
@@ -72,7 +75,8 @@ CoreDynUnit::CoreDynUnit (string iname, Component *parent,
     spike_state_ = 0;
     spike_mask_ = (1 << pipeline_depth_) - 2;
     is_idle_ = true;
-  
+    is_finish_ = true;
+
     ts_parity_ = false;
     idx_counter_ = num_neurons;
 
@@ -127,60 +131,76 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs,
 
     if (idx_counter_ != num_neurons_)
     {
-        INFO_PRINT ("[DYN] Initiate %dth neuron dynamics", 
-                idx_counter_);
-
-        // Check spike
-        bool is_spike =
-            (spike_trace_.empty())? false : 
-            (idx_counter_ == spike_trace_.front());
-        if(is_spike)
+        if(dyn_counter_)
         {
-            spike_state_ |= 0x1;
-            spike_trace_.pop_front();
-            
-            // const MetaRegisterWord *word = 
-            //     static_cast<const MetaRegisterWord *> 
-            //     (GetRegister()->GetWord (idx_counter_));
-            
-            // uint64_t metadata = word->value;
-
-            // uint16_t delay = (metadata >> 52) & 0x3ff;
-            // uint64_t ax_addr = (metadata >> 16) & 0xfffffffff;
-            // uint16_t ax_len = metadata & 0xffff;
-      
-            GetRegister()->GetWord (idx_counter_);
-
-            uint16_t delay = min_delay_;
-            uint64_t ax_addr = base_addr_ + avg_synapses_ * idx_counter_;
-            uint16_t ax_len = synlen_table[idx_counter_ % 1024];
-            outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, 
-                                                 ax_len, delay, prop_idx_);
-
-            INFO_PRINT ("[DYN] Send Axon Message (addr %lu, len %u)",
-                    ax_addr, ax_len);
+            dyn_counter_--;
         }
         else
         {
-            // Push task in pipeline
-            pipe_state_ |= 0x1;
+            INFO_PRINT ("[DYN] Initiate %dth neuron dynamics", 
+                    idx_counter_);
 
+            // Check spike
+            bool is_spike =
+                (spike_trace_.empty())? false : 
+                (idx_counter_ == spike_trace_.front());
+            if(is_spike)
+            {
+                spike_state_ |= 0x1;
+                spike_trace_.pop_front();
+
+                // const MetaRegisterWord *word = 
+                //     static_cast<const MetaRegisterWord *> 
+                //     (GetRegister()->GetWord (idx_counter_));
+
+                // uint64_t metadata = word->value;
+
+                // uint16_t delay = (metadata >> 52) & 0x3ff;
+                // uint64_t ax_addr = (metadata >> 16) & 0xfffffffff;
+                // uint16_t ax_len = metadata & 0xffff;
+
+                GetRegister()->GetWord (idx_counter_);
+
+                uint16_t delay = min_delay_;
+                uint64_t ax_addr = base_addr_ + avg_synapses_ * idx_counter_;
+                uint16_t ax_len = synlen_table[idx_counter_ % 1024];
+                
+                bool is_inh = idx_counter_ > 0.8*num_neurons_;
+                outmsgs[PORT_axon] = new AxonMessage (0, ax_addr, 
+                        ax_len, delay, prop_idx_, is_inh);
+
+                INFO_PRINT ("[DYN] Send Axon Message (addr %lu, len %u)",
+                        ax_addr, ax_len);
+            }
+            else
+            {
+                // Push task in pipeline
+                pipe_state_ |= 0x1;
+
+            }
+
+            idx_counter_++;
+            dyn_counter_ = dyn_latency_;
+
+            if(idx_counter_ == num_neurons_)
+            {
+                INFO_PRINT ("Dynamics finish");
+                is_finish_ = true;
+                outmsgs[PORT_dynfin] = new SignalMessage (0, true);
+            }
         }
-
-        idx_counter_++;
-        if(idx_counter_ == num_neurons_)
-            outmsgs[PORT_dynfin] = new SignalMessage (0, true);
     }
 
 
     // Update Idle state
-    if (is_idle_ && (pipe_state_ || spike_state_))
+    if (is_idle_ && (pipe_state_ || spike_state_) && is_finish_)
     {
         is_idle_ = false;
+        is_finish_ = false;
         outmsgs[PORT_dynfin] = new SignalMessage (0, false); 
         INFO_PRINT ("[DYN] Start Dynamics");
     }
-    else if (!is_idle_ && !(pipe_state_ || spike_state_))
+    else if (!is_idle_ && !(pipe_state_ || spike_state_) && is_finish_)
     {
         is_idle_ = true;
         INFO_PRINT ("[DYN] End Dyanmics");

@@ -30,7 +30,10 @@ class CoreDynUnit: public Module
     uint32_t row_size_, col_size_;
     uint32_t avg_synapses_;
     uint16_t min_delay_;
-    
+
+    uint16_t dyn_latency_;
+    uint16_t dyn_counter_;
+
     uint16_t core_idx_, prop_idx_;
     uint64_t base_addr_;
 
@@ -38,7 +41,7 @@ class CoreDynUnit: public Module
     uint32_t pipeline_depth_;
     uint16_t spike_state_, spike_mask_;
     uint16_t pipe_state_, pipe_mask_;
-    bool is_idle_;
+    bool is_idle_, is_finish_;
 
     bool ts_parity_;
     uint32_t idx_counter_;

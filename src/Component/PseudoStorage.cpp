@@ -21,7 +21,8 @@
 USING_TESTBENCH;
 
 PseudoStorage::PseudoStorage (string iname, Component* parent, 
-        uint8_t io_buf_size, uint32_t dram_outque_size, int idx)
+        uint8_t io_buf_size, uint32_t dram_outque_size, 
+        int board_idx, int prop_idx)
     : Module ("PseudoStorage", iname, parent, 0)
 {
     SetClock ("ddr");
@@ -45,6 +46,17 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     num_chips_ = GET_PARAMETER (num_chips);
     num_cores_ = GET_PARAMETER (num_cores);
     num_boards_ = GET_PARAMETER (num_boards);
+    
+    num_neurons_ = GET_PARAMETER (num_neurons);
+    neurons_per_board_ = num_neurons_ / num_boards_;
+
+    num_delay_ = GET_PARAMETER (num_delay);
+
+    this->remote_base_ = GET_PARAMETER (base_addr);
+    this->avg_syns_ = GET_PARAMETER (avg_synapses);
+    board_syns_ = avg_syns_ * num_delay_ * (neurons_per_board_ / 4);
+
+    this->board_idx_ = board_idx;
 
     this->outque_size_ = dram_outque_size;
     this->io_buf_size_ = io_buf_size;
@@ -63,7 +75,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     /* Initialize DRAM (ramulator */
     string config_path;
     config_path = "lib/ramulator/configs/DDR4_" + 
-                         to_string(idx) + "-config.cfg";
+                         to_string(prop_idx) + "-config.cfg";
     //config_path = "lib/ramulator/configs/DDR4-config.cfg"; 
 
     ramulator::Config configs(config_path);
@@ -104,6 +116,18 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     SetRegister (new EmptyRegister (Register::SRAM, regattr));
     
     //Stats::statlist.output("result/DRAM"+to_string(idx)+".stats");
+    
+    // Pseudo-random table
+    uint32_t n = GET_PARAMETER(num_samples);
+    uint32_t pint = GET_PARAMETER(probability);
+    double p = pint / double(1000000);
+    
+    std::default_random_engine generator;
+    std::binomial_distribution<int> distribution (n, p); 
+    for (int i=0; i<1024; i++)
+    {
+        synlen_table[i] = distribution(generator);
+    }
 }
 
 void PseudoStorage::PrintStats ()
@@ -200,6 +224,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
 
                 synmeta = SynMeta (tag, read_addr, off_ofs, 
                                   on_ofs, next_len);
+                synmeta.is_inh = raddr_msg->is_inh;
                 dram_state_[reqID] = synmeta;      
                 
                 INFO_PRINT ("[DRAM] synmeta entry. ID %d, addr %u, cnt %d",
@@ -318,9 +343,24 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
         if(offset + i < synmeta.off_board_ofs)
         {
             INFO_PRINT ("[DRAM] reqID: %d, addr: %u", reqID, addr);
-            SIM_ERROR ("Not Implemented. (Routing information)", GetFullName().c_str());
             dram_state_[reqID].entry_cnt--;
-            return;
+            
+            intra_board = true;
+            is_delay = false;
+            
+            destrhsid = offset + i;
+            destrhsid = (destrhsid >= board_idx_)? board_idx_+1: board_idx_;
+                
+            uint32_t bidx = destrhsid;
+            bidx = (bidx > board_idx_)? bidx-1 : bidx;
+           
+            uint32_t sidx = (addr + i) % (neurons_per_board_/4);
+
+            val32 = remote_base_ + (bidx) *board_syns_; // AxAddr
+            val32 += avg_syns_ * sidx; 
+
+            val16 = synlen_table[(offset+i)%1024] * num_delay_; // AxLen  
+            target_idx = destrhsid; 
         }
         else if (offset + i >= synmeta.on_board_ofs)
         {

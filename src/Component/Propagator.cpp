@@ -63,7 +63,8 @@ Propagator::Propagator (string iname, Component *parent,
     {
         axon_storage = 
             new PseudoStorage ("axon_storage", this, 
-                               dram_io_buf_size, dram_outque_size, prop_idx); 
+                               dram_io_buf_size, dram_outque_size, 
+                               board_idx, prop_idx); 
     }
     else
     {

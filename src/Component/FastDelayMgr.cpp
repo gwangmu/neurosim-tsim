@@ -40,6 +40,8 @@ FastDelayMgr::FastDelayMgr (string iname, Component* parent, uint8_t board_idx)
     this->num_neurons_ = GET_PARAMETER (num_neurons);
     this->neurons_per_board_ = num_neurons_ / num_boards;
 
+    this->base_addr_ = GET_PARAMETER (base_addr);
+
     this->avg_syns_ = GET_PARAMETER (avg_synapses);
     board_syns_ = avg_syns_ * num_delay_ * (neurons_per_board_ / 4);
    
@@ -169,6 +171,9 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                 ax_len = synlen_table[(sidx + delay)%256];
                 if(is_inh)
                     ax_len *= num_delay_;
+            
+                outmsgs[PORT_output] = 
+                    new AxonMessage (0, ax_addr, ax_len);
             }
             else // Inter-spike
             {
@@ -181,12 +186,11 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                 ax_addr += avg_syns_ * num_delay_ * sidx + 
                             avg_syns_ * (num_delay_ - delay);
                 ax_len = synlen_table[(sidx + delay)%256];
-                if(is_inh)
-                    ax_len *= num_delay_;
-            }
 
-            outmsgs[PORT_output] = 
-                new AxonMessage (0, ax_addr, ax_len);
+                if(num_delay_ != delay && !is_inh)
+                    outmsgs[PORT_output] = 
+                        new AxonMessage (0, ax_addr, ax_len);
+            }
 
             // Advance 
             spk_idx_ += 1;

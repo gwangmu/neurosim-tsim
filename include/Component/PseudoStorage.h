@@ -20,7 +20,7 @@ class PseudoStorage: public Module
 {
 public:
     PseudoStorage (string iname, Component *parent, uint8_t io_buf_size, 
-            uint32_t dram_outque_size, int idx);
+            uint32_t dram_outque_size, int board_idx, int prop_idx);
     virtual void Operation (Message **inmsgs, Message **outmsgs, 
             Instruction *instr);
 
@@ -51,6 +51,7 @@ private:
         uint16_t on_board_ofs;  // Synapse information
         uint16_t entry_cnt;
         uint16_t next_len;
+        bool is_inh;
     };
     
     uint32_t PORT_addr, PORT_data;
@@ -77,8 +78,15 @@ private:
     uint8_t io_buf_size_;
     uint32_t outque_size_;
 
+    uint16_t num_delay_;
+    uint64_t remote_base_;
+    uint32_t avg_syns_, board_syns_;
+
+    uint8_t board_idx_;
+
     // NeuroSim specification
     uint8_t num_chips_, num_cores_, num_boards_;
+    uint32_t num_neurons_, neurons_per_board_;
 
     // Internal function
     bool send(uint8_t reqID, uint64_t addr);
@@ -88,4 +96,6 @@ private:
     uint16_t idx_counter_;
 
     Stats::StatList statlist_;
+
+    uint16_t synlen_table[1024]; 
 };
