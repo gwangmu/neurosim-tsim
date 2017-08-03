@@ -19,7 +19,6 @@ Instruction* SpikeFileScript::ParseRawString (string rawstr)
     SpikeInstruction *instr = new SpikeInstruction ();
 
     instr->is_inh = stoi(toked[0]);
-    instr->spk_len = toked.size()-1;
     for(int i=1; i<toked.size(); i++)
     {
         instr->spike_idx.push_back(stoi(toked[i]));

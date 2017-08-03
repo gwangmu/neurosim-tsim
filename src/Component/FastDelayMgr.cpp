@@ -82,8 +82,6 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             (spk_inst->spike_idx.begin(),
              spk_inst->spike_idx.end());
         delayed_spks_.back().is_inh = spk_inst->is_inh;
-
-        PRINT("Spike len %u", spk_inst->spk_len);
     }
 
     IntegerMessage *ts_msg = 
@@ -161,6 +159,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             uint16_t ax_len;
 
             uint16_t delay = (*delay_it_).delay;
+            bool is_inh = (*delay_it_).is_inh;
             if(is_boardmsg) // Intra-spike
             {
                 uint32_t sidx = out_idx % (num_neurons_ / 4);
@@ -168,6 +167,8 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                 ax_addr = avg_syns_ * num_delay_ * sidx + 
                             avg_syns_ * (num_delay_ - delay);
                 ax_len = synlen_table[(sidx + delay)%256];
+                if(is_inh)
+                    ax_len *= num_delay_;
             }
             else // Inter-spike
             {
@@ -180,7 +181,8 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                 ax_addr += avg_syns_ * num_delay_ * sidx + 
                             avg_syns_ * (num_delay_ - delay);
                 ax_len = synlen_table[(sidx + delay)%256];
-
+                if(is_inh)
+                    ax_len *= num_delay_;
             }
 
             outmsgs[PORT_output] = 
