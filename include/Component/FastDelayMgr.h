@@ -25,10 +25,11 @@ private:
     uint32_t PORT_idle;
 
     // Parameters
-    uint8_t num_delay_;
+    uint8_t num_delay_, min_delay_;
     uint8_t board_idx_;
     uint64_t base_addr_, board_syns_;
-    uint32_t num_neurons_, avg_syns_;
+    uint32_t num_neurons_, neurons_per_board_, avg_syns_;
+    uint32_t inh_neurons_;
 
     struct DelayedSpk
     {
@@ -36,11 +37,13 @@ private:
         DelayedSpk (uint16_t delay) : delay(delay) {}
 
         uint16_t delay;
+        bool is_inh;
         std::vector<uint32_t> spikes;
     };
     
-    std::vector<DelayedSpk> delayed_spks_;
-    uint16_t delay_idx_, spk_idx_;
+    std::list<DelayedSpk> delayed_spks_;
+    std::list<DelayedSpk>::iterator delay_it_;
+    uint16_t spk_idx_;
     bool fetch_fin_, is_idle_;
 
     enum State {IDLE, PROMOTE, RETRIEVE, INSERT, FETCH};

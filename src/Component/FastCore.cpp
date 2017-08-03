@@ -41,7 +41,7 @@ FastCore::FastCore (string iname, Component *parent, int num_propagators,
     // Parameters
     int syn_queue_size = 64;
     int pipeline_depth = 8;
-    int num_neurons = GET_PARAMETER (num_neurons);
+    int num_neurons = GET_PARAMETER (neurons_per_core);
 
     // NBC-SRAM-NBC-(NB(depth))-AMQ-AT-AMQ
     pipeline_depth += 6;

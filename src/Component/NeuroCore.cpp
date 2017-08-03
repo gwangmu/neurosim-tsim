@@ -46,7 +46,7 @@ NeuroCore::NeuroCore (string iname, Component *parent, int num_propagators)
     // Parameters
     int syn_queue_size = 4;
     int pipeline_depth = 2;
-    int num_neurons = GET_PARAMETER (num_neurons);
+    int num_neurons = GET_PARAMETER (neurons_per_core);
 
     Module *neuron_block = new NeuronBlock ("neuron_block", this, pipeline_depth);
     Module *nb_controller = new NBController ("nb_controller", this, num_neurons);

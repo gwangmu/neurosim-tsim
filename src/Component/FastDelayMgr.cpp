@@ -29,15 +29,20 @@ FastDelayMgr::FastDelayMgr (string iname, Component* parent, uint8_t board_idx)
             Prototype<IntegerMessage>::Get());
 
     num_delay_ = GET_PARAMETER (num_delay);
+    min_delay_ = GET_PARAMETER (min_delay);
 
     delayed_spks_.clear();
     //delayed_spks_.resize(num_delay_);
  
+    uint16_t num_boards = GET_PARAMETER (num_boards);
+
     this->board_idx_ = board_idx;
     this->num_neurons_ = GET_PARAMETER (num_neurons);
+    this->neurons_per_board_ = num_neurons_ / num_boards;
+
     this->avg_syns_ = GET_PARAMETER (avg_synapses);
-    board_syns_ = avg_syns_ * num_delay_ * (num_neurons_ / 4);
-    
+    board_syns_ = avg_syns_ * num_delay_ * (neurons_per_board_ / 4);
+   
     SetScript (new SpikeFileScript());
 
     state_ = IDLE;
@@ -66,16 +71,19 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
 {
     SpikeInstruction *spk_inst =
         static_cast<SpikeInstruction*> (instr);
-    if (spk_inst)
+    if (spk_inst && num_delay_ != 0)
     {
-        delayed_spks_.push_back (DelayedSpk(num_delay_));
+        if(spk_inst->is_inh)
+            delayed_spks_.push_back (DelayedSpk(1));
+        else      
+            delayed_spks_.push_back (DelayedSpk(num_delay_));
+
         delayed_spks_.back().spikes.assign 
             (spk_inst->spike_idx.begin(),
              spk_inst->spike_idx.end());
+        delayed_spks_.back().is_inh = spk_inst->is_inh;
 
-        for (auto it = spk_inst->spike_idx.begin(); 
-                it != spk_inst->spike_idx.end(); it++)
-            INFO_PRINT ("[FDM] instr %u", *it);
+        PRINT("Spike len %u", spk_inst->spk_len);
     }
 
     IntegerMessage *ts_msg = 
@@ -87,7 +95,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             INFO_PRINT ("[FDM] Get TS parity");
             fetch_fin_ = false;
             spk_idx_ = 0;
-            delay_idx_ = 0;
+            delay_it_ = delayed_spks_.begin();
             ts_parity_ = ts_msg->value;
             input_n = 0;
         
@@ -137,7 +145,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
 
     if(state_ == FETCH && !state_counter_)
     {
-        if(delay_idx_ == delayed_spks_.size() ||
+        if(delay_it_ == delayed_spks_.end() ||
                 delayed_spks_.empty())
         {
             fetch_fin_ = true;
@@ -146,13 +154,13 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         else
         {
 
-            uint32_t out_idx = delayed_spks_[delay_idx_].spikes[spk_idx_];
+            uint32_t out_idx = (*delay_it_).spikes[spk_idx_];
             // Send Message
             bool is_boardmsg = (out_idx / num_neurons_) == board_idx_;
             uint64_t ax_addr;
             uint16_t ax_len;
 
-            uint16_t delay = delayed_spks_[delay_idx_].delay;
+            uint16_t delay = (*delay_it_).delay;
             if(is_boardmsg) // Intra-spike
             {
                 uint32_t sidx = out_idx % (num_neurons_ / 4);
@@ -178,22 +186,18 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             outmsgs[PORT_output] = 
                 new AxonMessage (0, ax_addr, ax_len);
 
-            INFO_PRINT ("[FDM] Fetch idx %d (addr %lu, %u)", 
-                    delay_idx_, ax_addr, ax_len);
-
             // Advance 
             spk_idx_ += 1;
-            if(spk_idx_ == delayed_spks_[delay_idx_].spikes.size())
+            if(spk_idx_ == (*delay_it_).spikes.size())
             {
-                delayed_spks_[delay_idx_].delay--;
-                if(!delay_idx_ && 
-                        !delayed_spks_[delay_idx_].delay)
+                (*delay_it_).delay--;
+                if(!(*delay_it_).delay)
                 {
-                    delayed_spks_[delay_idx_].spikes.clear();
-                    delayed_spks_.erase (delayed_spks_.begin());
+                    (*delay_it_).spikes.clear();
+                    delay_it_ = delayed_spks_.erase (delay_it_);
                 }
                 else
-                    delay_idx_ += 1;
+                    delay_it_ ++;
 
                 spk_idx_ = 0;
             }

@@ -15,5 +15,7 @@ public:
     SpikeInstruction (): Instruction ("SpikeInstruction") {}
 
 public:
+    bool is_inh;
+    uint32_t spk_len;
     std::list<uint32_t> spike_idx;
 };
