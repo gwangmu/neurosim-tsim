@@ -692,7 +692,7 @@ bool Simulator::Simulate ()
                 break;
             }
 
-            if(tb->GetTimestep(KEY(Simulator))%50 == 0 && 
+            if(tb->GetTimestep(KEY(Simulator))%25 == 0 && 
                     tb->GetTimestep(KEY(Simulator)) != 0)
             {
                 if(!print_report)
