@@ -62,7 +62,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     this->io_buf_size_ = io_buf_size;
     io_buffer.resize(io_buf_size_);
 
-    reqID_range = 40;
+    reqID_range = 100;
     dram_state_.resize(reqID_range);
     
     reqID_table_.clear();
@@ -220,15 +220,18 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
 
                 next_len = 0;
                 on_ofs = raddr_msg->len;
-                off_ofs = num_boards_ - 1;
+                off_ofs = 0;
+
+                if(raddr_msg->off_ofs)
+                    off_ofs = num_boards_ = 1;
 
                 synmeta = SynMeta (tag, read_addr, off_ofs, 
                                   on_ofs, next_len);
                 synmeta.is_inh = raddr_msg->is_inh;
                 dram_state_[reqID] = synmeta;      
                 
-                INFO_PRINT ("[DRAM] synmeta entry. ID %d, addr %u, cnt %d",
-                        reqID, synmeta.base_addr, synmeta.entry_cnt);
+                INFO_PRINT ("[DRAM] synmeta entry. ID %d, addr %u, off_ofs %d",
+                        reqID, synmeta.base_addr, raddr_msg->off_ofs);
             }
             else
             {
@@ -342,14 +345,13 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
         
         if(offset + i < synmeta.off_board_ofs)
         {
-            INFO_PRINT ("[DRAM] reqID: %d, addr: %u", reqID, addr);
             dram_state_[reqID].entry_cnt--;
             
             intra_board = true;
             is_delay = false;
             
             destrhsid = offset + i;
-            destrhsid = (destrhsid >= board_idx_)? board_idx_+1: board_idx_;
+            destrhsid = (destrhsid >= board_idx_)? destrhsid+1: destrhsid;
                 
             uint32_t bidx = destrhsid;
             bidx = (bidx > board_idx_)? bidx-1 : bidx;
@@ -359,8 +361,16 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
             val32 = remote_base_ + (bidx) *board_syns_; // AxAddr
             val32 += avg_syns_ * sidx; 
 
-            val16 = synlen_table[(offset+i)%1024] * num_delay_; // AxLen  
+            val16 = synlen_table[(offset+i)%1024];
+            
+            if(synmeta.is_inh)
+                val16 *= num_delay_; // AxLen  
+            
             target_idx = destrhsid; 
+            
+            INFO_PRINT ("[DRAM] %s Send offboard Axon %d to %d(%d) (addr: %lu, len %u)", 
+                    GetFullNameWOClass().c_str(), 
+                    board_idx_, destrhsid, offset+i, val32, val16);
         }
         else if (offset + i >= synmeta.on_board_ofs)
         {

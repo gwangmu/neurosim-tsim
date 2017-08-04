@@ -53,6 +53,7 @@ private:
 
     // Stats
     uint16_t input_n;
+    uint32_t data_cnt;
 
     // Hash table
     uint16_t synlen_table[256];

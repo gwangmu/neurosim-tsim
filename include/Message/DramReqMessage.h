@@ -20,13 +20,14 @@ public:
     DramReqMessage () : Message ("DramReqMessage") {}
 
     DramReqMessage (uint32_t destrhsid, uint32_t idx, uint8_t tag=0, 
-            uint16_t len=0, bool is_inh=false)
+            uint16_t len=0, bool is_inh=false, bool off_ofs=false)
         : Message ("DramReqMessage", destrhsid)
     {
         this->value = idx;
         this->tag = tag;
         this->len = len;
         this->is_inh = is_inh;
+        this->off_ofs = off_ofs;
     }
 
 public:
@@ -35,4 +36,5 @@ public:
     uint16_t len;
 
     bool is_inh;
+    bool off_ofs;
 };

@@ -53,6 +53,7 @@ private:
         uint32_t read_addr;
         uint8_t tag;
         bool is_inh;
+        bool off_ofs;
     };
     std::vector<StreamJob> streaming_task_;
         

@@ -2,6 +2,7 @@
 
 
 #include <TSim/Module/Module.h>
+#include <TSim/Simulation/Testbench.h>
 
 #include <cinttypes>
 #include <string>
@@ -22,5 +23,10 @@ private:
     uint32_t IPORT_Packet;
 
     // Output port
-    uint32_t OPORT_TSEnd, OPORT_Axon;
+    uint32_t OPORT_TSEnd;
+    std::vector<uint32_t> OPORT_Axons;
+    std::vector<uint32_t> OPORT_Bypass;
+
+    // Parameters
+    uint8_t num_propagators_;
 };

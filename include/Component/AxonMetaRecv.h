@@ -18,7 +18,7 @@ public:
 private:
     /* Port IDs */
     // Input port
-    uint32_t IPORT_Axon;
+    uint32_t IPORT_Axon, IPORT_Bypass;
 
     // Output port
     uint32_t OPORT_Axon, OPORT_idle, OPORT_delay;

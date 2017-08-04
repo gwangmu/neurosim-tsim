@@ -42,7 +42,7 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction 
 
     if(end_msg)
     {
-        INFO_PRINT ("[CoTS] CoreDynUnit is end? %d", end_msg->value);
+        //INFO_PRINT ("[CoTS] CoreDynUnit is end? %d", end_msg->value);
         
         /*** Check state of dynamics modules  ***/
         bool dynfin = end_msg->value;
@@ -54,6 +54,7 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction 
         }
         else if (dyn_end_ && !dynfin)
         {
+            INFO_PRINT ("[CoTS] Dynamics did not finish");
             outmsgs[PORT_DynFin] = new IntegerMessage (0);
             dyn_end_ = false;
         }
@@ -61,12 +62,14 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction 
     }
     if(idle_msg)
     {
-        INFO_PRINT ("[CoTS] Accumulator is end? %d", idle_msg->value);
+        if(idle_msg->value != acc_idle_)
+            INFO_PRINT ("[CoTS] Accumulator is end? %d", idle_msg->value);
         acc_idle_ = idle_msg->value;
     }
     if(empty_msg)
     {
-        INFO_PRINT ("[CoTS] Synapse data queue is empty %d", empty_msg->value);
+        if(empty_msg->value != syn_empty_)
+            INFO_PRINT ("[CoTS] Synapse data queue is empty %d", empty_msg->value);
         syn_empty_ = empty_msg->value;
     }
 

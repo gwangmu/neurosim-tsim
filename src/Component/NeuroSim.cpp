@@ -47,6 +47,7 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
     const int num_cores = GET_PARAMETER (num_cores);
 
     const int axon_entry_queue_size = 64;
+    const int decoder_queue_size = 256;
 
     /** Components **/
     std::vector<Component*> neurochips;
@@ -75,10 +76,17 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
 
     // Wires
     std::vector<RRFaninWire*> axon_data;
+    std::vector<Wire*> bypass_data;
     for (int i=0; i<num_propagators; i++)
+    {
         axon_data.push_back (new RRFaninWire (this, conattr, 
                                               Prototype<AxonMessage>::Get(), 
                                               num_chips + 3));
+        bypass_data.push_back (new Wire (this, conattr, 
+                                         Prototype<AxonMessage>::Get()
+                                         ));
+    }
+
     FanoutWire *cur_TSParity = new FanoutWire (this, conattr, 
                                            Prototype<IntegerMessage>::Get(), 
                                            num_chips + (2*num_propagators) + 1);
@@ -163,6 +171,8 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
 
         propagators[i]->Connect ("Axon", 
                                  axon_data[i]->GetEndpoint (Endpoint::RHS));
+        propagators[i]->Connect ("Bypass", 
+                                 bypass_data[i]->GetEndpoint (Endpoint::RHS));
         propagators[i]->Connect ("PropTS", 
                                 cur_TSParity->GetEndpoint (Endpoint::RHS, 
                                                           num_chips + (2*i+1)));
@@ -191,8 +201,10 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
                                  board_axon->GetEndpoint (Endpoint::LHS, i));
         propagators[i]->Connect ("BoardID", 
                                  board_id->GetEndpoint (Endpoint::LHS, i));
-        board_axon->GetEndpoint (Endpoint::LHS, i)->SetCapacity (4);
-        board_id->GetEndpoint (Endpoint::LHS, i)->SetCapacity (4);
+        board_axon->GetEndpoint (Endpoint::LHS, i)
+                  ->SetCapacity (axon_entry_queue_size);
+        board_id->GetEndpoint (Endpoint::LHS, i)    
+                  ->SetCapacity (axon_entry_queue_size);
         
         propagators[i]->Connect 
                 ("Idle", prop_idle[i]->GetEndpoint (Endpoint::LHS));
@@ -206,9 +218,18 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
 
         idle_and->Connect ("input" + to_string(i), 
                            prop_idle[i]->GetEndpoint (Endpoint::RHS)); 
-        controller->Connect ("AxonOut", 
+        controller->Connect ("AxonOut" + to_string(i), 
                             axon_data[i]->GetEndpoint 
                                             (Endpoint::LHS, num_chips + 2));
+        controller->Connect ("Bypass" + to_string(i), 
+                            bypass_data[i]->GetEndpoint 
+                                            (Endpoint::LHS));
+        axon_data[i]
+            ->GetEndpoint (Endpoint::LHS, num_chips + 2)
+            ->SetCapacity (decoder_queue_size);
+        bypass_data[i]
+            ->GetEndpoint (Endpoint::RHS)
+            ->SetCapacity (decoder_queue_size/2);
 
         for (int c=0; c<num_chips; c++)
         {

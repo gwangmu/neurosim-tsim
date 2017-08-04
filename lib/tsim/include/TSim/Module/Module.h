@@ -53,6 +53,13 @@ protected:
     inline uint32_t GetCtrlQueSize (uint32_t portid) 
     { return ctrlports[portid].endpt->GetNumMessages(); }
 
+    inline uint32_t GetOutQueCapacity (uint32_t portid) 
+    { return outports[portid].endpt->GetCapacity(); }
+    inline uint32_t GetInQueCapacity (uint32_t portid) 
+    { return inports[portid].endpt->GetCapacity(); }
+    inline uint32_t GetCtrlQueCapacity (uint32_t portid) 
+    { return ctrlports[portid].endpt->GetCapacity(); }
+
 private:
     static const uint32_t MAX_PDEPTH = 64;
 

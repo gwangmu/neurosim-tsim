@@ -11,19 +11,32 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
+#include <random>
 
 using namespace std;
+
+USING_TESTBENCH;
 
 PacketDecoder::PacketDecoder (string iname, Component *parent)
     : Module ("PacketDecoder", iname, parent, 1)
 {
+    num_propagators_ = GET_PARAMETER(num_propagators);
+    
     IPORT_Packet = CreatePort ("packet", Module::PORT_INPUT,
             Prototype<PacketMessage>::Get());
     
     OPORT_TSEnd = CreatePort ("ts_end", Module::PORT_OUTPUT,
             Prototype<SignalMessage>::Get());
-    OPORT_Axon = CreatePort ("axon", Module::PORT_OUTPUT,
-            Prototype<AxonMessage>::Get());
+
+    for(int i=0; i<num_propagators_; i++)
+    {
+        OPORT_Axons.push_back(CreatePort ("axon" + to_string(i), 
+                              Module::PORT_OUTPUT,
+                              Prototype<AxonMessage>::Get()));
+        OPORT_Bypass.push_back(CreatePort ("bypass" + to_string(i), 
+                              Module::PORT_OUTPUT,
+                              Prototype<AxonMessage>::Get()));
+    }
 }
 
 void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs, 
@@ -42,10 +55,23 @@ void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs,
         }
         else if (type == PacketMessage::AXON)
         {
+            int target_idx = rand() % num_propagators_;
+
             INFO_PRINT ("[PkD] Receive Axon message");
-            outmsgs[OPORT_Axon] = new AxonMessage (0, pkt_msg->addr,
+
+            if(GetOutQueSize(OPORT_Axons[target_idx]) > 
+                    0.7 * GetOutQueCapacity(OPORT_Axons[target_idx]))
+            {
+                outmsgs[OPORT_Bypass[target_idx]] = 
+                    new AxonMessage (0, pkt_msg->addr,
                     pkt_msg->len/*, pkt_msg->delay*/);
-            // FIXME: constructor needs the 4th argument 'delay'.
+            }
+            else
+            {
+                outmsgs[OPORT_Axons[target_idx]] = 
+                    new AxonMessage (0, pkt_msg->addr,
+                    pkt_msg->len/*, pkt_msg->delay*/);
+            }
         }
         else
             SYSTEM_ERROR ("bogus PacketMessage type");

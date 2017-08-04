@@ -119,10 +119,15 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs,
         static_cast<SignalMessage*>(inmsgs[PORT_coreTS]);
     if(parity_msg)
     {
-        ts_parity_ = parity_msg->value;
-        idx_counter_ = 0;
-        
-        INFO_PRINT("[DYN] Start Dynamics");
+        if(ts_parity_ != parity_msg->value)
+        {
+            INFO_PRINT("[DYN] Start Dynamics %d/%d",
+                    ts_parity_, parity_msg->value);
+            
+            ts_parity_ = parity_msg->value;
+            idx_counter_ = 0;
+            
+        }
     }
 
     /* Dynamics Operation */
@@ -137,8 +142,8 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            INFO_PRINT ("[DYN] Initiate %dth neuron dynamics", 
-                    idx_counter_);
+            //INFO_PRINT ("[DYN] Initiate %d/%d neuron dynamics", 
+            //        idx_counter_, num_neurons_);
 
             // Check spike
             bool is_spike =
@@ -184,7 +189,7 @@ void CoreDynUnit::Operation (Message **inmsgs, Message **outmsgs,
 
             if(idx_counter_ == num_neurons_)
             {
-                INFO_PRINT ("Dynamics finish");
+                INFO_PRINT ("[DYN] Dynamics finish");
                 is_finish_ = true;
                 outmsgs[PORT_dynfin] = new SignalMessage (0, true);
             }

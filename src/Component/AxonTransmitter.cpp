@@ -52,7 +52,7 @@ void AxonTransmitter::Operation (Message **inmsgs, Message **outmsgs, Instructio
             prop_idx = axon_msg->target;
 
         outmsgs[OPORT_Axons[prop_idx]] = 
-            new AxonMessage (0, addr, axon_msg->len, axon_msg->delay, -1,
+            new AxonMessage (0, addr, axon_msg->len, axon_msg->delay, prop_idx,
                     axon_msg->is_inh); 
         
         if (is_idle_)

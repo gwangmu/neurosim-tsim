@@ -21,11 +21,14 @@
 
 using namespace std;
 
+USING_TESTBENCH;
+
 Controller::Controller (string iname, Component *parent, uint32_t num_board)
     : Component ("Controller", iname, parent)
 {
     /** Parameters **/
-        
+    int num_propagators = GET_PARAMETER(num_propagators);
+
     /** Components **/
    
     /** Modules **/
@@ -67,7 +70,13 @@ Controller::Controller (string iname, Component *parent, uint32_t num_board)
     ExportPort ("AxonIn", pkt_constructor, "axon"); 
     ExportPort ("BoardID", pkt_constructor, "board_id");
 
-    ExportPort ("AxonOut", pkt_decoder, "axon");
+    for (int i=0; i<num_propagators; i++)
+    {
+        ExportPort ("AxonOut" + to_string(i), 
+                    pkt_decoder, "axon" + to_string(i));
+        ExportPort ("Bypass" + to_string(i), 
+                    pkt_decoder, "bypass" + to_string(i));
+    }
 
     // gwangmu
     ExportPort ("PCIeTxExport", pcie_controller, "tx_export");

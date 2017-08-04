@@ -57,10 +57,12 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         streaming_task_[idx] = 
             StreamJob (axon_msg->value, axon_msg->len,
                     axon_msg->value, tag_counter_[idx], axon_msg->is_inh);
+        streaming_task_[idx].off_ofs = (axon_msg->target != -1)? true:false;
 
         is_idle_[idx] = false;
 
-        INFO_PRINT("[AS] Start DRAM streaming (addr: %lx, len: %u, tag %d), stream_rr %d, task %d", 
+        INFO_PRINT("[AS] (%s) Start DRAM streaming (addr: %lx, len: %u, tag %d), stream_rr %d, task %d", 
+                GetFullNameWOClass().c_str(),
                 axon_msg->value, axon_msg->len, tag, idx, ongoing_task_);
         
         tag_counter_[idx] += num_streamer_;
@@ -100,7 +102,7 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
         if(job.read_addr == job.base_addr)
         {
             outmsgs[OPORT_Addr] = new DramReqMessage (0, job.read_addr, 
-                    job.tag, job.ax_len, job.is_inh);
+                    job.tag, job.ax_len, job.is_inh, job.off_ofs);
         }
         else
             outmsgs[OPORT_Addr] = new DramReqMessage (0, 
@@ -110,7 +112,9 @@ void AxonStreamer::Operation (Message **inmsgs, Message **outmsgs, Instruction *
     }
     else if(!streamer_idle)
     {
-        INFO_PRINT ("[AS] Finish DRAM streaming (addr: %u, len: %u)", job.base_addr, job.ax_len);
+        INFO_PRINT ("[AS] (%s) Finish DRAM streaming (addr: %u, len: %u)", 
+                GetFullNameWOClass().c_str(),
+                job.base_addr, job.ax_len);
         
         if(ongoing_task_ != 0)
             ongoing_task_--;

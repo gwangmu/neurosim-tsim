@@ -135,6 +135,7 @@ Propagator::Propagator (string iname, Component *parent,
     prop_idle->Connect ("input4", delay_idle->GetEndpoint (Endpoint::RHS));
 
     ExportPort ("Axon", axon_receiver, "axon_in"); 
+    ExportPort ("Bypass", axon_receiver, "axon_bypass"); 
     ExportPort ("PropTS", axon_classifier, "ts_parity");
     
     ExportPort ("DelayTS", delay_module, "TSParity"); 

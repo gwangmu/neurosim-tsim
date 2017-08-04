@@ -66,6 +66,7 @@ FastDelayMgr::FastDelayMgr (string iname, Component* parent, uint8_t board_idx)
     }
 
     input_n = 0;
+    data_cnt = 0;
 }
 
 void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs, 
@@ -88,6 +89,10 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         INFO_PRINT ("Spike list length: %zu", delayed_spks_.size());
         
         delay_it_ = delayed_spks_.begin();
+        data_cnt += spk_inst->spike_idx.size();
+
+        if(data_cnt > 400000)
+            SIM_FATAL ("[FDM] Delay SRAM is overflowed", GetFullName().c_str());
 
         if(state_ != START)
             SIM_FATAL ("[FDM] Order of state broke", GetFullName().c_str());
@@ -135,9 +140,17 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         // Fetch. Fast-mode support only continuous delay
         if(!fetch_fin_)
         {
-            state_ = FETCH;
-            state_counter_ = 2;            
-            INFO_PRINT ("[FDM] FETCH state (fin: %d)", fetch_fin_);
+            if(GetOutQueSize(PORT_output) < 2)
+            {
+                state_ = FETCH;
+                state_counter_ = 2;            
+                INFO_PRINT ("[FDM] FETCH state (fin: %d)", fetch_fin_);
+            }
+            else
+            {
+                state_ = IDLE;
+                state_counter_ = 0;
+            }
         }
         else if(!is_idle_)
         {
@@ -172,7 +185,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
 
             uint32_t out_idx = (*delay_it_).spikes[spk_idx_];
             // Send Message
-            bool is_boardmsg = (out_idx / num_neurons_) == board_idx_;
+            bool is_boardmsg = (out_idx / neurons_per_board_) == board_idx_;
             uint64_t ax_addr;
             uint16_t ax_len;
 
@@ -180,23 +193,33 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             bool is_inh = (*delay_it_).is_inh;
             if(is_boardmsg) // Intra-spike
             {
-                uint32_t sidx = out_idx % (num_neurons_ / 4);
+                uint32_t sidx = out_idx % (neurons_per_board_ / 4);
                 
                 ax_addr = avg_syns_ * num_delay_ * sidx + 
                             avg_syns_ * (num_delay_ - delay);
                 ax_len = synlen_table[(sidx + delay)%256];
+                int tgt = (num_delay_ == delay)? 1 : -1;
+                
                 if(is_inh)
+                {
+                    tgt = 1;
                     ax_len *= num_delay_;
+                }
             
                 outmsgs[PORT_output] = 
-                    new AxonMessage (0, ax_addr, ax_len);
+                    new AxonMessage (0, ax_addr, ax_len, 0, tgt, is_inh);
+            
+                INFO_PRINT ("[FDM] (%s) Fetch spike %d/%zu (addr: %lu, len %u), delay %d tgt %d",
+                        GetFullNameWOClass().c_str(),
+                        spk_idx_, (*delay_it_).spikes.size(),
+                        ax_addr, ax_len, delay, tgt);
             }
             else // Inter-spike
             {
-                uint32_t bidx = out_idx / num_neurons_;
+                uint32_t bidx = out_idx / neurons_per_board_;
                 bidx = (bidx > board_idx_)? bidx-1 : bidx;
 
-                uint32_t sidx = out_idx % (num_neurons_ / 4);
+                uint32_t sidx = out_idx % (neurons_per_board_ / 4);
                
                 ax_addr = base_addr_ + bidx * board_syns_;
                 ax_addr += avg_syns_ * num_delay_ * sidx + 
@@ -208,6 +231,11 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                         new AxonMessage (0, ax_addr, ax_len);
             }
 
+            INFO_PRINT ("[FDM] (%s) Fetch spike %d/%zu (addr: %lu, len %u)",
+                    GetFullNameWOClass().c_str(),
+                    spk_idx_, (*delay_it_).spikes.size(),
+                    ax_addr, ax_len);
+
             // Advance 
             spk_idx_ += 1;
             if(spk_idx_ == (*delay_it_).spikes.size())
@@ -215,6 +243,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                 (*delay_it_).delay--;
                 if(!(*delay_it_).delay)
                 {
+                    data_cnt -= (*delay_it_).spikes.size();
                     (*delay_it_).spikes.clear();
                     delay_it_ = delayed_spks_.erase (delay_it_);
                 }

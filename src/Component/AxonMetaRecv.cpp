@@ -17,6 +17,8 @@ AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
 {
     IPORT_Axon = CreatePort ("axon_in", Module::PORT_INPUT,
             Prototype<AxonMessage>::Get());
+    IPORT_Bypass = CreatePort ("axon_bypass", Module::PORT_INPUT,
+            Prototype<AxonMessage>::Get());
     OPORT_Axon = CreatePort ("axon_out", Module::PORT_OUTPUT,
             Prototype<AxonMessage>::Get());
     OPORT_delay = CreatePort ("delay_out", Module::PORT_OUTPUT,
@@ -30,21 +32,32 @@ AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
 void AxonMetaRecv::Operation (Message **inmsgs, Message **outmsgs, Instruction *instr)
 {
     AxonMessage *axon_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Axon]);
+    AxonMessage *bypass_msg = static_cast<AxonMessage*>(inmsgs[IPORT_Bypass]);
 
-    if(axon_msg)
+    AxonMessage *msg = nullptr;
+    if(bypass_msg)
+    {
+        msg = bypass_msg;
+        inmsgs[IPORT_Axon] = nullptr;
+    }
+    else if(axon_msg)
+        msg = axon_msg;
+
+   if(msg)
     {
         INFO_PRINT ("[AMR] Receive message (addr %lu, delay %u)", 
-                axon_msg->value, axon_msg->delay);
+                msg->value, msg->delay);
 
-        if(!axon_msg->delay)
+        if(msg->delay == 0)
             outmsgs[OPORT_Axon] = 
-                new AxonMessage (0, axon_msg->value, axon_msg->len, 0, -1,
-                                 axon_msg->is_inh);
+                new AxonMessage (0, msg->value, msg->len, 0, 
+                                 msg->target,
+                                 msg->is_inh);
         else    
             outmsgs[OPORT_delay] = 
-                new AxonMessage (0, axon_msg->value, 
-                                axon_msg->len, axon_msg->delay, -1,
-                                axon_msg->is_inh);
+                new AxonMessage (0, msg->value, 
+                                msg->len, msg->delay, -1,
+                                msg->is_inh);
 
         if (is_idle_)
         {
