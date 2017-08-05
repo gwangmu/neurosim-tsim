@@ -93,9 +93,6 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
 
         if(data_cnt > 400000)
             SIM_FATAL ("[FDM] Delay SRAM is overflowed", GetFullName().c_str());
-
-        if(state_ != START)
-            SIM_FATAL ("[FDM] Order of state broke", GetFullName().c_str());
     }
 
     IntegerMessage *ts_msg = 

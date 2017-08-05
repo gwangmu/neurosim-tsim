@@ -8,10 +8,11 @@
 #include <TSim/Device/AndGate.h>
 
 #include <Component/Accumulator.h>
-#include <Component/SlowCoreTSMgr.h>
+#include <Component/FastCoreTSMgr.h>
 #include <Component/SynDataQueue.h>
 #include <Component/CoreDynUnit.h>
 #include <Component/CoreAccUnit.h>
+#include <Component/DynAccUnit.h>
 #include <Component/FastSynQueue.h>
 
 #include <Component/SimpleDelta.h>
@@ -53,7 +54,7 @@ SlowCore::SlowCore (string iname, Component *parent, int num_propagators,
         new FastSynQueue ("syn_queue", this, num_propagators);
     
     
-    Module *core_tsmgr = new SlowCoreTSMgr ("core_tsmgr", this);
+    Module *core_tsmgr = new FastCoreTSMgr ("core_tsmgr", this);
 
     AndGate *syn_buf = new AndGate ("empty_buf", this, 1);
 
