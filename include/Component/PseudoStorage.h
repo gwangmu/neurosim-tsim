@@ -63,6 +63,7 @@ private:
     bool is_idle_;
     bool clk_parity_;
 
+    uint8_t num_rank_, cur_rank_;
     std::vector<DramMessage*> io_buffer; // For synch I/O clock and DRAM clock
     uint8_t io_counter;
 
