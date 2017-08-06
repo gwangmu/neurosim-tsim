@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 RRFaninWire::RRFaninWire (Component *parent, ConnectionAttr conattr, 

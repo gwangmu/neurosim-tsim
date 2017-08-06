@@ -24,6 +24,7 @@
 #include <fstream>
 
 using namespace std;
+using namespace TSim;
 
 
 bool Testbench::LoadSimulationSpec (string specfilename, PERMIT(Simulator))

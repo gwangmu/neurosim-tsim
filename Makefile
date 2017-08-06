@@ -96,7 +96,7 @@ LIBS:=$(foreach LIB,	\
 
 .PHONY: $(USING_LIBS)
 
-all: $(USING_LIBS) $(OBJSUBDIRS) $(FRAMEWORK) $(BIN)
+all: $(USING_LIBS) $(OBJSUBDIRS) $(BIN)
 
 TSIM:
 	@ $(if $(wildcard $(TSIM_HDRDIR)),,$(error non-existing $(TSIM_HDRDIR)))
@@ -126,5 +126,5 @@ clean:
 	@ $(call print,"done.")
 
 superclean:
-	@ $(MAKE) -C $(TSIM_DIR) clean
+	@ $(MAKE) -C $(TSIM_DIR) superclean
 	@ $(MAKE) clean

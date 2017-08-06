@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Instruction* ExampleFileScript::ParseRawString (string rawstr)

@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Message* AndGate::Logic (Message const * const *inmsgs)

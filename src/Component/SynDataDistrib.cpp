@@ -12,6 +12,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 SynDataDistrib::SynDataDistrib (string iname, Component *parent, 
         uint32_t num_propagator)

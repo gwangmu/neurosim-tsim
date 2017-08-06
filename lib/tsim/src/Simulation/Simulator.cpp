@@ -4,6 +4,7 @@
 #include <TSim/Base/Unit.h>
 #include <TSim/Module/Module.h>
 #include <TSim/Module/PCIeSwitch.h>
+#include <TSim/Module/RouterNetwork.h>
 #include <TSim/Device/Device.h>
 #include <TSim/Device/Gate.h>
 #include <TSim/Register/FileRegister.h>
@@ -21,6 +22,7 @@
 #include <set>
 
 using namespace std;
+using namespace TSim;
 
 // NOTE: CLOCK_PERIOD is written in NS (simspec), calculated in PS (simulation)
 
@@ -81,6 +83,7 @@ bool Simulator::LoadTestbench ()
     vector<Pathway *> pathways;
     uint32_t nmodules = 0;
     uint32_t npswitches = 0;
+    uint32_t nrouternets = 0;
     uint32_t ndevices = 0;
     uint32_t ngates = 0;
     uint32_t npathways = 0;
@@ -118,6 +121,11 @@ bool Simulator::LoadTestbench ()
                         {
                             pswitches.push_back (pswitch);
                             npswitches++;
+                        }
+                        else if (RouterNetwork *routernet = dynamic_cast<RouterNetwork *>(module))
+                        {
+                            routernets.push_back (routernet);
+                            nrouternets++;
                         }
                     }
                     else if (Device *device = dynamic_cast<Device *>(unit))
@@ -675,7 +683,7 @@ bool Simulator::Simulate ()
 
             if (nexttstime <= curtime)
             {
-                INFO_PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
+                PRINT ("Simulating %.3lf ns..", TO_SPEC_TIMEUNIT(curtime));
                 nexttstime += opt.tsinterval;
             }
 
@@ -755,6 +763,7 @@ void Simulator::ReportDesignSummary ()
 
 #define STROKE PRINT ("%s", string(46, '-').c_str())
 #define ROW(f, v) PRINT (" %-29s %14s ", f, v)
+#define ROW_ADDITIONAL(f, v, add) PRINT (" %-29s %14s %s", f, v, add)
 
     STROKE;
     ROW ("Specification", "Value");
@@ -778,7 +787,8 @@ void Simulator::ReportDesignSummary ()
         const char *fieldname = "";
         if (i == 0) fieldname = "Clock frequency (MHz)";
 
-        ROW (fieldname, ("(" + cdom.name + ") " + to_string (freq)).c_str());
+        ROW_ADDITIONAL (fieldname, (to_string (freq)).c_str(),
+                ("(" + cdom.name + ") ").c_str());
     }
 
     uint32_t aggsize = 0;
@@ -797,6 +807,7 @@ void Simulator::ReportDesignSummary ()
 
 #undef STROKE
 #undef ROW
+#undef ROW_ADDITIONAL
 }
 
 void Simulator::ReportSimulationSummary ()
@@ -804,7 +815,8 @@ void Simulator::ReportSimulationSummary ()
     macrotask ("< Simulation summary >");
 
 #define STROKE PRINT ("%s", string(46, '-').c_str())
-#define ROW(f, v) PRINT (" %-29s %14s ", f, v)
+#define ROW(f, v) PRINT (" %-29s %14s", f, v)
+#define ROW_ADDITIONAL(f, v, add) PRINT (" %-33s %10s %s", f, v, add)
         
     double simtime = TO_SPEC_TIMEUNIT(curtime) / 1000000000;
 
@@ -846,7 +858,8 @@ void Simulator::ReportSimulationSummary ()
         const char *fieldname = "";
         if (i == 0) fieldname = "Number of cycles";
 
-        ROW (fieldname, ("(" + cdom.name + ") " + to_string (cdom.ncycles)).c_str());
+        ROW_ADDITIONAL (fieldname, to_string (cdom.ncycles).c_str(),
+                ("(" + cdom.name + ") ").c_str());
     }
     
     for (auto i = 0; i < pswitches.size(); i++)
@@ -855,8 +868,21 @@ void Simulator::ReportSimulationSummary ()
         const char *fieldname = "";
         if (i == 0) fieldname = "PCIe switch traffic (MB/s)";
 
-        ROW (fieldname, ("(" + pswitches[i]->GetInstanceName() + ") " + 
-                    to_string (traffic)).c_str());
+        ROW_ADDITIONAL (fieldname, to_string(traffic).c_str(),
+                       ("(" + pswitches[i]->GetInstanceName() + ") ").c_str()); 
+    }
+
+    for (auto i = 0; i < routernets.size(); i++)
+    {
+        PRINT ("%lf", simtime);
+        bool unknown = routernets[i]->GetNumEdges() == -1;
+        double traffic = (double)routernets[i]->GetAccumTrafficBytes() / 
+            routernets[i]->GetNumEdges () / (1 << 20) / simtime;
+        const char *fieldname = "";
+        if (i == 0) fieldname = "Network traffic per edge (MB/s)";
+
+        ROW_ADDITIONAL (fieldname, (unknown) ? "Unknown" : to_string(traffic).c_str(),
+                       ("(" + routernets[i]->GetInstanceName() + ") ").c_str()); 
     }
 
     STROKE;
@@ -873,6 +899,7 @@ void Simulator::ReportSimulationSummary ()
 
 #undef STROKE
 #undef ROW
+#undef ROW_ADDITIONAL
 }
 
 void Simulator::ReportActivityEvents ()

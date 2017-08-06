@@ -12,6 +12,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 typedef uint64_t State;
 

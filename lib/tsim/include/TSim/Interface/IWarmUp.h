@@ -2,8 +2,11 @@
 
 #include <TSim/Utility/AccessKey.h>
 
-class IWarmUp
+namespace TSim
 {
-public:
-    virtual void WarmUp (PERMIT(Simulator)) = 0;
-};
+    class IWarmUp
+    {
+    public:
+        virtual void WarmUp (PERMIT(Simulator)) = 0;
+    };
+}

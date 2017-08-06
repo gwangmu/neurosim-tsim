@@ -3,11 +3,14 @@
 #include <TSim/Base/IssueCount.h>
 #include <TSim/Utility/AccessKey.h>
 
-class Simulator;
-
-class IValidatable
+namespace TSim
 {
-public:
-    virtual IssueCount Validate (PERMIT(Simulator)) = 0;
-};
+    class Simulator;
+
+    class IValidatable
+    {
+    public:
+        virtual IssueCount Validate (PERMIT(Simulator)) = 0;
+    };
+}
 

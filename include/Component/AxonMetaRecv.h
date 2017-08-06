@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 class AxonMetaRecv: public Module

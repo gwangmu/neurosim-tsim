@@ -10,22 +10,24 @@
 
 using namespace std;
 
-class Component;
-class Message;
-
-
-class Link: public Pathway
+namespace TSim
 {
-public:
-    Link (Component *parent, ConnectionAttr conattr, double link_speed,
-            Message *msgproto);
+    class Component;
+    class Message;
 
-    void ApplyReferenceClockPeriod (uint32_t period);
-    virtual uint32_t GetBitWidth ();
-    virtual uint32_t NextTargetLHSEndpointID ();
-
-private:
-    uint32_t bitwidth;
-    double link_speed;      // NOTE: in GT/s
-    double factor;
-};
+    class Link: public Pathway
+    {
+    public:
+        Link (Component *parent, ConnectionAttr conattr, double link_speed,
+                Message *msgproto);
+    
+        void ApplyReferenceClockPeriod (uint32_t period);
+        virtual uint32_t GetBitWidth ();
+        virtual uint32_t NextTargetLHSEndpointID ();
+    
+    private:
+        uint32_t bitwidth;
+        double link_speed;      // NOTE: in GT/s
+        double factor;
+    };
+}

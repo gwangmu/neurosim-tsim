@@ -6,74 +6,76 @@
 
 using namespace std;
 
-struct RegisterWord;
-class Module;
-
-
-class Register: public Metadata
+namespace TSim
 {
-public:
-    enum Type { FF, SRAM, DRAM };
+    struct RegisterWord;
+    class Module;
 
-    struct Attr
+    class Register: public Metadata
     {
-        Attr (uint32_t wordsize, uint32_t addrsize)
+    public:
+        enum Type { FF, SRAM, DRAM };
+    
+        struct Attr
         {
-            this->wordsize = wordsize;
-            this->addrsize = addrsize;
-        }
-
-        uint32_t wordsize;
-        uint64_t addrsize;
+            Attr (uint32_t wordsize, uint32_t addrsize)
+            {
+                this->wordsize = wordsize;
+                this->addrsize = addrsize;
+            }
+    
+            uint32_t wordsize;
+            uint64_t addrsize;
+        };
+    
+    public:
+        Register (const char *clsname, Type type, Attr attr, RegisterWord *wproto);
+    
+        inline const Type& GetType () { return type; }
+        inline const Attr& GetAttr () { return attr; }
+        inline RegisterWord* GetWordPrototype () { return wproto; }
+    
+        Module* GetParent () { return parent; }
+        void SetParent (Module *module, PERMIT(Module)) { parent = module; }
+        uint64_t GetByteCapacity () { return attr.addrsize * attr.wordsize / 8; }
+        uint32_t GetReadCount () { return rdcount; }
+        uint32_t GetWriteCount () { return wrcount; }
+    
+        /* Called by 'Simulator' */
+        void SetReadEnergy (double rdenergy) { this->rdenergy = rdenergy; }
+        void SetWriteEnergy (double wrenergy) { this->wrenergy = wrenergy; }
+        void SetStaticPower (uint32_t stapower) { this->stapower = stapower; }
+        double GetReadEnergy () { return rdenergy; }
+        double GetWriteEnergy () { return wrenergy; }
+        uint32_t GetStaticPower () { return stapower; }
+    
+        double GetConsumedStaticEnergy ();
+        double GetAccumReadEnergy ();
+        double GetAccumWriteEnergy ();
+    
+        // TODO: need to be optimized
+        virtual const RegisterWord* GetWord (uint64_t addr) = 0;
+        virtual bool SetWord (uint64_t addr, RegisterWord *word) = 0;
+    
+        /* Called by derived 'Register' */
+        void IncrReadCount () { rdcount++; }
+        void IncrWriteCount () { wrcount++; }
+    
+    protected:
+        virtual bool InitWord (uint64_t addr, RegisterWord *word) = 0;
+    
+    private:
+        Module *parent;
+    
+        Type type;
+        Attr attr;
+        RegisterWord *wproto;
+    
+        double rdenergy;
+        double wrenergy;
+        uint32_t stapower;
+        uint32_t rdcount;
+        uint32_t wrcount;
     };
-
-public:
-    Register (const char *clsname, Type type, Attr attr, RegisterWord *wproto);
-
-    inline const Type& GetType () { return type; }
-    inline const Attr& GetAttr () { return attr; }
-    inline RegisterWord* GetWordPrototype () { return wproto; }
-
-    Module* GetParent () { return parent; }
-    void SetParent (Module *module, PERMIT(Module)) { parent = module; }
-    uint64_t GetByteCapacity () { return attr.addrsize * attr.wordsize / 8; }
-    uint32_t GetReadCount () { return rdcount; }
-    uint32_t GetWriteCount () { return wrcount; }
-
-    /* Called by 'Simulator' */
-    void SetReadEnergy (double rdenergy) { this->rdenergy = rdenergy; }
-    void SetWriteEnergy (double wrenergy) { this->wrenergy = wrenergy; }
-    void SetStaticPower (uint32_t stapower) { this->stapower = stapower; }
-    double GetReadEnergy () { return rdenergy; }
-    double GetWriteEnergy () { return wrenergy; }
-    uint32_t GetStaticPower () { return stapower; }
-
-    double GetConsumedStaticEnergy ();
-    double GetAccumReadEnergy ();
-    double GetAccumWriteEnergy ();
-
-    // TODO: need to be optimized
-    virtual const RegisterWord* GetWord (uint64_t addr) = 0;
-    virtual bool SetWord (uint64_t addr, RegisterWord *word) = 0;
-
-    /* Called by derived 'Register' */
-    void IncrReadCount () { rdcount++; }
-    void IncrWriteCount () { wrcount++; }
-
-protected:
-    virtual bool InitWord (uint64_t addr, RegisterWord *word) = 0;
-
-private:
-    Module *parent;
-
-    Type type;
-    Attr attr;
-    RegisterWord *wproto;
-
-    double rdenergy;
-    double wrenergy;
-    uint32_t stapower;
-    uint32_t rdcount;
-    uint32_t wrcount;
-};
+}
 

@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 class InputFeeder: public Module

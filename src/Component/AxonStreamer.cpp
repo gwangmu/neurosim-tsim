@@ -12,6 +12,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size)
     : Module ("AxonStreamer", iname, parent, 1)

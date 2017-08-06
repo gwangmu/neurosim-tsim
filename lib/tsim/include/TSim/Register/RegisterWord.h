@@ -5,9 +5,12 @@
 
 using namespace std;
 
-struct RegisterWord: public Metadata
+namespace TSim
 {
-public:
-    RegisterWord (const char *clsname): Metadata (clsname, "") {}
-};
+    struct RegisterWord: public Metadata
+    {
+    public:
+        RegisterWord (const char *clsname): Metadata (clsname, "") {}
+    };
+}
 

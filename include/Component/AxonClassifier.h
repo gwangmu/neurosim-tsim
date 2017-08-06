@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 class AxonClassifier: public Module

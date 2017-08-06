@@ -11,21 +11,23 @@
 
 using namespace std;
 
-class Message;
-class Component;
-class Simulator;
-
-
-class XorGate: public Gate
+namespace TSim
 {
-public:
-    XorGate (string iname, Component *parent, uint32_t ninput)
-        : Gate ("XorGate", iname, parent, Prototype<IntegerMessage>::Get(), ninput), 
-        cached (false) {}
+    class Message;
+    class Component;
+    class Simulator;
 
-    virtual Message* Logic (Message const * const *inmsgs);
-
-private:
-    IntegerMessage cached_output;
-    bool cached;
-};
+    class XorGate: public Gate
+    {
+    public:
+        XorGate (string iname, Component *parent, uint32_t ninput)
+            : Gate ("XorGate", iname, parent, Prototype<IntegerMessage>::Get(), ninput), 
+            cached (false) {}
+    
+        virtual Message* Logic (Message const * const *inmsgs);
+    
+    private:
+        IntegerMessage cached_output;
+        bool cached;
+    };
+}

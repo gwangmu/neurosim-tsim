@@ -8,17 +8,19 @@
 
 using namespace std;
 
-class Component;
-class Message;
-
-
-class RRFaninWire: public Pathway
+namespace TSim
 {
-public:
-    RRFaninWire (Component *parent, ConnectionAttr conattr, 
-            Message *msgproto, uint32_t n_lhs);
-    virtual uint32_t NextTargetLHSEndpointID ();
+    class Component;
+    class Message;
 
-private:
-    uint32_t cur_lhsid;
-};
+    class RRFaninWire: public Pathway
+    {
+    public:
+        RRFaninWire (Component *parent, ConnectionAttr conattr, 
+                Message *msgproto, uint32_t n_lhs);
+        virtual uint32_t NextTargetLHSEndpointID ();
+    
+    private:
+        uint32_t cur_lhsid;
+    };
+}

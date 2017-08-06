@@ -24,61 +24,63 @@
 
 using namespace std;
 
-class Simulator;
-class Component;
-
-
-class Testbench: public Metadata
+namespace TSim
 {
-public:
-    enum ParamType 
-    { 
-        FILESCRIPT_PATH, 
-        REGISTER_DATAPATH, 
-        CLOCK_PERIOD,
-        UNIT_DYNAMIC_POWER,
-        UNIT_STATIC_POWER,
-        COMPONENT_DIS_POWER,
-        COMPONENT_DYNAMIC_POWER,
-        COMPONENT_STATIC_POWER,
-        REGISTER_READ_ENERGY,
-        REGISTER_WRITE_ENERGY,
-        REGISTER_STATIC_POWER,
-        PARAMETER
+    class Simulator;
+    class Component;
+
+    class Testbench: public Metadata
+    {
+    public:
+        enum ParamType 
+        { 
+            FILESCRIPT_PATH, 
+            REGISTER_DATAPATH, 
+            CLOCK_PERIOD,
+            UNIT_DYNAMIC_POWER,
+            UNIT_STATIC_POWER,
+            COMPONENT_DIS_POWER,
+            COMPONENT_DYNAMIC_POWER,
+            COMPONENT_STATIC_POWER,
+            REGISTER_READ_ENERGY,
+            REGISTER_WRITE_ENERGY,
+            REGISTER_STATIC_POWER,
+            PARAMETER
+        };
+    
+    public:
+        Testbench (const char *clsname, LazyComponentCreatorBase *creator)
+            : Metadata (clsname, ""), creator (creator), TOP_COMPONENT (nullptr) {}
+    
+        /* Called by 'Simulator' */
+        bool LoadSimulationSpec (string specfilename, PERMIT(Simulator));
+        void CreateComponentAndInitialize (PERMIT(Simulator));
+        virtual void Initialize (PERMIT(Simulator)) = 0;
+        virtual Component *const GetTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
+    
+        string GetStringParam (ParamType ptype, string pname);
+        uint32_t GetUIntParam (ParamType ptype, string pname);
+        double GetDoubleParam (ParamType ptype, string pname);
+    
+        virtual bool IsFinished (PERMIT(Simulator)) = 0;
+        virtual void Finalize (PERMIT(Simulator)) = 0;
+        virtual uint16_t GetTimestep (PERMIT(Simulator)) { return -1;}
+    
+    protected:
+        Component *TOP_COMPONENT;
+        LazyComponentCreatorBase *creator;
+    
+        map<string, string> fscrpaths;
+        map<string, string> regpaths;
+        map<string, uint32_t> clkperiods;
+        map<string, uint32_t> moddynpow;
+        map<string, uint32_t> modstapow;
+        map<string, uint32_t> compdispow;
+        map<string, uint32_t> compdynpow;
+        map<string, uint32_t> compstapow;
+        map<string, double> regwrenergy;
+        map<string, double> regrdenergy;
+        map<string, uint32_t> regstapow;
+        map<string, uint32_t> modparams;
     };
-
-public:
-    Testbench (const char *clsname, LazyComponentCreatorBase *creator)
-        : Metadata (clsname, ""), creator (creator), TOP_COMPONENT (nullptr) {}
-
-    /* Called by 'Simulator' */
-    bool LoadSimulationSpec (string specfilename, PERMIT(Simulator));
-    void CreateComponentAndInitialize (PERMIT(Simulator));
-    virtual void Initialize (PERMIT(Simulator)) = 0;
-    virtual Component *const GetTopComponent (PERMIT(Simulator)) { return TOP_COMPONENT; }
-
-    string GetStringParam (ParamType ptype, string pname);
-    uint32_t GetUIntParam (ParamType ptype, string pname);
-    double GetDoubleParam (ParamType ptype, string pname);
-
-    virtual bool IsFinished (PERMIT(Simulator)) = 0;
-    virtual void Finalize (PERMIT(Simulator)) = 0;
-    virtual uint16_t GetTimestep (PERMIT(Simulator)) { return -1;}
-
-protected:
-    Component *TOP_COMPONENT;
-    LazyComponentCreatorBase *creator;
-
-    map<string, string> fscrpaths;
-    map<string, string> regpaths;
-    map<string, uint32_t> clkperiods;
-    map<string, uint32_t> moddynpow;
-    map<string, uint32_t> modstapow;
-    map<string, uint32_t> compdispow;
-    map<string, uint32_t> compdynpow;
-    map<string, uint32_t> compstapow;
-    map<string, double> regwrenergy;
-    map<string, double> regrdenergy;
-    map<string, uint32_t> regstapow;
-    map<string, uint32_t> modparams;
-};
+}

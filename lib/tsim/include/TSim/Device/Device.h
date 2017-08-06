@@ -11,39 +11,41 @@
 
 using namespace std;
 
-class Module;
-class Endpoint;
-class Simulator;
-class Message;
-
-
-class Device: public Unit 
+namespace TSim
 {
-public:
-    static const char *const OUTPORT_NAME;
+    class Module;
+    class Endpoint;
+    class Simulator;
+    class Message;
 
-public:
-    /* Universal */
-    Device (const char* clsname, string iname, Component *parent, Message *msgproto);
-    virtual string GetClock (); 
-    std::set <string> GetClockSet();
-
-    /* Called by 'Simulator' */
-    virtual IssueCount Validate (PERMIT(Simulator));
-    virtual void PreClock (PERMIT(Simulator)) = 0;
-    virtual void PostClock (PERMIT(Simulator)) = 0;
+    class Device: public Unit 
+    {
+    public:
+        static const char *const OUTPORT_NAME;
     
-    /* Called by 'Component' */
-    virtual bool IsValidConnection (Port *port, Endpoint *endpt);
-
-protected:  
-    /* Called by derived 'Module' */
-    virtual void OnCreatePort (Port &newport);
-
-    Message **nextinmsgs;
-    IntegerMessage *nextctrlmsgs;
-
-private:
-    // port management
-    Message* msgproto;
-};
+    public:
+        /* Universal */
+        Device (const char* clsname, string iname, Component *parent, Message *msgproto);
+        virtual string GetClock (); 
+        std::set <string> GetClockSet();
+    
+        /* Called by 'Simulator' */
+        virtual IssueCount Validate (PERMIT(Simulator));
+        virtual void PreClock (PERMIT(Simulator)) = 0;
+        virtual void PostClock (PERMIT(Simulator)) = 0;
+        
+        /* Called by 'Component' */
+        virtual bool IsValidConnection (Port *port, Endpoint *endpt);
+    
+    protected:  
+        /* Called by derived 'Module' */
+        virtual void OnCreatePort (Port &newport);
+    
+        Message **nextinmsgs;
+        IntegerMessage *nextctrlmsgs;
+    
+    private:
+        // port management
+        Message* msgproto;
+    };
+}

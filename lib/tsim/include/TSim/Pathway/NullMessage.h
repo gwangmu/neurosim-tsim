@@ -5,9 +5,12 @@
 
 using namespace std;
 
-struct NullMessage : public Message
+namespace TSim
 {
-public:
-    NullMessage () 
-        : Message ("NullMessage", TOGGLE, -1) {}
-};
+    struct NullMessage : public Message
+    {
+    public:
+        NullMessage () 
+            : Message ("NullMessage", TOGGLE, -1) {}
+    };
+}

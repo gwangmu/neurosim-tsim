@@ -15,6 +15,7 @@
 #include <set>
 
 using namespace std;
+using namespace TSim;
 
 Component::Component (const char *clsname, string name, Component *parent)
     : Metadata (clsname, name)

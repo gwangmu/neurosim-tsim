@@ -9,6 +9,7 @@
 #include <map>
 
 using namespace std;
+using namespace TSim;
 
 
 class DelayFileRegister: public SparseFileRegister

@@ -10,6 +10,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 // NOTE: GUESSING pipeline depth..
 PCIeSwitch::PCIeSwitch (string iname, Component *parent, string clkname, 
@@ -96,7 +97,7 @@ void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs, Instruction *in
             if (likely (pciemsg->DEV_ID < n_ports))
             {
                 DEBUG_PRINT ("forwarded %p to %u (cur_idx: %u)", 
-                        GetName().c_str(), pciemsg, pciemsg->DEV_ID, cur_idx);
+                        pciemsg, pciemsg->DEV_ID, cur_idx);
                 
                 pciemsg->Recycle ();
                 outmsgs[PORT_TX[pciemsg->DEV_ID]] = pciemsg;
@@ -106,7 +107,7 @@ void PCIeSwitch::Operation (Message **inmsgs, Message **outmsgs, Instruction *in
             else if (pciemsg->DEV_ID == -1)
             {
                 DEBUG_PRINT ("forwarded %p to everyone (cur_idx: %u)", 
-                        GetName().c_str(), pciemsg, cur_idx);
+                        pciemsg, cur_idx);
                 
                 for (auto i = 0; i < n_ports; i++)
                 {

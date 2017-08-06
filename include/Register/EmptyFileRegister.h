@@ -9,6 +9,7 @@
 #include <map>
 
 using namespace std;
+using namespace TSim;
 
 
 class EmptyFileRegister: public Register

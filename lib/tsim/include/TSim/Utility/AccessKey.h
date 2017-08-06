@@ -5,15 +5,18 @@
 #define TRANSFER_KEY(x) x##_access_key
 
 #define CREATE_KEY(x)               \
-    class x;                        \
-    class x##AccessKey              \
+    namespace TSim              \
     {                               \
-    public:                         \
-        friend class x;             \
-        x##AccessKey () {}          \
+        class x;                    \
+        class x##AccessKey          \
+        {                           \
+        public:                     \
+            friend class x;         \
+            x##AccessKey () {}      \
+        };                          \
     }
 
-CREATE_KEY(Simulator);
-CREATE_KEY(Pathway);
-CREATE_KEY(Module);
-CREATE_KEY(Component);
+CREATE_KEY(Simulator)
+CREATE_KEY(Pathway)
+CREATE_KEY(Module)
+CREATE_KEY(Component)

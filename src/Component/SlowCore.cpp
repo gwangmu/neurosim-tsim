@@ -32,6 +32,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 USING_TESTBENCH;
 

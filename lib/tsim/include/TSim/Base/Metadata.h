@@ -5,36 +5,39 @@
 
 using namespace std;
 
-class Metadata
+namespace TSim
 {
-public:
-    static inline string SEPARATOR () { return "."; }
-    static inline string SCOPE () { return "::"; }
-
-    Metadata (const char *clsname, string iname)
+    class Metadata
     {
-        if (!clsname)
-            DESIGN_FATAL ("clsname cannot be null", iname.c_str());
-        this->clsname = clsname;
-
-        if (iname.empty ())
-            this->iname = "(noname)";
-        else
+    public:
+        static inline string SEPARATOR () { return "."; }
+        static inline string SCOPE () { return "::"; }
+    
+        Metadata (const char *clsname, string iname)
         {
-            if (iname.find(SEPARATOR()) != string::npos)
-                DESIGN_FATAL ("instance name cannot contain '%s'",
-                        (string (clsname) + " " + iname).c_str(), SEPARATOR().c_str());
-            this->iname = iname;
+            if (!clsname)
+                DESIGN_FATAL ("clsname cannot be null", iname.c_str());
+            this->clsname = clsname;
+    
+            if (iname.empty ())
+                this->iname = "(noname)";
+            else
+            {
+                if (iname.find(SEPARATOR()) != string::npos)
+                    DESIGN_FATAL ("instance name cannot contain '%s'",
+                            (string (clsname) + " " + iname).c_str(), SEPARATOR().c_str());
+                this->iname = iname;
+            }
         }
-    }
-
-    virtual string GetInstanceName () { return iname; }
-    const char* GetClassName () { return clsname; }
-    string GetName () { return string(clsname) + " " + GetInstanceName(); }
-
-    virtual string GetSummary () { return ""; }
-
-private:
-    const char* clsname;
-    string iname;
-};
+    
+        virtual string GetInstanceName () { return iname; }
+        const char* GetClassName () { return clsname; }
+        string GetName () { return string(clsname) + " " + GetInstanceName(); }
+    
+        virtual string GetSummary () { return ""; }
+    
+    private:
+        const char* clsname;
+        string iname;
+    };
+}

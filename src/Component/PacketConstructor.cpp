@@ -13,6 +13,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 PacketConstructor::PacketConstructor (string iname, Component *parent)
     : Module ("PacketConstructor", iname, parent, 1)

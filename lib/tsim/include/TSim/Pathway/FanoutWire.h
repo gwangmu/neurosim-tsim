@@ -8,14 +8,16 @@
 
 using namespace std;
 
-class Component;
-class Message;
-
-
-class FanoutWire: public Pathway
+namespace TSim
 {
-public:
-    FanoutWire (Component *parent, ConnectionAttr conattr, 
-            Message *msgproto, uint32_t n_rhs);
-    virtual uint32_t NextTargetLHSEndpointID ();
-};
+    class Component;
+    class Message;
+
+    class FanoutWire: public Pathway
+    {
+    public:
+        FanoutWire (Component *parent, ConnectionAttr conattr, 
+                Message *msgproto, uint32_t n_rhs);
+        virtual uint32_t NextTargetLHSEndpointID ();
+    };
+}

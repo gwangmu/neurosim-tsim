@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 struct DramMessage: public Message
 {

@@ -11,6 +11,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
     : Module ("AxonMetaRecv", iname, parent, 1)

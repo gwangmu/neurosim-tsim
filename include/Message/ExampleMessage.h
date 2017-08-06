@@ -11,6 +11,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 struct ExampleMessage: public Message

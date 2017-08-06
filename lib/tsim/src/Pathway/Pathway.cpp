@@ -9,6 +9,7 @@
 #include <TSim/Utility/StaticBranchPred.h>
 
 using namespace std;
+using namespace TSim;
 
 
 Pathway::Connection::Connection (Pathway *parent)

@@ -11,6 +11,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Mux::Mux (string iname, Component *parent, Message *msgproto, uint32_t ninput)

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+TMPFILENAME="$1.tmp"
+rm -f $TMPFILENAME
+touch $TMPFILENAME
+
+IFS='%'
+TAB1=0
+TAB2=0
+while read -r LINE; do
+    if [[ -z "$LINE" ]]; then
+        LINE=""
+    fi
+
+    if [[ $TAB1 == 1 && $TAB2 == 1 ]]; then
+        LINE="    $LINE"
+    fi
+
+    if [[ $(awk '/namespace NeuroSim/ {print $1}' <<< $LINE) ]]; then
+        TAB1=1
+    fi
+
+    if [[ $TAB1 && $(awk '/{/ {print $1}' <<< $LINE) ]]; then
+        TAB2=1
+    fi
+
+    if [[ $(awk '/^    };/ {print $1}' <<< $LINE) ]]; then
+        TAB1=0
+        TAB2=0
+    fi
+
+    echo "$LINE" >> $TMPFILENAME
+done < "$1"
+
+mv $TMPFILENAME $1

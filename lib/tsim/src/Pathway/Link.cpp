@@ -9,6 +9,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Link::Link (Component *parent, ConnectionAttr conattr, double link_speed,

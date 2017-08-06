@@ -9,6 +9,7 @@
 #include <list>
 
 using namespace std;
+using namespace TSim;
 
 class Accumulator: public Module
 {

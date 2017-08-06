@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Wire::Wire (Component *parent, ConnectionAttr conattr, Message *msgproto)

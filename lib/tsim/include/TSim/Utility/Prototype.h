@@ -1,19 +1,22 @@
 #pragma once
 
-template <typename T>
-class Prototype
+namespace TSim
 {
-public:
-    static T* Get ()
+    template <typename T>
+    class Prototype
     {
-        if (proto == nullptr)
-            proto = new T();
-        return proto;
-    }
+    public:
+        static T* Get ()
+        {
+            if (proto == nullptr)
+                proto = new T();
+            return proto;
+        }
+    
+    private:
+        static T *proto;
+    };
 
-private:
-    static T *proto;
-};
-
-template <typename T>
-T* Prototype<T>::proto = nullptr;
+    template <typename T>
+    T* Prototype<T>::proto = nullptr;
+}

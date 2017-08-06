@@ -7,6 +7,7 @@
 #include <list>
 
 using namespace std;
+using namespace TSim;
 
 struct SpikeInstruction: public Instruction
 {

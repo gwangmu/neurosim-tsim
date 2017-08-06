@@ -16,6 +16,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 AxonClassifier::AxonClassifier (string iname, Component *parent)
     : Module ("AxonClassifier", iname, parent, 1)

@@ -8,13 +8,15 @@
 
 using namespace std;
 
-class Component;
-class Message;
-
-
-class Wire: public Pathway
+namespace TSim
 {
-public:
-    Wire (Component *parent, ConnectionAttr conattr, Message *msgproto);
-    virtual uint32_t NextTargetLHSEndpointID ();
-};
+    class Component;
+    class Message;
+
+    class Wire: public Pathway
+    {
+    public:
+        Wire (Component *parent, ConnectionAttr conattr, Message *msgproto);
+        virtual uint32_t NextTargetLHSEndpointID ();
+    };
+}

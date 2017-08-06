@@ -16,6 +16,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 NeuronBlock::NeuronBlock (string iname, Component *parent, uint32_t depth)
     : Module ("NeuronBlockModule", iname, parent, depth)

@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Message* XorGate::Logic (Message const * const *inmsgs)

@@ -7,10 +7,13 @@
 #include <map>
 
 using namespace std;
+using namespace TSim;
 
-struct RegisterWord;
-class Simulator;
-
+namespace NeuroSim
+{
+    struct RegisterWord;
+    class Simulator;
+}
 
 SparseFileRegister::SparseFileRegister (const char *clsname, Type type, 
         Attr attr, RegisterWord *wproto)

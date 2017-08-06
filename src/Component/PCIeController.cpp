@@ -16,6 +16,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 PCIeController::PCIeController (string iname, Component *parent)
     : Module ("PCIeController", iname, parent, 1)

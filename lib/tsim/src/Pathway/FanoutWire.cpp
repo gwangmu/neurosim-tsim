@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 FanoutWire::FanoutWire (Component *parent, ConnectionAttr conattr, 

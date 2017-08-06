@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 //class ExampleTestbench;
 class NeuroSimTestbench;

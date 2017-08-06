@@ -2,14 +2,17 @@
 
 #include <TSim/Base/IssueCount.h>
 
-class IssueCounter
+namespace TSim
 {
-public:
-    void CheckError () { icount.error++; }
-    void CheckWarning () { icount.warning++; }
-
-    IssueCount GetIssueCount () { return icount; }
-
-private:
-    IssueCount icount;
-};
+    class IssueCounter
+    {
+    public:
+        void CheckError () { icount.error++; }
+        void CheckWarning () { icount.warning++; }
+    
+        IssueCount GetIssueCount () { return icount; }
+    
+    private:
+        IssueCount icount;
+    };
+}

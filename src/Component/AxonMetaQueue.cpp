@@ -14,6 +14,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 AxonMetaQueue::AxonMetaQueue (string iname, Component *parent)
     : Module ("AxonMetaQueue", iname, parent, 1)

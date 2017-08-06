@@ -4,6 +4,7 @@
 #include <string>
 
 using namespace std;
+using namespace TSim;
 
 struct DramRegisterWord: public RegisterWord
 {

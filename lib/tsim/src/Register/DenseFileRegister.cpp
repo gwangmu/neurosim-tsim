@@ -8,9 +8,13 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
-struct RegisterWord;
-class Simulator;
+namespace NeuroSim
+{
+    struct RegisterWord;
+    class Simulator;
+}
 
 
 DenseFileRegister::DenseFileRegister (const char *clsname, Type type, 

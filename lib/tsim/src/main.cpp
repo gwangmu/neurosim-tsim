@@ -6,6 +6,7 @@
 #include <map>
 
 using namespace std;
+using namespace TSim;
 
 extern Testbench *simtb;
 

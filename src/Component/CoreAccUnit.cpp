@@ -16,6 +16,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 // SynDataQueue(1) -> Acc -> DG read -> Accum --> DG write
 const uint16_t acc_depth = 3; 

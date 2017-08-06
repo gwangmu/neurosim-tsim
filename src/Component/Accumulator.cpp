@@ -16,6 +16,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 Accumulator::Accumulator (string iname, Component *parent)
     : Module ("AccumulatorModule", iname, parent, 1)

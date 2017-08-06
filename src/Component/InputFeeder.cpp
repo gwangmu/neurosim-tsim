@@ -15,6 +15,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace TSim;
 
 USING_TESTBENCH;
 

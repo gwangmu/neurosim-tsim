@@ -1,19 +1,22 @@
 #pragma once
 
-class Component;
-
-class LazyComponentCreatorBase
+namespace TSim
 {
-public:
-    virtual Component* Create () = 0;
-};
+    class Component;
 
-template <typename COMP_TYPE>
-class LazyComponentCreator: public LazyComponentCreatorBase
-{
-public:
-    virtual Component* Create () 
-    { 
-        return new COMP_TYPE ("top", nullptr); 
-    }
-};
+    class LazyComponentCreatorBase
+    {
+    public:
+        virtual Component* Create () = 0;
+    };
+
+    template <typename COMP_TYPE>
+    class LazyComponentCreator: public LazyComponentCreatorBase
+    {
+    public:
+        virtual Component* Create () 
+        { 
+            return new COMP_TYPE ("top", nullptr); 
+        }
+    };
+}

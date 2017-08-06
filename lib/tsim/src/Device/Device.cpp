@@ -18,6 +18,7 @@
 #include <set>
 
 using namespace std;
+using namespace TSim;
 
 
 const char *const Device::OUTPORT_NAME = "output";

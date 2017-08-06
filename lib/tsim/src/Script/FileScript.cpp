@@ -10,6 +10,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 FileScript::FileScript (const char *clsname, Instruction *iproto):

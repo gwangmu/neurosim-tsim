@@ -10,6 +10,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Instruction* SpikeFileScript::ParseRawString (string rawstr)

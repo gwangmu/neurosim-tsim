@@ -14,6 +14,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 NBController::NBController (string iname, Component *parent, uint32_t max_index) 
     : Module ("NBController", iname, parent, 1)

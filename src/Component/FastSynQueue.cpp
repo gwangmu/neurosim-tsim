@@ -15,6 +15,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 FastSynQueue::FastSynQueue (
         string iname, Component *parent, uint32_t num_propagators)

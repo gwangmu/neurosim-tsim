@@ -11,6 +11,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 TSManager::TSManager (string iname, Component *parent, uint32_t num_boards)
     : Module ("TSManager", iname, parent, 1)

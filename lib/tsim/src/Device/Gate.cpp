@@ -9,6 +9,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 Gate::Gate (const char *clsname, string iname, Component *parent, 

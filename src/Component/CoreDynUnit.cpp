@@ -20,6 +20,7 @@
 #include <random>
 
 using namespace std;
+using namespace TSim;
 
 USING_TESTBENCH;
 

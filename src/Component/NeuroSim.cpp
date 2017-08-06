@@ -29,6 +29,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 USING_TESTBENCH;
 
@@ -246,8 +247,8 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
         }
     }
 
-    ExportPort ("PCIeTxExport", controller, "PCIeTxExport");
-    ExportPort ("PCIeRxImport", controller, "PCIeRxImport");
+    ExportPort ("TxExport", controller, "TxExport");
+    ExportPort ("RxImport", controller, "RxImport");
 }
 
 

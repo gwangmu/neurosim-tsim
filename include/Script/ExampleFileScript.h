@@ -9,6 +9,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 class ExampleFileScript: public FileScript

@@ -14,6 +14,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 SynDataQueue::SynDataQueue (string iname, Component *parent, 
         uint32_t max_queue_size)

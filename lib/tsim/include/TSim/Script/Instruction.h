@@ -5,9 +5,12 @@
 
 using namespace std;
 
-struct Instruction: public Metadata
+namespace TSim
 {
-public:
-    Instruction (const char *clsname): Metadata (clsname, "") {}
-};
+    struct Instruction: public Metadata
+    {
+    public:
+        Instruction (const char *clsname): Metadata (clsname, "") {}
+    };
+}
 

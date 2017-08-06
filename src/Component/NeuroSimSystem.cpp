@@ -3,7 +3,7 @@
 #include <TSim/Pathway/Link.h>
 #include <TSim/Simulation/Testbench.h>
 #include <TSim/Utility/Prototype.h>
-#include <TSim/Module/PCIeSwitch.h>
+#include <TSim/Module/RouterNetwork.h>
 
 #include <Component/NeuroSim.h>
 #include <Component/TimestepReporter.h>
@@ -14,6 +14,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 USING_TESTBENCH;
 
@@ -33,8 +34,8 @@ NeuroSimSystem::NeuroSimSystem (string iname, Component *parent)
     // NOTE: this TimestepReporter is only for simulation progress checking.
     tsrep = new TimestepReporter ("tsrep", this, num_boards);
 
-    Component *pswitch = new PCIeSwitch ("pswitch", this, "pcie",
-            Prototype<PacketMessage>::Get(), num_boards + 1, 64, 64);
+    Component *routernet = new RouterNetwork ("routernet", this, "pcie",
+            Prototype<PacketMessage>::Get(), "torus", 64, num_boards + 1);
 
     /** Pathways & Connections **/
     Pathway::ConnectionAttr conattr (0, 12);
@@ -43,23 +44,23 @@ NeuroSimSystem::NeuroSimSystem (string iname, Component *parent)
     {
         Link *m2s_link = new Link (this, conattr, 5, 
                 Prototype<PacketMessage>::Get());
-        neurosims[i]->Connect ("PCIeTxExport", 
+        neurosims[i]->Connect ("TxExport", 
                 m2s_link->GetEndpoint (Endpoint::LHS));
-        pswitch->Connect ("rx" + to_string(i), 
+        routernet->Connect ("rx" + to_string(i), 
                 m2s_link->GetEndpoint (Endpoint::RHS));
 
         Link *s2m_link = new Link (this, conattr, 5, 
                 Prototype<PacketMessage>::Get());
-        pswitch->Connect ("tx" + to_string(i), 
+        routernet->Connect ("tx" + to_string(i), 
                 s2m_link->GetEndpoint (Endpoint::LHS));
-        neurosims[i]->Connect ("PCIeRxImport", 
+        neurosims[i]->Connect ("RxImport", 
                 s2m_link->GetEndpoint (Endpoint::RHS));
     }
 
     Link *s2m_link = new Link (this, conattr, 5, Prototype<PacketMessage>::Get());
-    pswitch->Connect ("tx" + to_string(num_boards), 
+    routernet->Connect ("tx" + to_string(num_boards), 
             s2m_link->GetEndpoint (Endpoint::LHS));
     tsrep->Connect ("remote_tsend", s2m_link->GetEndpoint (Endpoint::RHS));
     
-    pswitch->Connect ("rx" + to_string(num_boards), Endpoint::PORTCAP());
+    routernet->Connect ("rx" + to_string(num_boards), Endpoint::PORTCAP());
 }

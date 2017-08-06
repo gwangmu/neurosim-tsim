@@ -12,130 +12,134 @@
 
 using namespace std;
 
-class Testbench;
-class Component;
-class Module;
-class Device;
-class Pathway;
-class FileScript;
-class FileRegister;
-class PCIeSwitch;
-
-
-class Simulator final
+namespace TSim
 {
-public:
-    struct Option
+    class Testbench;
+    class Component;
+    class Module;
+    class Device;
+    class Pathway;
+    class FileScript;
+    class FileRegister;
+    class PCIeSwitch;
+    class RouterNetwork;
+
+    class Simulator final
     {
-        Option () {}
-
-        uint64_t timelimit = -1;
-        uint64_t tsinterval = -1;
-        bool printpath = false;
-        string gvfilename = "";
-        string logfilename = "";
-    };
-
-protected:
-    struct ClockDomain
-    {
-        ClockDomain ();
-
-        // Clock properties
-        string name;
-        uint32_t period;    // unit: nanoseconds
-
-        // Configuration
-        vector<Module *> modules;
-        vector<Device *> devices;
-        vector<Pathway *> pathways;
-
-        // Clock functions (in execution order)
-        // HAVE FUN WITH FUNCTION POINTERS! XD
-        class Clocker
+    public:
+        struct Option
         {
-        public:
-            template <
-                typename T,
-                typename = typename std::enable_if<
-                    std::is_base_of<Metadata, T>::value &&
-                    std::is_base_of<IClockable, T>::value
-                >::type
-            >
-            Clocker (T *cls, IClockable::ClockFunction clkfn)
-                : iclk (dynamic_cast<IClockable *>(cls)),
-                meta (dynamic_cast<Metadata *>(cls)), clkfn (clkfn) {}
-
-            // TODO: optimizable?
-            inline void Invoke (PERMIT(Simulator)) 
-            { 
-                // NOTE: fnpt -> branch
-                if (clkfn == &IClockable::PreClock)
-                    iclk->PreClock (TRANSFER_KEY(Simulator));
-                else if (clkfn == &IClockable::PostClock)
-                    iclk->PostClock (TRANSFER_KEY(Simulator));
-
-                //(iclk->*clkfn) (TRANSFER_KEY(Simulator)); 
-            }
-            
-            inline string GetTagString ()
-            { 
-                string fntype = "";
-                if (clkfn == &IClockable::PreClock)
-                    fntype = "PreClock";
-                else if (clkfn == &IClockable::PostClock)
-                    fntype = "PostClock";
-                else
-                    SYSTEM_ERROR ("unknown clock function");
-
-                return (meta ? meta->GetName() + "." + fntype : "");
-            }
-
-        private:
-            IClockable *iclk;
-            Metadata *meta;
-            IClockable::ClockFunction clkfn;
-        };            
-        vector<Clocker> clockers;
-
-        // Simulation states
-        uint64_t nexttime;
-        uint64_t ncycles;
-    };
-
-public:
-    Simulator (string specfilename, Option opt = Option());
-
-    bool AttachTestbench (Testbench *tb);
-    bool Simulate ();
+            Option () {}
     
-    bool PrintGraphVizSource (string filename);
-    void ReportDesignSummary ();
-    void ReportSimulationSummary ();
-    void ReportActivityEvents ();
-
-private:
-    void ReportClockFunctionSchedule (ClockDomain &cdom);
-    void ReportComponentRec (Component *comp, uint32_t level);
-
-    // 'AttachTestbench' subfunctions
-    bool LoadTestbench ();
-    bool ValidateTestbench ();
-
-    // Simulator setting
-    Option opt;
-
-    // Loaded design
-    string specfilename;
-    Testbench *tb;
-    vector<ClockDomain> cdomains;
-    vector<FileScript *> fscrs;
-    vector<FileRegister *> regs;
-    vector<PCIeSwitch *> pswitches;
-
-    // Simulation states
-    uint64_t curtime;
-    double runtime;
-};
+            uint64_t timelimit = -1;
+            uint64_t tsinterval = -1;
+            bool printpath = false;
+            string gvfilename = "";
+            string logfilename = "";
+        };
+    
+    protected:
+        struct ClockDomain
+        {
+            ClockDomain ();
+    
+            // Clock properties
+            string name;
+            uint32_t period;    // unit: nanoseconds
+    
+            // Configuration
+            vector<Module *> modules;
+            vector<Device *> devices;
+            vector<Pathway *> pathways;
+    
+            // Clock functions (in execution order)
+            // HAVE FUN WITH FUNCTION POINTERS! XD
+            class Clocker
+            {
+            public:
+                template <
+                    typename T,
+                    typename = typename std::enable_if<
+                        std::is_base_of<Metadata, T>::value &&
+                        std::is_base_of<IClockable, T>::value
+                    >::type
+                >
+                Clocker (T *cls, IClockable::ClockFunction clkfn)
+                    : iclk (dynamic_cast<IClockable *>(cls)),
+                    meta (dynamic_cast<Metadata *>(cls)), clkfn (clkfn) {}
+    
+                // TODO: optimizable?
+                inline void Invoke (PERMIT(Simulator)) 
+                { 
+                    // NOTE: fnpt -> branch
+                    if (clkfn == &IClockable::PreClock)
+                        iclk->PreClock (TRANSFER_KEY(Simulator));
+                    else if (clkfn == &IClockable::PostClock)
+                        iclk->PostClock (TRANSFER_KEY(Simulator));
+    
+                    //(iclk->*clkfn) (TRANSFER_KEY(Simulator)); 
+                }
+                
+                inline string GetTagString ()
+                { 
+                    string fntype = "";
+                    if (clkfn == &IClockable::PreClock)
+                        fntype = "PreClock";
+                    else if (clkfn == &IClockable::PostClock)
+                        fntype = "PostClock";
+                    else
+                        SYSTEM_ERROR ("unknown clock function");
+    
+                    return (meta ? meta->GetName() + "." + fntype : "");
+                }
+    
+            private:
+                IClockable *iclk;
+                Metadata *meta;
+                IClockable::ClockFunction clkfn;
+            };            
+            vector<Clocker> clockers;
+    
+            // Simulation states
+            uint64_t nexttime;
+            uint64_t ncycles;
+        };
+    
+    public:
+        Simulator (string specfilename, Option opt = Option());
+    
+        bool AttachTestbench (Testbench *tb);
+        bool Simulate ();
+        
+        bool PrintGraphVizSource (string filename);
+        void ReportDesignSummary ();
+        void ReportSimulationSummary ();
+        void ReportActivityEvents ();
+    
+    private:
+        void ReportClockFunctionSchedule (ClockDomain &cdom);
+        void ReportComponentRec (Component *comp, uint32_t level);
+    
+        // 'AttachTestbench' subfunctions
+        bool LoadTestbench ();
+        bool ValidateTestbench ();
+    
+        // Simulator setting
+        Option opt;
+    
+        // Loaded design
+        string specfilename;
+        Testbench *tb;
+        vector<ClockDomain> cdomains;
+        vector<FileScript *> fscrs;
+        vector<FileRegister *> regs;
+        vector<PCIeSwitch *> pswitches;
+        vector<RouterNetwork *> routernets;
+    
+        // Simulation states
+        uint64_t curtime;
+        double runtime;
+    };
+}
 
 

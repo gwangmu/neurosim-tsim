@@ -16,6 +16,7 @@
 #include <queue>
 
 using namespace std;
+using namespace TSim;
 
 
 Endpoint *Endpoint::_PORTCAP = nullptr;

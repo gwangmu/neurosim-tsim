@@ -1,0 +1,3 @@
+Loading 'NeuroSimTestbench (noname)'..
+(NeuroSimTestbench (noname)) error: cannot open simulation spec file 'workloads/realworld//neurosim/simspec/neurosim.simspec'
+(NeuroSimTestbench (noname)) fatal: (src/Simulation/Simulator.cpp, line 71) cannot load simulation spec 'workloads/realworld//neurosim/simspec/neurosim.simspec'

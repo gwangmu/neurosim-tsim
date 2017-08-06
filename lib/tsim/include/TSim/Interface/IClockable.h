@@ -2,11 +2,14 @@
 
 #include <TSim/Utility/AccessKey.h>
 
-class IClockable
+namespace TSim
 {
-public:
-    typedef void (IClockable::*ClockFunction) (PERMIT(Simulator));
-
-    virtual void PreClock (PERMIT(Simulator)) = 0;
-    virtual void PostClock (PERMIT(Simulator)) = 0;
-};
+    class IClockable
+    {
+    public:
+        typedef void (IClockable::*ClockFunction) (PERMIT(Simulator));
+    
+        virtual void PreClock (PERMIT(Simulator)) = 0;
+        virtual void PostClock (PERMIT(Simulator)) = 0;
+    };
+}

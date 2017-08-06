@@ -17,6 +17,7 @@
 #include <vector>
 
 using namespace std;
+using namespace TSim;
 
 
 template <class M, class T>
