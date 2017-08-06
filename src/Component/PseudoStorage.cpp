@@ -54,7 +54,10 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 
     this->remote_base_ = GET_PARAMETER (base_addr);
     this->avg_syns_ = GET_PARAMETER (avg_synapses);
-    board_syns_ = avg_syns_ * num_delay_ * (neurons_per_board_ / 4);
+
+    num_propagators_ = GET_PARAMETER (num_propagators);
+    board_syns_ = avg_syns_ * num_delay_ * 
+                  (neurons_per_board_ / num_propagators_);
 
     this->board_idx_ = board_idx;
 
@@ -356,7 +359,7 @@ void PseudoStorage::callback (uint32_t reqID, uint32_t addr)
             uint32_t bidx = destrhsid;
             bidx = (bidx > board_idx_)? bidx-1 : bidx;
            
-            uint32_t sidx = (addr + i) % (neurons_per_board_/4);
+            uint32_t sidx = (addr + i) % (neurons_per_board_/num_propagators_);
 
             val32 = remote_base_ + (bidx) *board_syns_; // AxAddr
             val32 += avg_syns_ * sidx; 

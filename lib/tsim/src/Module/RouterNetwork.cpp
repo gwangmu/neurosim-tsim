@@ -125,23 +125,34 @@ void RouterNetwork::Operation (Message **inmsgs, Message **outmsgs, Instruction 
     bool has_pending_msgs = false;
     bool has_full_outque = false;
     bool outque_ready[MAX_NETSIZE];
+
+    uint16_t remain_outque[MAX_NETSIZE];
+    uint16_t min_remain_outque = -1;
+
     for (uint32_t x = 0; x < netsize; x++)
     {
         if (!msgqueue[x].empty())
             has_pending_msgs = true;
-
-        if (msgqueue[x].size() + GetOutQueSize(PORT_TX[x]) ==
-                GetOutQueCapacity(PORT_TX[x]))
-        {
-            has_full_outque = true;
-            outque_ready[x] = false;
-        }
-        else
-            outque_ready[x] = true;
         
         if (unlikely (msgqueue[x].size() + GetOutQueSize(PORT_TX[x]) >
                 GetOutQueCapacity(PORT_TX[x])))
-            SYSTEM_ERROR ("router output queue exploded");
+            SYSTEM_ERROR ("router output queue exploded %d /%d ",
+                           msgqueue[x].size(),
+                           msgqueue[x].size() + GetOutQueSize(PORT_TX[x]));
+
+        remain_outque[x] = GetOutQueCapacity(PORT_TX[x]) -
+                             (msgqueue[x].size() + GetOutQueSize(PORT_TX[x]));
+        if(remain_outque[x] < min_remain_outque)
+            min_remain_outque = remain_outque[x];
+        
+        //if (msgqueue[x].size() + GetOutQueSize(PORT_TX[x]) >= 
+        //        GetOutQueCapacity(PORT_TX[x]))
+        //{
+        //    has_full_outque = true;
+        //    outque_ready[x] = false;
+        //}
+        //else
+        //    outque_ready[x] = true;
     }
 
     for (uint32_t x = 0; x < netsize; x++)
@@ -154,8 +165,8 @@ void RouterNetwork::Operation (Message **inmsgs, Message **outmsgs, Instruction 
             uint32_t xdst = inmsg_casted->DST_ID0;
             bool is_broadcast = (xdst == -1);
 
-            if ((is_broadcast && !has_full_outque) ||
-                    (!is_broadcast && outque_ready[xdst]))
+            if ((is_broadcast && (min_remain_outque > 0)) ||
+                    (!is_broadcast && (remain_outque[xdst] > 0)))
             {
                 if (is_broadcast)
                 {
@@ -165,15 +176,22 @@ void RouterNetwork::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                             RemoteMessage *msgclone = inmsg_casted->Clone();
                             msgclone->Recycle();
                             msgqueue[xx].push (msgclone);
+                            remain_outque[xx] -= 1;
                             
                             BookSim_GeneratePacket (x, xx, msgclone->BIT_WIDTH / FLIT_SIZE);
                         }
+
+                    min_remain_outque -= 1;
                 }
                 else
                 {
                     inmsg_casted->Recycle();
                     msgqueue[xdst].push (inmsg_casted);
-                    
+                
+                    remain_outque[xdst] -= 1;
+                    if(remain_outque[xdst] < min_remain_outque)
+                        min_remain_outque = remain_outque[xdst];
+
                     BookSim_GeneratePacket (x, xdst, inmsg_casted->BIT_WIDTH / FLIT_SIZE);
                 }
             }

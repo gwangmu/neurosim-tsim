@@ -25,7 +25,8 @@ NeuroSimSystem::NeuroSimSystem (string iname, Component *parent)
 
     /** Parameters **/
     const int num_boards = GET_PARAMETER (num_boards);
-
+    const int router_outque_size = 64;
+        
     /** Components **/
     vector<Component *> neurosims;
     for (uint32_t i = 0; i < num_boards; i++)
@@ -55,6 +56,8 @@ NeuroSimSystem::NeuroSimSystem (string iname, Component *parent)
                 s2m_link->GetEndpoint (Endpoint::LHS));
         neurosims[i]->Connect ("RxImport", 
                 s2m_link->GetEndpoint (Endpoint::RHS));
+        s2m_link->GetEndpoint (Endpoint::LHS)->SetCapacity(router_outque_size);
+        s2m_link->GetEndpoint (Endpoint::RHS)->SetCapacity(router_outque_size);
     }
 
     Link *s2m_link = new Link (this, conattr, 5, Prototype<PacketMessage>::Get());

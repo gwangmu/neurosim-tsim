@@ -5,4 +5,4 @@ DIR=$(find workloads/microbench -name "$ID*")
 DIR=${DIR##*/}
 TIMESTEP=$(awk '/max_timestep/ {print $2}' workloads/microbench/$DIR/neurosim/simspec/neurosim.simspec)
 
-./neurosim-tsim workloads/microbench/$DIR/neurosim/simspec/neurosim.simspec -o ${DIR}_${TIMESTEP}ts.rep
+./neurosim-tsim workloads/microbench/$DIR/neurosim/simspec/neurosim.simspec > reports/${DIR}_${TIMESTEP}ts.rep

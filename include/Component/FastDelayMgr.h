@@ -29,7 +29,7 @@ private:
     uint8_t num_delay_, min_delay_;
     uint8_t board_idx_;
     uint64_t base_addr_, board_syns_;
-    uint32_t num_neurons_, neurons_per_board_, avg_syns_;
+    uint32_t num_neurons_, neurons_per_board_, neurons_per_prop_, avg_syns_;
     uint32_t inh_neurons_;
 
     struct DelayedSpk

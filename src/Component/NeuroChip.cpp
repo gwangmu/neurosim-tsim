@@ -14,6 +14,7 @@
 
 #include <Component/NeuroCore.h>
 #include <Component/FastCore.h>
+#include <Component/SlowCore.h>
 #include <Component/SynDataDistrib.h>
 #include <Component/AxonTransmitter.h>
 

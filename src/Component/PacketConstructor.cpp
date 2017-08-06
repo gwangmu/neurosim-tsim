@@ -36,25 +36,23 @@ void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs,
     AxonMessage *axon_msg = static_cast <AxonMessage*> (inmsgs[IPORT_Axon]);
     SelectMessage *sel_msg = static_cast <SelectMessage*> (inmsgs[IPORT_boardID]);
 
-    if(end_msg)
+    if(axon_msg && sel_msg)
     {
-        if(unlikely(axon_msg || sel_msg))
-            SIM_ERROR ("It sends end message before finishing", 
-                    GetFullName().c_str());
-
+        INFO_PRINT ("[PkC] Send packet to %d", sel_msg->value);  
+        outmsgs[OPORT_Packet] = new PacketMessage (PacketMessage::AXON,
+                sel_msg->value, axon_msg->value, axon_msg->len/*, axon_msg->delay*/);
+        // FIXME: should insert axon_msg->delay
+        //
+        inmsgs[IPORT_TSEnd] = nullptr;
+    }
+    else if(end_msg)
+    {
         INFO_PRINT ("[PkC] Broadcast end message");
         outmsgs[OPORT_Packet] = new PacketMessage (PacketMessage::TSEND);
 
         // NOTE: unpop not-yet-processed axon metadata
         inmsgs[IPORT_Axon] = nullptr;
         inmsgs[IPORT_boardID] = nullptr;
-    }
-    else if(axon_msg && sel_msg)
-    {
-        INFO_PRINT ("[PkC] Send packet to %d", sel_msg->value);  
-        outmsgs[OPORT_Packet] = new PacketMessage (PacketMessage::AXON,
-                sel_msg->value, axon_msg->value, axon_msg->len/*, axon_msg->delay*/);
-        // FIXME: should insert axon_msg->delay
     }
     else if(unlikely(axon_msg || sel_msg))
     {

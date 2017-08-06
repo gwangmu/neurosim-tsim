@@ -87,7 +87,7 @@ private:
     uint8_t board_idx_;
 
     // NeuroSim specification
-    uint8_t num_chips_, num_cores_, num_boards_;
+    uint8_t num_chips_, num_cores_, num_boards_, num_propagators_;
     uint32_t num_neurons_, neurons_per_board_;
 
     // Internal function

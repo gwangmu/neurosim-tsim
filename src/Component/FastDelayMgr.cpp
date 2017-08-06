@@ -40,10 +40,13 @@ FastDelayMgr::FastDelayMgr (string iname, Component* parent, uint8_t board_idx)
     this->num_neurons_ = GET_PARAMETER (num_neurons);
     this->neurons_per_board_ = num_neurons_ / num_boards;
 
+    uint8_t num_propagators = GET_PARAMETER (num_propagators)
+    this->neurons_per_prop_ = neurons_per_board_ / num_propagators;
+
     this->base_addr_ = GET_PARAMETER (base_addr);
 
     this->avg_syns_ = GET_PARAMETER (avg_synapses);
-    board_syns_ = avg_syns_ * num_delay_ * (neurons_per_board_ / 4);
+    board_syns_ = avg_syns_ * num_delay_ * (neurons_per_prop_);
    
     SetScript (new SpikeFileScript());
 
@@ -190,7 +193,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
             bool is_inh = (*delay_it_).is_inh;
             if(is_boardmsg) // Intra-spike
             {
-                uint32_t sidx = out_idx % (neurons_per_board_ / 4);
+                uint32_t sidx = out_idx % (neurons_per_prop_);
                 
                 ax_addr = avg_syns_ * num_delay_ * sidx + 
                             avg_syns_ * (num_delay_ - delay);
@@ -216,7 +219,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                 uint32_t bidx = out_idx / neurons_per_board_;
                 bidx = (bidx > board_idx_)? bidx-1 : bidx;
 
-                uint32_t sidx = out_idx % (neurons_per_board_ / 4);
+                uint32_t sidx = out_idx % (neurons_per_prop_);
                
                 ax_addr = base_addr_ + bidx * board_syns_;
                 ax_addr += avg_syns_ * num_delay_ * sidx + 
