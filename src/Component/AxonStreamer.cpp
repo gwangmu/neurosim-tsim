@@ -28,7 +28,7 @@ AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size
     read_bytes = io_buf_size; 
 
     // Parameter
-    num_streamer_ = 4;
+    num_streamer_ = 1;
 
     for (int i=0; i<num_streamer_; i++)
     {

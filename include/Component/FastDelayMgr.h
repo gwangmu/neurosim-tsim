@@ -45,7 +45,7 @@ private:
     std::list<DelayedSpk> delayed_spks_;
     std::list<DelayedSpk>::iterator delay_it_;
     uint16_t spk_idx_;
-    bool fetch_fin_, is_idle_;
+    bool fetch_fin_, is_idle_, is_start_;
 
     enum State {IDLE, PROMOTE, RETRIEVE, INSERT, FETCH, START};
     State state_;

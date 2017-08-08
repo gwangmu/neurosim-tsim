@@ -5,6 +5,7 @@
 #include <Message/SignalMessage.h>
 #include <Message/IndexMessage.h>
 
+#include <Register/EmptyRegister.h>
 #include <Script/SpikeFileScript.h>
 #include <Script/SpikeInstruction.h>
 
@@ -49,9 +50,12 @@ FastDelayMgr::FastDelayMgr (string iname, Component* parent, uint8_t board_idx)
     board_syns_ = avg_syns_ * num_delay_ * (neurons_per_prop_);
    
     SetScript (new SpikeFileScript());
+    Register::Attr regattr (64, 4096);
+    SetRegister (new EmptyRegister (Register::SRAM, regattr));
 
     state_ = IDLE;
     is_idle_ = false;
+    is_start_ = false;
     fetch_fin_ = true;
     ts_parity_ = false;
 
@@ -90,8 +94,12 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         delayed_spks_.back().is_inh = spk_inst->is_inh;
     
         INFO_PRINT ("Spike list length: %zu", delayed_spks_.size());
-        
-        delay_it_ = delayed_spks_.begin();
+       
+        if(!is_start_)
+        { 
+            delay_it_ = delayed_spks_.begin();
+            is_start_ = true;
+        }
         data_cnt += spk_inst->spike_idx.size();
 
         if(data_cnt > 400000)
@@ -117,6 +125,8 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
 
             state_ = START;
             state_counter_ = 3;
+
+            is_start_ = false;
         }
     }
 
@@ -235,6 +245,7 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
                     GetFullNameWOClass().c_str(),
                     spk_idx_, (*delay_it_).spikes.size(),
                     ax_addr, ax_len);
+            GetRegister()->GetWord(0);
 
             // Advance 
             spk_idx_ += 1;

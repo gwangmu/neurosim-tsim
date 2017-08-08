@@ -65,6 +65,7 @@ Controller::Controller (string iname, Component *parent, uint32_t num_board)
     ts_mgr->Connect ("remote_tsend", remote_tsend->GetEndpoint (Endpoint::RHS));
 
     ExportPort ("DynFin", ts_mgr, "dynfin");
+    ExportPort ("AccIdle", ts_mgr, "accidle");
     ExportPort ("Idle", ts_mgr, "idle");
     ExportPort ("TSParity", ts_mgr, "ts_parity");
     

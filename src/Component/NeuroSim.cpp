@@ -67,6 +67,7 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
     /** Modules **/
     AndGate *idle_and = new AndGate ("idle_and", this, num_propagators);
     AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_chips + 1);
+    AndGate *accidle_and = new AndGate ("accidle_and", this, num_chips);
 
     Module *input_feeder;
     input_feeder = new InputFeeder ("input_feeder", this, num_propagators);
@@ -121,11 +122,17 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
                                     Prototype<IntegerMessage>::Get());
 
     std::vector<Wire*> chip_dynfin;
+    std::vector<Wire*> chip_accidle;
     for (int i=0; i<num_chips; i++)
+    {
         chip_dynfin.push_back (new Wire (this, conattr, 
                                          Prototype<IntegerMessage>::Get()));
+        chip_accidle.push_back (new Wire (this, conattr, 
+                                         Prototype<IntegerMessage>::Get()));
+    }
 
     Wire *dynfin = new Wire (this, conattr, Prototype<IntegerMessage>::Get()); 
+    Wire *accidle = new Wire (this, conattr, Prototype<IntegerMessage>::Get()); 
     Wire *input_idle = 
             new Wire (this, conattr, Prototype<IntegerMessage>::Get()); 
 
@@ -146,16 +153,23 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
                                 chip_dynfin[i]->GetEndpoint (Endpoint::LHS));
         dynfin_and->Connect ("input" + to_string(i+1), 
                              chip_dynfin[i]->GetEndpoint (Endpoint::RHS));
+        
+        neurochips[i]->Connect ("AccIdle", 
+                chip_accidle[i]->GetEndpoint (Endpoint::LHS));
+        accidle_and->Connect ("input" + to_string(i), 
+                             chip_accidle[i]->GetEndpoint (Endpoint::RHS));
     }
 
     idle_and->Connect ("output", prop_idle_and->GetEndpoint (Endpoint::LHS));
     dynfin_and->Connect ("output", dynfin->GetEndpoint (Endpoint::LHS));
+    accidle_and->Connect ("output", accidle->GetEndpoint (Endpoint::LHS));
 
     controller->Connect ("TSParity", cur_TSParity->GetEndpoint (Endpoint::LHS));
     controller->Connect ("AxonIn", board_axon->GetEndpoint (Endpoint::RHS));
     controller->Connect ("BoardID", board_id->GetEndpoint (Endpoint::RHS));
     controller->Connect ("Idle", prop_idle_and->GetEndpoint (Endpoint::RHS));
     controller->Connect ("DynFin", dynfin->GetEndpoint (Endpoint::RHS));   
+    controller->Connect ("AccIdle", accidle->GetEndpoint (Endpoint::RHS));   
 
     // Input Feeder
     input_feeder->Connect ("ts_parity", 

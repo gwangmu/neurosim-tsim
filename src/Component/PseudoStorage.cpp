@@ -69,7 +69,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     dram_state_.resize(reqID_range);
     
     reqID_table_.clear();
-    num_streamer_ = 4;
+    num_streamer_ = 1;
     for (int i=0; i<num_streamer_; i++) // 4: # of streamer
         reqID_table_.push_back(0);
 
@@ -136,6 +136,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 void PseudoStorage::PrintStats ()
 {
     dram_->finish();
+    PRINT ("total outbytes: %lu", outbytes);
     //statlist_.printall();
     //Stats::statlist.printall();
     return;
@@ -284,6 +285,7 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
         if(io_buffer[idx] != nullptr)
         {
             outmsgs[PORT_data] = io_buffer[idx];
+            outbytes += 8;      //gwangmu
             
             INFO_PRINT ("[DRAM] Send dram data to %u/%u/%u", 
                     io_buffer[idx]->dest_idx, 

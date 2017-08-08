@@ -59,6 +59,7 @@ private:
     uint32_t PORT_idle;
 
     // Internal State
+    uint64_t outbytes;      //gwangmu
     uint32_t entry_cnt;
     bool is_idle_;
     bool clk_parity_;

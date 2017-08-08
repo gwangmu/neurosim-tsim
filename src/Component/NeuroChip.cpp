@@ -65,6 +65,7 @@ NeuroChip::NeuroChip (string iname, Component *parent,
     Module *syn_distributor = 
             new SynDataDistrib ("syn_distributor", this, num_propagators);
     AndGate *dynfin_and = new AndGate ("dynfin_and", this, num_cores + 1);
+    AndGate *accidle_and = new AndGate ("accidle_and", this, num_cores);
     AndGate *ts_buf = new AndGate ("ts_buf", this, 1);
 
     /** Wires **/
@@ -73,10 +74,16 @@ NeuroChip::NeuroChip (string iname, Component *parent,
 
     // Wires
     std::vector<Wire*> core_DynFin;
+    std::vector<Wire*> core_AccIdle;
     for (int i =0; i<num_cores; i++)
+    {
         core_DynFin.push_back (
                 new Wire (this, conattr, 
                           Prototype<IntegerMessage>::Get()));
+        core_AccIdle.push_back (
+                new Wire (this, conattr, 
+                          Prototype<IntegerMessage>::Get()));
+    }
     Wire* transmitter_idle = 
         new Wire (this, conattr, Prototype<IntegerMessage>::Get());
 
@@ -116,6 +123,10 @@ NeuroChip::NeuroChip (string iname, Component *parent,
                             core_DynFin[i]->GetEndpoint (Endpoint::LHS));
         dynfin_and->Connect ("input" + to_string(i), 
                             core_DynFin[i]->GetEndpoint (Endpoint::RHS));
+        cores[i]->Connect ("AccIdle", 
+                            core_AccIdle[i]->GetEndpoint (Endpoint::LHS));
+        accidle_and->Connect ("input" + to_string(i), 
+                            core_AccIdle[i]->GetEndpoint (Endpoint::RHS));
 
         cores[i]->Connect ("CurTSParity", 
                             cur_tsparity->GetEndpoint(Endpoint::RHS, i));
@@ -160,5 +171,6 @@ NeuroChip::NeuroChip (string iname, Component *parent,
     }
 
     ExportPort ("DynFin", dynfin_and, "output");
+    ExportPort ("AccIdle", accidle_and, "output");
 }
 

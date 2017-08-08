@@ -22,6 +22,8 @@ FastCoreTSMgr::FastCoreTSMgr (string iname, Component* parent)
             Prototype<SignalMessage>::Get());
     PORT_DynFin = CreatePort ("DynFin", Module::PORT_OUTPUT,
             Prototype<IntegerMessage>::Get());
+    PORT_Accidle = CreatePort ("AccIdle", Module::PORT_OUTPUT,
+            Prototype<IntegerMessage>::Get());
 
     dyn_end_ = true;
     acc_idle_ = true;
@@ -63,8 +65,11 @@ void FastCoreTSMgr::Operation (Message **inmsgs, Message **outmsgs, Instruction 
     if(idle_msg)
     {
         if(idle_msg->value != acc_idle_)
+        {
             INFO_PRINT ("[CoTS] Accumulator is end? %d", idle_msg->value);
-        acc_idle_ = idle_msg->value;
+            acc_idle_ = idle_msg->value;
+            outmsgs[PORT_Accidle] = new IntegerMessage (acc_idle_);
+        }
     }
     if(empty_msg)
     {
