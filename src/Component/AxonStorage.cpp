@@ -91,7 +91,8 @@ void AxonStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction *i
         {
             uint32_t read_addr = raddr_msg->value;
 
-            if(((entry_cnt + io_buf_size_ + /**outque_size*/ GetOutQueSize(PORT_data)) > outque_size_) || (!send(read_addr)))
+            if(((entry_cnt + io_buf_size_ + GetOutQueSize(PORT_data) + 1) > 
+                        outque_size_) || (!send(read_addr)))
             {
                 INFO_PRINT("[DRAM] DRAM is full (entry %d/ outque %u)", entry_cnt, /**outque_size*/ GetOutQueSize(PORT_data)); 
                 inmsgs[PORT_addr] = nullptr;

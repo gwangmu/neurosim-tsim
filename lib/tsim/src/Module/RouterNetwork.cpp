@@ -42,8 +42,8 @@ RouterNetwork::RouterNetwork (string iname, Component *parent, string clock,
         PORT_TX[i] = CreatePort ("tx" + to_string(i), Module::PORT_OUTPUT, msgproto);
     }
 
-    for (uint32_t x = 0; x < netsize; x++)
-        arrived_msgs[x] = nullptr;
+    //for (uint32_t x = 0; x < netsize; x++)
+    //    arrived_msgs[x] = nullptr;
 
     traffic_size_bits = 0;
 
@@ -79,6 +79,7 @@ RouterNetwork::RouterNetwork (string iname, Component *parent, string clock,
     configfile << "write_request_end_vc = 0" << ";" << endl;
     configfile << "write_reply_begin_vc = 0" << ";" << endl;
     configfile << "write_reply_end_vc = 0" << ";" << endl;
+    configfile << "output_buffer_size = 128" << ";" << endl;
 
     configfile << "traffic = uniform" << ";" << endl;
     configfile << "injection_rate = 0.15" << ";" << endl;
@@ -131,17 +132,19 @@ void RouterNetwork::Operation (Message **inmsgs, Message **outmsgs, Instruction 
 
     for (uint32_t x = 0; x < netsize; x++)
     {
+        uint32_t flight_msg = msgqueue[x].size() + 
+                              arrived_msg_queue[x].size() + 
+                              GetOutQueSize(PORT_TX[x]) + 1;
+
         if (!msgqueue[x].empty())
             has_pending_msgs = true;
         
-        if (unlikely (msgqueue[x].size() + GetOutQueSize(PORT_TX[x]) >
-                GetOutQueCapacity(PORT_TX[x])))
+        if (unlikely (flight_msg > GetOutQueCapacity(PORT_TX[x])))
             SYSTEM_ERROR ("router output queue exploded %d /%d ",
                            msgqueue[x].size(),
                            msgqueue[x].size() + GetOutQueSize(PORT_TX[x]));
 
-        remain_outque[x] = GetOutQueCapacity(PORT_TX[x]) -
-                             (msgqueue[x].size() + GetOutQueSize(PORT_TX[x]));
+        remain_outque[x] = GetOutQueCapacity(PORT_TX[x]) - flight_msg;
         if(remain_outque[x] < min_remain_outque)
             min_remain_outque = remain_outque[x];
         
@@ -216,8 +219,12 @@ void RouterNetwork::Operation (Message **inmsgs, Message **outmsgs, Instruction 
     {
         for (uint32_t x = 0; x < netsize; x++)
         {
-            outmsgs[PORT_TX[x]] = arrived_msgs[x];
-            arrived_msgs[x] = nullptr;
+            if(!arrived_msg_queue[x].empty())
+            {
+                outmsgs[PORT_TX[x]] = arrived_msg_queue[x].front();
+                arrived_msg_queue[x].pop();
+            }
+            //arrived_msgs[x] = nullptr;
         }
 
         msg_arrived = false;
@@ -229,7 +236,7 @@ void RouterNetwork::PacketArrivalCallback (uint32_t id, uint32_t latency,
 {
     RemoteMessage *msg = msgqueue[dstid].front();
     msgqueue[dstid].pop();
-    arrived_msgs[dstid] = msg;
+    arrived_msg_queue[dstid].push(msg); //= msg;
 
     traffic_size_bits += msg->BIT_WIDTH;
     msg_arrived = true;

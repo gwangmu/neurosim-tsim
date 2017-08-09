@@ -14,9 +14,12 @@
 using namespace std;
 using namespace TSim;
 
-AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size)
+AxonStreamer::AxonStreamer (string iname, Component *parent, 
+        uint8_t io_buf_size)
     : Module ("AxonStreamer", iname, parent, 1)
 {
+    SetClock ("dram");
+
     IPORT_Axon = CreatePort ("axon_in", Module::PORT_INPUT,
             Prototype<AxonMessage>::Get());
     OPORT_Addr = CreatePort ("addr_out", Module::PORT_OUTPUT,
@@ -28,7 +31,7 @@ AxonStreamer::AxonStreamer (string iname, Component *parent, uint8_t io_buf_size
     read_bytes = io_buf_size; 
 
     // Parameter
-    num_streamer_ = 1;
+    num_streamer_ = 4;
 
     for (int i=0; i<num_streamer_; i++)
     {

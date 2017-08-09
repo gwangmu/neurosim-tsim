@@ -16,6 +16,8 @@ using namespace TSim;
 AxonMetaRecv::AxonMetaRecv (string iname, Component *parent)
     : Module ("AxonMetaRecv", iname, parent, 1)
 {
+    //SetClock ("dram");
+    
     IPORT_Axon = CreatePort ("axon_in", Module::PORT_INPUT,
             Prototype<AxonMessage>::Get());
     IPORT_Bypass = CreatePort ("axon_bypass", Module::PORT_INPUT,

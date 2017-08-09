@@ -3,6 +3,8 @@
 #include <TSim/Utility/Prototype.h>
 #include <TSim/Utility/Logging.h>
 
+#include <Register/EmptyRegister.h>
+
 #include <Message/AxonMessage.h>
 #include <Message/SignalMessage.h>
 #include <Message/SelectMessage.h>
@@ -27,6 +29,9 @@ PacketConstructor::PacketConstructor (string iname, Component *parent)
 
     OPORT_Packet = CreatePort ("packet", Module::PORT_OUTPUT,
             Prototype<PacketMessage>::Get());
+    
+    Register::Attr regattr (64, 10);
+    SetRegister (new EmptyRegister (Register::SRAM, regattr));
 }
 
 void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs, 
@@ -44,10 +49,13 @@ void PacketConstructor::Operation (Message **inmsgs, Message **outmsgs,
         // FIXME: should insert axon_msg->delay
         //
         inmsgs[IPORT_TSEnd] = nullptr;
+        
+        GetRegister()->GetWord(0); // Only for check # of packets
     }
     else if(end_msg)
     {
-        INFO_PRINT ("[PkC] Broadcast end message");
+        INFO_PRINT ("[PkC] %s Broadcast end message", 
+                GetFullNameWOClass().c_str());
         outmsgs[OPORT_Packet] = new PacketMessage (PacketMessage::TSEND);
 
         // NOTE: unpop not-yet-processed axon metadata

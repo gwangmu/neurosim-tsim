@@ -38,10 +38,12 @@ Propagator::Propagator (string iname, Component *parent,
     /** Parameters **/
     int dram_size = 4096;
     int dram_io_buf_size = 8;
-    int dram_outque_size = 64 * dram_io_buf_size;
+    int dram_outque_size = 64 * dram_io_buf_size + 1;
 
     int delay_storage_size = 2048;
     int delay_input_queue_sz = 256;
+
+    int streamer_inque_size = 64;
 
     int fast = GET_PARAMETER (fast);
 
@@ -104,6 +106,8 @@ Propagator::Propagator (string iname, Component *parent,
     /** Connect **/
     axon_receiver->Connect ("axon_out", axon_data->GetEndpoint (Endpoint::LHS));
     axon_streamer->Connect ("axon_in", axon_data->GetEndpoint (Endpoint::RHS)); 
+    axon_data->GetEndpoint (Endpoint::RHS)
+             ->SetCapacity (streamer_inque_size);
 
     axon_streamer->Connect ("addr_out", dram_addr->GetEndpoint (Endpoint::LHS));
     axon_storage->Connect ("r_addr", dram_addr->GetEndpoint (Endpoint::RHS));

@@ -83,7 +83,9 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         static_cast<SpikeInstruction*> (instr);
     if (spk_inst && num_delay_ != 0)
     {
-        if(spk_inst->is_inh)
+        if(spk_inst->type == SpikeInstruction::SpikeType::INH)
+            delayed_spks_.push_back (DelayedSpk(1));
+        else if(spk_inst->type == SpikeInstruction::SpikeType::DELAYED)
             delayed_spks_.push_back (DelayedSpk(1));
         else      
             delayed_spks_.push_back (DelayedSpk(num_delay_));
@@ -91,7 +93,8 @@ void FastDelayMgr::Operation (Message **inmsgs, Message **outmsgs,
         delayed_spks_.back().spikes.assign 
             (spk_inst->spike_idx.begin(),
              spk_inst->spike_idx.end());
-        delayed_spks_.back().is_inh = spk_inst->is_inh;
+        delayed_spks_.back().is_inh = 
+            (spk_inst->type == SpikeInstruction::SpikeType::INH);
     
         INFO_PRINT ("Spike list length: %zu", delayed_spks_.size());
        

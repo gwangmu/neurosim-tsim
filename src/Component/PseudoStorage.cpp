@@ -69,7 +69,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     dram_state_.resize(reqID_range);
     
     reqID_table_.clear();
-    num_streamer_ = 1;
+    num_streamer_ = 4;
     for (int i=0; i<num_streamer_; i++) // 4: # of streamer
         reqID_table_.push_back(0);
 
@@ -91,6 +91,7 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     /** Ramulator Spec **/ 
     ramulator::DDR4::Org org = ramulator::DDR4::Org::DDR4_4Gb_x8;
     ramulator::DDR4::Speed speed = ramulator::DDR4::Speed::DDR4_2400R;
+    //ramulator::DDR4::Speed speed = ramulator::DDR4::Speed::DDR3_2133M;
 
     dram_spec_ = new DDR4 (org, speed);
     
@@ -117,8 +118,9 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
     Register::Attr regattr (64, dram_size_);
     //SetRegister (new DramFileRegister (Register::SRAM, regattr));
     SetRegister (new EmptyRegister (Register::SRAM, regattr));
-    
-    //Stats::statlist.output("result/DRAM"+to_string(idx)+".stats");
+   
+    if(board_idx == 0 && prop_idx == 0) 
+        Stats::statlist.output("reports/DRAM.stats");
     
     // Pseudo-random table
     uint32_t n = GET_PARAMETER(num_samples);
@@ -136,9 +138,8 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 void PseudoStorage::PrintStats ()
 {
     dram_->finish();
-    PRINT ("total outbytes: %lu", outbytes);
-    //statlist_.printall();
-    //Stats::statlist.printall();
+    INFO_PRINT ("total outbytes: %lu", outbytes);
+    Stats::statlist.printall();
     return;
 }
 
@@ -227,7 +228,9 @@ void PseudoStorage::Operation (Message **inmsgs, Message **outmsgs, Instruction 
                 off_ofs = 0;
 
                 if(raddr_msg->off_ofs)
-                    off_ofs = num_boards_ = 1;
+                {
+                    off_ofs = num_boards_ - 1;
+                }
 
                 synmeta = SynMeta (tag, read_addr, off_ofs, 
                                   on_ofs, next_len);

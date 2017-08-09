@@ -44,7 +44,7 @@ namespace TSim
     
         // state
         uint32_t nedges;
-        RemoteMessage *arrived_msgs[MAX_NETSIZE];
+        std::queue<RemoteMessage *> arrived_msg_queue[MAX_NETSIZE];
         bool msg_arrived;
         uint64_t traffic_size_bits;
     

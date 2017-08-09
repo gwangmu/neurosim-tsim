@@ -51,17 +51,19 @@ void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs,
 
         if (type == PacketMessage::TSEND)
         {
-            INFO_PRINT ("[PkD] Receive remote TS end message");
+            INFO_PRINT ("[PkD] %s Receive remote TS end message",
+                    GetFullNameWOClass().c_str());
             outmsgs[OPORT_TSEnd] = new SignalMessage (0, 1);
         }
         else if (type == PacketMessage::AXON)
         {
             int target_idx = rand() % num_propagators_;
 
-            INFO_PRINT ("[PkD] Receive Axon message");
+            INFO_PRINT ("[PkD] %s Receive Axon message",
+                    GetFullNameWOClass().c_str());
 
             if(GetOutQueSize(OPORT_Axons[target_idx]) > 
-                    0.7 * GetOutQueCapacity(OPORT_Axons[target_idx]))
+                    0.5 * GetOutQueCapacity(OPORT_Axons[target_idx]))
             {
                 outmsgs[OPORT_Bypass[target_idx]] = 
                     new AxonMessage (0, pkt_msg->addr,

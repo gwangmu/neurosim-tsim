@@ -120,6 +120,7 @@ SlowCore::SlowCore (string iname, Component *parent, int num_propagators,
     ExportPort ("AxonData", dyn_acc_unit, "axon");
     ExportPort ("CurTSParity", core_tsmgr, "curTS");
     ExportPort ("DynFin", core_tsmgr, "DynFin");
+    ExportPort ("AccIdle", core_tsmgr, "AccIdle");
     
     for(int i=0; i<num_propagators; i++)
     {

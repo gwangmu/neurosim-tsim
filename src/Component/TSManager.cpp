@@ -107,7 +107,8 @@ void TSManager::Operation (Message **inmsgs, Message **outmsgs, Instruction *ins
             return;
         }
         
-        INFO_PRINT ("[TSM] Get remote TS end signal");
+        INFO_PRINT ("[TSM] %s Get remote TS end signal",
+                GetFullNameWOClass().c_str());
     }
 
     if (is_finish && is_start && !is_end)
