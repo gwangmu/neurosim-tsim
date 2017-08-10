@@ -149,7 +149,7 @@ void DynAccUnit::Operation (Message **inmsgs, Message **outmsgs,
     pipe_state_ = (pipe_state_ << 1) & pipe_mask_;
     spike_state_ = (spike_state_ << 1) & spike_mask_;
     acc_state_ = (acc_state_ << 1) & acc_mask_;
-    
+   
     /* Weight Accumulation */
     SynapseMessage *syn_msg = static_cast<SynapseMessage*>(inmsgs[PORT_syn]);
     if(syn_msg && !(pipe_state_ || spike_state_))
@@ -158,6 +158,7 @@ void DynAccUnit::Operation (Message **inmsgs, Message **outmsgs,
                 syn_msg->idx);
         if(sent_accfin_)
         {
+            INFO_PRINT ("[Acc] %s Acc start", GetFullNameWOClass().c_str());
             outmsgs[PORT_accfin] = new SignalMessage (0, false);
             sent_accfin_ = false;
         }
@@ -172,13 +173,14 @@ void DynAccUnit::Operation (Message **inmsgs, Message **outmsgs,
     {
         if(!sent_accfin_ && (acc_state_ == 0))
         {
+            INFO_PRINT ("[Acc] %s Acc finish", GetFullNameWOClass().c_str());
             outmsgs[PORT_accfin] = new SignalMessage (0, true);
             sent_accfin_ = true;
         }
     }
     
     /* Dynamics Operation */
-    if ((idx_counter_ != num_neurons_) && (!syn_msg))
+    if ((idx_counter_ != num_neurons_) && (!syn_msg) && (!acc_state_))
     {
         if(dyn_counter_)
         {
@@ -186,8 +188,8 @@ void DynAccUnit::Operation (Message **inmsgs, Message **outmsgs,
         }
         else
         {
-            //INFO_PRINT ("[DYN] Initiate %d/%d neuron dynamics", 
-            //        idx_counter_, num_neurons_);
+            INFO_PRINT ("[DYN] Initiate %d/%d neuron dynamics %p", 
+                    idx_counter_, num_neurons_, syn_msg);
 
             // Check spike
             bool is_spike =

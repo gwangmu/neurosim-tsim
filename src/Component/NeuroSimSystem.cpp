@@ -25,7 +25,7 @@ NeuroSimSystem::NeuroSimSystem (string iname, Component *parent)
 
     /** Parameters **/
     const int num_boards = GET_PARAMETER (num_boards);
-    const int router_outque_size = 64;
+    const int router_outque_size = 256;
         
     /** Components **/
     vector<Component *> neurosims;

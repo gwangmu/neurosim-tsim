@@ -207,7 +207,7 @@ void RouterNetwork::Operation (Message **inmsgs, Message **outmsgs, Instruction 
     }
 
     // NOTE: clock Mhz * 8 (250MHz->2000Mhz)
-    for (uint32_t i = 0; i < 8; i++)
+    for (uint32_t i = 0; i < 1; i++)
     {
         if (has_pending_msgs)
             BookSim_Advance();

@@ -77,8 +77,8 @@ PseudoStorage::PseudoStorage (string iname, Component* parent,
 
     /* Initialize DRAM (ramulator */
     string config_path;
-    // config_path = "lib/ramulator/configs/DDR4_" + 
-    //                      to_string(prop_idx) + "-config.cfg";
+    //config_path = "lib/ramulator/configs/DDR4_" + 
+    //                     to_string(prop_idx) + "-config.cfg";
     config_path = "lib/ramulator/configs/DDR4-config.cfg"; 
 
     ramulator::Config configs(config_path);
@@ -323,7 +323,7 @@ bool PseudoStorage::send (uint8_t reqID, uint64_t addr)
     {
         INFO_PRINT ("[DRAM] Response to request (ID: %u, addr: %lx)", 
                 reqID, addr);
-        GetRegister()->GetWord(addr);
+        GetRegister()->GetWord(0);
         return true;
     }
     else

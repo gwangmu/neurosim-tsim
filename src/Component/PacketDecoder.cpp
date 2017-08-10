@@ -63,7 +63,7 @@ void PacketDecoder::Operation (Message **inmsgs, Message **outmsgs,
                     GetFullNameWOClass().c_str());
 
             if(GetOutQueSize(OPORT_Axons[target_idx]) > 
-                    0.5 * GetOutQueCapacity(OPORT_Axons[target_idx]))
+                    0.3 * GetOutQueCapacity(OPORT_Axons[target_idx]))
             {
                 outmsgs[OPORT_Bypass[target_idx]] = 
                     new AxonMessage (0, pkt_msg->addr,

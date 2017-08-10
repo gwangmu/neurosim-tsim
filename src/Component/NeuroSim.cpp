@@ -244,7 +244,7 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
             ->SetCapacity (decoder_queue_size);
         bypass_data[i]
             ->GetEndpoint (Endpoint::RHS)
-            ->SetCapacity (decoder_queue_size/2);
+            ->SetCapacity (decoder_queue_size);
 
         for (int c=0; c<num_chips; c++)
         {
@@ -257,6 +257,13 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
             neurochips[c]->Connect 
                     ("SynCidx" + to_string(i), 
                     syn_cidx[i]->GetEndpoint (Endpoint::RHS, c));
+
+            syn_data[i]->GetEndpoint(Endpoint::RHS, c)
+                       ->SetCapacity(2);
+            syn_parity[i]->GetEndpoint(Endpoint::RHS, c)
+                       ->SetCapacity(2);
+            syn_cidx[i]->GetEndpoint(Endpoint::RHS, c)
+                       ->SetCapacity(2);
 
         }
     }
