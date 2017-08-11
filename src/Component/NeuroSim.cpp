@@ -48,7 +48,7 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
     const int num_cores = GET_PARAMETER (num_cores);
 
     const int axon_entry_queue_size = 64;
-    const int decoder_queue_size = 256;
+    const int decoder_queue_size = 1048576;
 
     /** Components **/
     std::vector<Component*> neurochips;
@@ -165,11 +165,16 @@ NeuroSim::NeuroSim (string iname, Component *parent, int board_idx)
     accidle_and->Connect ("output", accidle->GetEndpoint (Endpoint::LHS));
 
     controller->Connect ("TSParity", cur_TSParity->GetEndpoint (Endpoint::LHS));
-    controller->Connect ("AxonIn", board_axon->GetEndpoint (Endpoint::RHS));
-    controller->Connect ("BoardID", board_id->GetEndpoint (Endpoint::RHS));
     controller->Connect ("Idle", prop_idle_and->GetEndpoint (Endpoint::RHS));
     controller->Connect ("DynFin", dynfin->GetEndpoint (Endpoint::RHS));   
     controller->Connect ("AccIdle", accidle->GetEndpoint (Endpoint::RHS));   
+    
+    controller->Connect ("AxonIn", board_axon->GetEndpoint (Endpoint::RHS));
+    controller->Connect ("BoardID", board_id->GetEndpoint (Endpoint::RHS));
+    board_axon->GetEndpoint (Endpoint::RHS)
+              ->SetCapacity (decoder_queue_size);
+    board_id->GetEndpoint (Endpoint::RHS)
+              ->SetCapacity (decoder_queue_size);
 
     // Input Feeder
     input_feeder->Connect ("ts_parity", 
