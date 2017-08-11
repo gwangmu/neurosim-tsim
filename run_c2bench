@@ -1,0 +1,8 @@
+#!/bin/bash
+
+ID=$1
+DIR=$(find workloads/c2bench -name "$ID*")
+DIR=${DIR##*/}
+TIMESTEP=$(awk '/max_timestep/ {print $2}' workloads/c2bench/$DIR/neurosim/simspec/neurosim.simspec)
+
+./neurosim-tsim workloads/c2bench/$DIR/neurosim/simspec/neurosim.simspec -o reports/${DIR}_${TIMESTEP}ts.rep
