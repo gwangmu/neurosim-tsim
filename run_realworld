@@ -1,8 +1,0 @@
-#!/bin/bash
-
-ID=$1
-DIR=$(find workloads/realworld -name "$ID*")
-DIR=${DIR##*/}
-TIMESTEP=$(awk '/max_timestep/ {print $2}' workloads/realworld/$DIR/neurosim/simspec/neurosim.simspec)
-
-./neurosim-tsim workloads/realworld/$DIR/neurosim/simspec/neurosim.simspec -o reports/${DIR}_${TIMESTEP}ts.rep
